@@ -1,1 +1,0 @@
-import{n as e}from"./index-BmAqipwY.js";import{t}from"./PageShell-D1EvsAlJ.js";var n=e();function r(){return(0,n.jsx)(t,{eyebrow:`Career`,title:`Careers at Knora`,description:`Explore teaching, mentoring, operations, media, and technology opportunities with the Knora Academy team.`})}var i=r;export{i as component};

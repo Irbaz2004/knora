@@ -140,7 +140,7 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
     if (!anchorPx) return [vw * 0.22, -0.1, 0]; // fallback until measured
     const nx = (anchorPx.x - size.width / 2) / size.width;
     const ny = (anchorPx.y - size.height / 2) / size.height;
-    return [nx * vw, -ny * vh - 0.45, 0];
+    return [nx * vw, -ny * vh, 0];
   }, [anchorPx, vw, vh, size.width, size.height, isNarrow]);
 
   useEffect(() => {

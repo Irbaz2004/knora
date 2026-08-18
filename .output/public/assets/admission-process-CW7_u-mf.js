@@ -1,1 +1,0 @@
-import{n as e}from"./index-BmAqipwY.js";import{t}from"./PageShell-D1EvsAlJ.js";var n=e();function r(){return(0,n.jsx)(t,{eyebrow:`Admission`,title:`Admission Process`,description:`Understand the step-by-step admission journey, eligibility, counseling, enrollment, and onboarding process for Knora Academy.`})}var i=r;export{i as component};

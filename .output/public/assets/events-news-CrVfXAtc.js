@@ -1,1 +1,0 @@
-import{n as e}from"./index-BmAqipwY.js";import{t}from"./PageShell-D1EvsAlJ.js";var n=e();function r(){return(0,n.jsx)(t,{eyebrow:`Media`,title:`Events & News`,description:`Follow workshops, bootcamps, announcements, AI sessions, community events, and academy updates from Knora Academy.`})}var i=r;export{i as component};

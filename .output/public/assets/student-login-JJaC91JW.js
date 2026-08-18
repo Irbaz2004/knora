@@ -1,1 +1,0 @@
-import{n as e}from"./index-BmAqipwY.js";import{t}from"./PageShell-D1EvsAlJ.js";var n=e();function r(){return(0,n.jsx)(t,{eyebrow:`Login`,title:`Student Login`,description:`Access your student dashboard, course progress, projects, assignments, mentor feedback, and academy updates.`,primaryAction:`Go Home`})}var i=r;export{i as component};

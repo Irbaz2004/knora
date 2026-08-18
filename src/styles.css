@@ -1649,12 +1649,15 @@
   cursor: pointer;
   isolation: isolate;
   filter: drop-shadow(0 18px 30px rgba(37, 99, 235, 0.26));
-  transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    transform 0.36s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.36s ease;
 }
 
 .hero-k-mark:hover,
 .hero-k-mark:focus-visible {
   transform: scale(1.025);
+  filter: drop-shadow(0 22px 36px rgba(37, 99, 235, 0.34));
 }
 
 .hero-k-mark:focus-visible {
@@ -1687,8 +1690,11 @@
   line-height: 0.82;
   transform-origin: 50% 50%;
   animation:
-    hero-letter-enter 0.58s cubic-bezier(0.22, 1, 0.36, 1) both,
-    hero-letter-breathe 4s ease-in-out 0.58s infinite;
+    hero-letter-pop 0.72s cubic-bezier(0.22, 1, 0.36, 1) both,
+    hero-letter-shimmer 3.6s ease-in-out 0.72s infinite;
+  text-shadow:
+    0 0 18px color-mix(in oklab, var(--primary) 44%, transparent),
+    0 0 34px color-mix(in oklab, var(--electric) 26%, transparent);
 }
 
 .hero-morph-letter::before,
@@ -1712,22 +1718,25 @@
     color-mix(in oklab, white 92%, var(--primary)),
     transparent
   );
-  clip-path: inset(42% 0 44% 0);
-  opacity: 0.68;
-  animation: hero-letter-scan 1.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+  clip-path: inset(0 0 0 0);
+  opacity: 0;
+  transform: translateX(-0.35em) skewX(-12deg);
+  animation: hero-letter-sheen 2.7s cubic-bezier(0.22, 1, 0.36, 1) 0.5s
+    infinite;
 }
 
 .hero-morph-letter::after {
   -webkit-text-stroke: 0.014em
     color-mix(in oklab, var(--primary) 58%, transparent);
-  transform: translate(0.035em, 0.035em);
-  opacity: 0.38;
+  transform: translate(0, 0);
+  opacity: 0.42;
+  animation: hero-letter-echo 3.2s ease-in-out 0.72s infinite;
 }
 
 .hero-k-mark:hover .hero-morph-letter {
   animation:
-    hero-letter-enter 0.58s cubic-bezier(0.22, 1, 0.36, 1) both,
-    hero-letter-breathe 4s ease-in-out 0.58s infinite;
+    hero-letter-pop 0.72s cubic-bezier(0.22, 1, 0.36, 1) both,
+    hero-letter-shimmer 2.4s ease-in-out 0.72s infinite;
 }
 
 .hero-k-mark::before {
@@ -1745,7 +1754,7 @@
     transparent 60% 100%
   );
   opacity: 0.8;
-  animation: hero-k-orbit 7.5s linear infinite;
+  animation: hero-ring-pulse 3.4s ease-in-out infinite;
 }
 
 .hero-k-mark::after {
@@ -1764,6 +1773,7 @@
   box-shadow:
     inset 0 0 26px rgba(255, 255, 255, 0.65),
     0 0 28px rgba(47, 128, 237, 0.25);
+  animation: hero-inner-glow 3.8s ease-in-out infinite;
 }
 
 .hero-letter-orbit {
@@ -1791,7 +1801,7 @@
       transparent 68%
     );
   opacity: 0.72;
-  animation: hero-k-orbit-reverse 10.5s linear infinite;
+  animation: hero-dash-pulse 2.8s ease-in-out infinite;
 }
 
 .hero-orbit {
@@ -1826,61 +1836,103 @@
   border-style: dashed;
 }
 
-@keyframes hero-k-orbit {
-  to {
-    rotate: 360deg;
+@keyframes hero-ring-pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(0.96);
+    filter: blur(0);
+  }
+  48% {
+    opacity: 0.95;
+    transform: scale(1.05);
+    filter: blur(0.5px);
   }
 }
 
-@keyframes hero-k-orbit-reverse {
-  to {
-    rotate: -360deg;
+@keyframes hero-dash-pulse {
+  0%,
+  100% {
+    opacity: 0.42;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.82;
+    transform: scale(1.06);
   }
 }
 
-@keyframes hero-letter-enter {
+@keyframes hero-inner-glow {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 0 26px rgba(255, 255, 255, 0.65),
+      0 0 28px rgba(47, 128, 237, 0.25);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 34px rgba(255, 255, 255, 0.78),
+      0 0 38px rgba(47, 128, 237, 0.34);
+  }
+}
+
+@keyframes hero-letter-pop {
   0% {
     opacity: 0;
-    transform: translateY(0.14em) scale(0.72) rotate(-8deg);
-    filter: blur(12px) saturate(1.35);
+    transform: translateY(0.12em) scale(0.72);
+    filter: blur(14px) saturate(1.45) brightness(1.22);
   }
-  68% {
+  62% {
     opacity: 1;
-    transform: translateY(-0.02em) scale(1.06) rotate(1.5deg);
-    filter: blur(0) saturate(1.2);
+    transform: translateY(-0.035em) scale(1.12);
+    filter: blur(0) saturate(1.32) brightness(1.12);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1) rotate(0deg);
+    transform: translateY(0) scale(1);
     filter: blur(0) saturate(1);
   }
 }
 
-@keyframes hero-letter-breathe {
+@keyframes hero-letter-shimmer {
   0%,
   100% {
     transform: translateY(0) scale(1);
-    filter: saturate(1);
+    filter: saturate(1) brightness(1);
   }
   50% {
-    transform: translateY(-0.025em) scale(1.035);
-    filter: saturate(1.18);
+    transform: translateY(-0.018em) scale(1.025);
+    filter: saturate(1.22) brightness(1.1);
   }
 }
 
-@keyframes hero-letter-scan {
+@keyframes hero-letter-sheen {
   0% {
-    clip-path: inset(0 0 88% 0);
     opacity: 0;
-    transform: translateY(-0.26em);
+    transform: translateX(-0.45em) skewX(-14deg);
+  }
+  18% {
+    opacity: 0;
   }
   42% {
-    opacity: 0.78;
+    opacity: 0.86;
   }
+  68%,
   100% {
-    clip-path: inset(78% 0 8% 0);
     opacity: 0;
-    transform: translateY(0.24em);
+    transform: translateX(0.46em) skewX(-14deg);
+  }
+}
+
+@keyframes hero-letter-echo {
+  0%,
+  100% {
+    opacity: 0.24;
+    transform: translate(0.02em, 0.025em) scale(1);
+  }
+  45% {
+    opacity: 0.58;
+    transform: translate(0.045em, 0.02em) scale(1.03);
   }
 }
 

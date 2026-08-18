@@ -1,1 +1,0 @@
-import{n as e}from"./index-BmAqipwY.js";import{t}from"./PageShell-D1EvsAlJ.js";var n=e();function r(){return(0,n.jsx)(t,{eyebrow:`Login`,title:`Teacher Login`,description:`Access faculty tools for batches, lessons, student reviews, assignments, and mentorship workflows.`,primaryAction:`Go Home`})}var i=r;export{i as component};

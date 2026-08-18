@@ -1,1 +1,0 @@
-import{n as e}from"./index-BmAqipwY.js";import{t}from"./PageShell-D1EvsAlJ.js";var n=e();function r(){return(0,n.jsx)(t,{eyebrow:`About`,title:`Vision & Mission`,description:`Our vision is to make advanced AI education accessible, practical, and career-ready for learners who want to build the future.`})}var i=r;export{i as component};
