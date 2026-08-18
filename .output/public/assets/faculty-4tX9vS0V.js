@@ -1,0 +1,1 @@
+import{n as e}from"./index-BmAqipwY.js";import{t}from"./PageShell-D1EvsAlJ.js";var n=e();function r(){return(0,n.jsx)(t,{eyebrow:`About`,title:`Faculty`,description:`Meet the mentors, researchers, and engineers guiding Knora Academy students through real AI systems and portfolio projects.`})}var i=r;export{i as component};

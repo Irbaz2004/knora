@@ -1,0 +1,1 @@
+import{n as e}from"./index-BmAqipwY.js";import{t}from"./PageShell-D1EvsAlJ.js";var n=e();function r(){return(0,n.jsx)(t,{eyebrow:`Media`,title:`Gallery`,description:`View moments from learning sessions, student projects, mentorship events, workshops, and Knora Academy community activities.`})}var i=r;export{i as component};

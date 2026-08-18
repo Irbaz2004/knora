@@ -1,0 +1,1 @@
+import{n as e}from"./index-BmAqipwY.js";import{t}from"./PageShell-D1EvsAlJ.js";var n=e();function r(){return(0,n.jsx)(t,{eyebrow:`Courses`,title:`AI Courses`,description:`Explore machine learning, deep learning, generative AI, computer vision, Python, deployment, and career-focused project tracks.`})}var i=r;export{i as component};

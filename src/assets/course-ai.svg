@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="AI and machine learning course">
+  <defs>
+    <radialGradient id="aiGlow" cx="50%" cy="42%" r="58%">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset=".48" stop-color="#a9d1ff"/>
+      <stop offset="1" stop-color="#2f80ed"/>
+    </radialGradient>
+    <linearGradient id="aiLine" x1="36" x2="204" y1="60" y2="188">
+      <stop stop-color="#2f80ed"/>
+      <stop offset="1" stop-color="#7ec8ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="240" height="240" rx="120" fill="#eef7ff"/>
+  <circle cx="120" cy="120" r="86" fill="url(#aiGlow)" opacity=".32"/>
+  <circle cx="120" cy="120" r="68" fill="#ffffff" opacity=".74"/>
+  <path d="M94 82c-17 4-27 18-24 35 2 11 9 18 18 21-2 18 12 32 30 30 8 12 28 10 35-4 16-2 27-14 26-30 12-10 13-28 1-40-2-17-19-28-36-23-13-13-36-8-50 11Z" fill="none" stroke="url(#aiLine)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M120 78v84M94 115h52M100 140h36M146 98c-14 6-22 18-22 36" fill="none" stroke="#2f80ed" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="78" cy="80" r="5" fill="#2f80ed"/>
+  <circle cx="170" cy="160" r="6" fill="#2f80ed"/>
+  <circle cx="185" cy="92" r="4" fill="#7ec8ff"/>
+</svg>

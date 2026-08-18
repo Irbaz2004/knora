@@ -1,0 +1,1 @@
+import{n as e}from"./index-BmAqipwY.js";import{t}from"./PageShell-D1EvsAlJ.js";var n=e();function r(){return(0,n.jsx)(t,{eyebrow:`Admission`,title:`Apply Online`,description:`Start your online admission form and take the first step toward building your AI portfolio with Knora Academy.`,primaryAction:`Start Application`})}var i=r;export{i as component};

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Computer vision course">
+  <defs>
+    <radialGradient id="visionGlow" cx="50%" cy="48%" r="60%">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset=".48" stop-color="#badcff"/>
+      <stop offset="1" stop-color="#2f80ed"/>
+    </radialGradient>
+    <linearGradient id="visionLine" x1="54" x2="186" y1="120" y2="120">
+      <stop stop-color="#7ec8ff"/>
+      <stop offset=".5" stop-color="#2f80ed"/>
+      <stop offset="1" stop-color="#7ec8ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="240" height="240" rx="120" fill="#eff8ff"/>
+  <circle cx="120" cy="120" r="88" fill="url(#visionGlow)" opacity=".36"/>
+  <path d="M56 120c17-30 39-45 64-45s47 15 64 45c-17 30-39 45-64 45s-47-15-64-45Z" fill="#fff" opacity=".72" stroke="url(#visionLine)" stroke-width="10" stroke-linejoin="round"/>
+  <circle cx="120" cy="120" r="29" fill="none" stroke="#2f80ed" stroke-width="9"/>
+  <circle cx="120" cy="120" r="10" fill="#2f80ed"/>
+  <path d="M77 78 63 64M163 78l14-14M77 162l-14 14M163 162l14 14" stroke="#7ec8ff" stroke-width="7" stroke-linecap="round"/>
+</svg>

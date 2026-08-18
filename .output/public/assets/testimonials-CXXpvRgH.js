@@ -1,0 +1,1 @@
+import{n as e}from"./index-BmAqipwY.js";import{t}from"./PageShell-D1EvsAlJ.js";var n=e();function r(){return(0,n.jsx)(t,{eyebrow:`Media`,title:`Testimonials`,description:`Read what learners say about Knora Academy courses, project guidance, mentor support, and career-focused AI training.`})}var i=r;export{i as component};

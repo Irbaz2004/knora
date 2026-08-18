@@ -1,0 +1,1 @@
+import{n as e}from"./index-BmAqipwY.js";import{t}from"./PageShell-D1EvsAlJ.js";var n=e();function r(){return(0,n.jsx)(t,{eyebrow:`Success Stories`,title:`Placements`,description:`Discover student outcomes, success stories, interview preparation, portfolio reviews, and career support at Knora Academy.`})}var i=r;export{i as component};

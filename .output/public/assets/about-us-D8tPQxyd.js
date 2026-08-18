@@ -1,0 +1,1 @@
+import{n as e}from"./index-BmAqipwY.js";import{t}from"./PageShell-D1EvsAlJ.js";var n=e();function r(){return(0,n.jsx)(t,{eyebrow:`About`,title:`About Us`,description:`Learn how Knora Academy helps students build practical AI skills through modern courses, mentorship, and project-based learning.`})}var i=r;export{i as component};

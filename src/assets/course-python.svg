@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Python for data and AI course">
+  <defs>
+    <linearGradient id="pyCard" x1="42" x2="198" y1="42" y2="198">
+      <stop stop-color="#dff1ff"/>
+      <stop offset="1" stop-color="#2f80ed"/>
+    </linearGradient>
+    <radialGradient id="pyGlow" cx="50%" cy="48%" r="58%">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset=".54" stop-color="#c8e2ff"/>
+      <stop offset="1" stop-color="#2f80ed"/>
+    </radialGradient>
+  </defs>
+  <rect width="240" height="240" rx="120" fill="#eff8ff"/>
+  <circle cx="120" cy="120" r="88" fill="url(#pyGlow)" opacity=".36"/>
+  <rect x="60" y="64" width="120" height="112" rx="26" fill="#fff" opacity=".78"/>
+  <path d="M103 87 74 119l29 34" fill="none" stroke="url(#pyCard)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M137 87 166 119l-29 34" fill="none" stroke="url(#pyCard)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M128 78 111 164" fill="none" stroke="#2f80ed" stroke-width="9" stroke-linecap="round"/>
+  <rect x="76" y="185" width="88" height="10" rx="5" fill="#2f80ed" opacity=".24"/>
+  <circle cx="76" cy="54" r="5" fill="#2f80ed"/>
+  <circle cx="179" cy="68" r="4" fill="#7ec8ff"/>
+</svg>
