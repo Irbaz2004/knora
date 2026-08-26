@@ -98,7 +98,8 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
 
   const toggleTheme = () => {
-    document.documentElement.classList.toggle("dark");
+    const isDark = document.documentElement.classList.toggle("dark");
+    localStorage.setItem("knora-theme", isDark ? "dark" : "light");
   };
 
   useEffect(() => {
@@ -130,12 +131,18 @@ export default function Navbar() {
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener("knora:navigation", onScroll);
+    window.addEventListener("popstate", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("knora:navigation", onScroll);
+      window.removeEventListener("popstate", onScroll);
+    };
   }, []);
 
   return (
     <header className="fixed inset-x-0 top-2 z-50 flex justify-center px-3 sm:top-3 sm:px-6">
-      <nav className="navbar-shell glass flex w-full max-w-[1820px] items-center justify-between gap-4 rounded-full px-5 py-3 sm:px-6">
+      <nav className="glass flex w-full max-w-[1820px] items-center justify-between gap-4 rounded-full px-5 py-3 sm:px-6">
         <a href="/" className="flex shrink-0 items-center gap-2">
           <img
             src={logo}
@@ -195,7 +202,7 @@ export default function Navbar() {
       </nav>
 
       {open && (
-        <div className="nav-dropdown-panel absolute top-20 max-h-[calc(100vh-6rem)] w-[calc(100%-1.5rem)] max-w-md overflow-y-auto rounded-3xl p-4 xl:hidden">
+        <div className="nav-dropdown-panel absolute left-1/2 top-20 z-[60] max-h-[calc(100vh-6rem)] w-[calc(100%-1.5rem)] max-w-md -translate-x-1/2 overflow-y-auto rounded-3xl p-4 xl:hidden">
           <div className="grid gap-1">
             {menu.map((item) => (
               <div key={item.label}>

@@ -68,6 +68,8 @@ import facultyAisha from "@/assets/faculty-aisha.avif";
 import facultyRahul from "@/assets/faculty-rahul.jpg";
 
 const SCENE_COUNT = 13;
+const SCENE_SCROLL_HEIGHT = 80;
+const SCENE_SLOT = 1.42;
 
 const heroCards = [
   {
@@ -478,10 +480,16 @@ export default function Home() {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
       const proxy = { p: 0 };
-      const sceneSlot = 1.55;
+      const sceneSlot = SCENE_SLOT;
       const scenes = sceneRefs.current.slice(0, SCENE_COUNT).filter(Boolean);
-      gsap.set(scenes.slice(1), { autoAlpha: 0, y: 64 });
-      gsap.set(scenes[0], { autoAlpha: 1, y: 0 });
+      gsap.set(scenes, { pointerEvents: "none" });
+      gsap.set(scenes.slice(1), { autoAlpha: 0, y: 56, zIndex: 0 });
+      gsap.set(scenes[0], {
+        autoAlpha: 1,
+        y: 0,
+        zIndex: 2,
+        pointerEvents: "auto",
+      });
       gsap.from(".hero-pop", {
         y: 28,
         autoAlpha: 0,
@@ -503,7 +511,9 @@ export default function Home() {
           trigger: wrapper.current,
           start: "top top",
           end: "bottom bottom",
-          scrub: journey.reducedMotion ? true : 0.9,
+          scrub: journey.reducedMotion ? true : 0.58,
+          invalidateOnRefresh: true,
+          anticipatePin: 0.5,
         },
         defaults: { ease: "none" },
       });
@@ -667,7 +677,8 @@ export default function Home() {
           const start = i * sceneSlot;
           const selector = `.section-${i + 1}`;
           if (i > 0) {
-            tl.to(scene, { y: 0, autoAlpha: 1, duration: 0.5, ease }, start);
+            tl.set(scene, { zIndex: 3, pointerEvents: "auto" }, start - 0.02);
+            tl.to(scene, { y: 0, autoAlpha: 1, duration: 0.58, ease }, start);
             hologramIn(`${selector} .holo-text`, start + 0.06);
             lettersIn(scene, start + 0.16);
             tl.from(
@@ -694,6 +705,7 @@ export default function Home() {
               },
               hideAt,
             );
+            tl.set(scene, { zIndex: 0, pointerEvents: "none" }, hideAt + 0.24);
           }
         });
       }
@@ -777,7 +789,7 @@ export default function Home() {
       <main
         ref={wrapper}
         className="relative w-full"
-        style={{ height: `${SCENE_COUNT * 82}vh` }}
+        style={{ height: `${SCENE_COUNT * SCENE_SCROLL_HEIGHT}vh` }}
       >
         <div className="sticky top-0 h-screen w-full overflow-hidden">
           <section

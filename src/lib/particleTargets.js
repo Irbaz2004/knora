@@ -97,7 +97,7 @@ export function dataWaves(count, width, seed = 4242) {
   return out;
 }
 
-/** Hybrid learning object: a particle laptop/video console with signal arcs. */
+/** Hybrid learning object: clean abstract ribbons and soft orbital clusters. */
 export function hybridLearningConsole(
   count,
   width,
@@ -109,108 +109,54 @@ export function hybridLearningConsole(
   const rnd = makeRandom(seed);
   const w = width;
   const h = height;
-  const screenW = w * 0.62;
-  const screenH = h * 0.56;
-  const top = h * 0.22;
-  const bottom = top - screenH;
-  const left = -screenW / 2;
-  const right = screenW / 2;
 
   const put = (i, x, y, z = 0) => {
     const i3 = i * 3;
     out[i3] = center[0] + x;
     out[i3 + 1] = center[1] + y;
-    out[i3 + 2] = center[2] + z + (rnd() - 0.5) * 0.16;
-  };
-
-  const putRectEdge = (i, inset = 0) => {
-    const t = rnd();
-    const side = Math.floor(rnd() * 4);
-    const l = left + inset;
-    const r = right - inset;
-    const tp = top - inset;
-    const bt = bottom + inset;
-    if (side === 0) put(i, l + t * (r - l), tp);
-    else if (side === 1) put(i, r, tp - t * (tp - bt));
-    else if (side === 2) put(i, r - t * (r - l), bt);
-    else put(i, l, bt + t * (tp - bt));
+    out[i3 + 2] = center[2] + z + (rnd() - 0.5) * 0.28;
   };
 
   for (let i = 0; i < count; i++) {
-    const bucket = i % 12;
+    const bucket = i % 10;
 
-    if (bucket < 3) {
-      putRectEdge(i);
-    } else if (bucket === 3) {
-      putRectEdge(i, 0.22);
-    } else if (bucket < 6) {
-      const baseW = screenW * (bucket === 4 ? 1.15 : 0.92);
+    if (bucket < 5) {
+      const lane = bucket - 2;
       const t = rnd();
-      const x = -baseW / 2 + t * baseW;
-      const y = bottom - 0.55 + Math.sin(t * Math.PI) * 0.14;
-      put(i, x, y, (rnd() - 0.5) * 0.22);
-    } else if (bucket === 6) {
-      const edge = Math.floor(rnd() * 3);
-      const triW = screenW * 0.14;
-      const triH = screenH * 0.22;
+      const x = (t - 0.5) * w * 0.84;
+      const sweep = t * Math.PI * 2.4;
+      const y =
+        Math.sin(sweep + lane * 0.64) * h * 0.18 +
+        Math.sin(sweep * 0.52 - lane) * h * 0.08 +
+        lane * h * 0.045;
+      const z = Math.cos(sweep + lane * 0.7) * 0.52;
+      put(i, x, y, z);
+    } else if (bucket < 8) {
+      const cluster = bucket === 5 ? -1 : bucket === 6 ? 0 : 1;
       const t = rnd();
-      if (edge === 0)
-        put(
-          i,
-          -triW * 0.45 + t * triW * 0.9,
-          bottom + screenH * 0.52 + triH * 0.5,
-        );
-      else if (edge === 1)
-        put(
-          i,
-          -triW * 0.45 + t * triW * 0.9,
-          bottom + screenH * 0.52 - triH * 0.5,
-        );
-      else put(i, triW * 0.5, bottom + screenH * 0.52 - triH * 0.5 + t * triH);
-    } else if (bucket === 7) {
-      const a = rnd() * Math.PI * 2;
-      const radius = 0.36 + rnd() * 0.22;
+      const angle = t * Math.PI * 2;
+      const radius = (0.28 + rnd() * 0.9) * Math.min(w, h) * 0.14;
+      const anchorX = cluster * w * 0.18;
+      const anchorY = Math.sin(cluster * 1.7) * h * 0.08;
       put(
         i,
-        Math.cos(a) * radius,
-        bottom + screenH * 0.52 + Math.sin(a) * radius,
-        (rnd() - 0.5) * 0.16,
-      );
-    } else if (bucket < 10) {
-      const lane = bucket - 8;
-      const t = rnd();
-      const x = left + screenW * 0.16 + t * screenW * 0.68;
-      const y = bottom + screenH * (0.22 + lane * 0.18) + (rnd() - 0.5) * 0.05;
-      put(i, x, y, (rnd() - 0.5) * 0.12);
-    } else if (bucket === 10) {
-      const arc = Math.floor(rnd() * 3);
-      const a = Math.PI * (0.18 + rnd() * 0.64);
-      const r = screenW * (0.32 + arc * 0.11);
-      put(
-        i,
-        Math.cos(a) * r,
-        top + 0.2 + Math.sin(a) * r * 0.34,
-        (rnd() - 0.5) * 0.3,
+        anchorX + Math.cos(angle) * radius,
+        anchorY + Math.sin(angle) * radius * 0.68,
+        Math.sin(angle * 1.3) * 0.45,
       );
     } else {
-      const side = rnd() > 0.5 ? 1 : -1;
-      const a = rnd() * Math.PI * 2;
-      const radius = 0.15 + rnd() * 0.24;
-      const anchorX = side * screenW * (0.32 + rnd() * 0.18);
-      const anchorY = bottom + screenH * (0.28 + rnd() * 0.5);
-      put(
-        i,
-        anchorX + Math.cos(a) * radius,
-        anchorY + Math.sin(a) * radius,
-        (rnd() - 0.5) * 0.36,
-      );
+      const angle = rnd() * Math.PI * 2;
+      const radius = Math.sqrt(rnd()) * Math.min(w, h) * 0.36;
+      const x = Math.cos(angle) * radius * 1.55;
+      const y = Math.sin(angle) * radius * 0.54;
+      put(i, x, y, (rnd() - 0.5) * 0.62);
     }
   }
 
   return out;
 }
 
-/** Launch events object: calendar board, date grid, clock ring, and marker. */
+/** Launch events object: clean launch burst with orbit arcs and flowing trails. */
 export function eventCalendarFormation(
   count,
   width,
@@ -222,124 +168,59 @@ export function eventCalendarFormation(
   const rnd = makeRandom(seed);
   const w = width;
   const h = height;
-  const left = -w / 2;
-  const right = w / 2;
-  const top = h / 2;
-  const bottom = -h / 2;
-  const headerY = top - h * 0.22;
-  const jitter = Math.min(w, h) * 0.006;
 
   const put = (i, x, y, z = 0) => {
     const i3 = i * 3;
-    out[i3] = center[0] + x + (rnd() - 0.5) * jitter;
-    out[i3 + 1] = center[1] + y + (rnd() - 0.5) * jitter;
-    out[i3 + 2] = center[2] + z + (rnd() - 0.5) * 0.08;
-  };
-
-  const line = (i, x1, y1, x2, y2, t = rnd()) => {
-    put(i, x1 + (x2 - x1) * t, y1 + (y2 - y1) * t);
-  };
-
-  const rect = (i, x, y, rw, rh, t = rnd()) => {
-    const p = t * (rw * 2 + rh * 2);
-    if (p < rw) line(i, x - rw / 2, y + rh / 2, x + rw / 2, y + rh / 2, p / rw);
-    else if (p < rw + rh)
-      line(i, x + rw / 2, y + rh / 2, x + rw / 2, y - rh / 2, (p - rw) / rh);
-    else if (p < rw * 2 + rh)
-      line(
-        i,
-        x + rw / 2,
-        y - rh / 2,
-        x - rw / 2,
-        y - rh / 2,
-        (p - rw - rh) / rw,
-      );
-    else
-      line(
-        i,
-        x - rw / 2,
-        y - rh / 2,
-        x - rw / 2,
-        y + rh / 2,
-        (p - rw * 2 - rh) / rh,
-      );
-  };
-
-  const circle = (i, x, y, r, t = rnd(), scaleY = 1) => {
-    const a = t * Math.PI * 2;
-    put(i, x + Math.cos(a) * r, y + Math.sin(a) * r * scaleY);
-  };
-
-  const arc = (i, x, y, r, start, end, t = rnd(), scaleY = 1) => {
-    const a = start + (end - start) * t;
-    put(i, x + Math.cos(a) * r, y + Math.sin(a) * r * scaleY);
+    out[i3] = center[0] + x + (rnd() - 0.5) * 0.025;
+    out[i3 + 1] = center[1] + y + (rnd() - 0.5) * 0.025;
+    out[i3 + 2] = center[2] + z + (rnd() - 0.5) * 0.16;
   };
 
   for (let i = 0; i < count; i++) {
-    const n = i / count;
+    const bucket = i % 12;
 
-    if (n < 0.24) {
-      rect(i, 0, 0, w, h);
-    } else if (n < 0.34) {
-      line(i, left, headerY, right, headerY);
-    } else if (n < 0.44) {
-      const side = Math.floor((n - 0.34) / 0.05) === 0 ? -1 : 1;
-      const t = ((n - 0.34) % 0.05) / 0.05;
-      circle(i, side * w * 0.28, top + h * 0.015, h * 0.055, t);
-    } else if (n < 0.58) {
-      const local = (n - 0.44) / 0.14;
-      const cells = 9;
-      const cell = Math.min(cells - 1, Math.floor(local * cells));
-      const cellT = local * cells - cell;
-      const col = cell % 3;
-      const row = Math.floor(cell / 3);
-      const cellW = w * 0.105;
-      const cellH = h * 0.105;
-      const gapX = w * 0.035;
-      const gapY = h * 0.045;
-      const gridW = cellW * 3 + gapX * 2;
-      const x = -w * 0.19 - gridW / 2 + cellW / 2 + col * (cellW + gapX);
-      const y = headerY - h * 0.19 - row * (cellH + gapY);
-      rect(i, x, y, cellW, cellH, cellT);
-    } else if (n < 0.78) {
-      const local = (n - 0.58) / 0.2;
-      const rows = 3;
-      const row = Math.min(rows - 1, Math.floor(local * rows));
-      const rowT = local * rows - row;
-      const segment = Math.floor(rowT * 4);
-      const t = rowT * 4 - segment;
-      const rowW = w * 0.32;
-      const rowH = h * 0.105;
-      const x = w * 0.22;
-      const y = headerY - h * 0.18 - row * h * 0.17;
-      if (segment < 2) {
-        rect(i, x, y, rowW, rowH, rowT * 2);
-      } else {
-        const lineY = y + (segment === 2 ? rowH * 0.13 : -rowH * 0.13);
-        line(i, x - rowW * 0.28, lineY, x + rowW * 0.25, lineY, t);
-      }
-    } else if (n < 0.88) {
-      const local = (n - 0.78) / 0.1;
-      const row = Math.min(2, Math.floor(local * 3));
-      const t = local * 3 - row;
-      const x = w * 0.08;
-      const y = headerY - h * 0.18 - row * h * 0.17;
-      circle(i, x, y, h * 0.032, t);
-    } else if (n < 0.96) {
-      const t = (n - 0.88) / 0.08;
-      arc(
+    if (bucket < 4) {
+      const arcIndex = bucket;
+      const t = rnd();
+      const start = -Math.PI * (0.08 + arcIndex * 0.1);
+      const end = Math.PI * (1.08 + arcIndex * 0.08);
+      const angle = start + (end - start) * t;
+      const radius = Math.min(w, h) * (0.23 + arcIndex * 0.055);
+      const x = Math.cos(angle) * radius * (1.4 + arcIndex * 0.04);
+      const y =
+        Math.sin(angle) * radius * (0.44 + arcIndex * 0.04) +
+        Math.sin(t * Math.PI) * h * 0.05;
+      put(i, x, y, Math.cos(angle * 1.2) * 0.46);
+    } else if (bucket < 8) {
+      const trail = bucket - 4;
+      const t = rnd();
+      const side = trail % 2 === 0 ? -1 : 1;
+      const x = side * w * (0.08 + t * 0.36);
+      const y =
+        Math.sin(t * Math.PI * 1.35 + trail * 0.72) * h * 0.18 +
+        (trail - 1.5) * h * 0.035;
+      put(i, x, y, Math.sin(t * Math.PI) * side * 0.58);
+    } else if (bucket < 11) {
+      const cluster = bucket - 9;
+      const angle = rnd() * Math.PI * 2;
+      const radius = Math.sqrt(rnd()) * Math.min(w, h) * 0.115;
+      const anchorX = cluster * w * 0.2;
+      const anchorY = (cluster === 0 ? -1 : 1) * h * 0.13;
+      put(
         i,
-        -w * 0.06,
-        bottom - h * 0.03,
-        w * 0.2,
-        Math.PI * 0.16,
-        Math.PI * 0.84,
-        t,
-        0.62,
+        anchorX + Math.cos(angle) * radius,
+        anchorY + Math.sin(angle) * radius * 0.75,
+        Math.cos(angle) * 0.34,
       );
     } else {
-      const t = (n - 0.96) / 0.04;
-      circle(i, -w * 0.32, bottom + h * 0.18, h * 0.055, t);
+      const angle = rnd() * Math.PI * 2;
+      const radius = Math.pow(rnd(), 0.72) * Math.min(w, h) * 0.48;
+      put(
+        i,
+        Math.cos(angle) * radius * 1.22,
+        Math.sin(angle) * radius * 0.52,
+        (rnd() - 0.5) * 0.62,
+      );
     }
   }
 

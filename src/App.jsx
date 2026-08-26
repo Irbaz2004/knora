@@ -1,8 +1,10 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import AboutUs from "@/pages/AboutUs";
 import AdmissionProcess from "@/pages/AdmissionProcess";
 import ApplyOnline from "@/pages/ApplyOnline";
 import Career from "@/pages/Career";
 import ContactUs from "@/pages/ContactUs";
+import SplashScreen from "@/components/SplashScreen";
 import Courses from "@/pages/Courses";
 import EventsNews from "@/pages/EventsNews";
 import Faculty from "@/pages/Faculty";
@@ -32,6 +34,28 @@ const routes = {
   "/vision-mission": VisionMission,
 };
 
+const routeLabels = {
+  "/": "Home",
+  "/about-us": "About Us",
+  "/admission-process": "Admission Process",
+  "/apply-online": "Apply Online",
+  "/career": "Career",
+  "/contact-us": "Contact Us",
+  "/courses": "Courses",
+  "/events-news": "Events & News",
+  "/faculty": "Faculty",
+  "/gallery": "Gallery",
+  "/placements": "Placements",
+  "/student-login": "Student Login",
+  "/teacher-login": "Teacher Login",
+  "/testimonials": "Testimonials",
+  "/vision-mission": "Vision & Mission",
+};
+
+function normalizePath(path) {
+  return path.replace(/\/$/, "") || "/";
+}
+
 function NotFound() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -55,8 +79,101 @@ function NotFound() {
 }
 
 export default function App() {
-  const path = window.location.pathname.replace(/\/$/, "") || "/";
-  const Page = routes[path] || NotFound;
+  const [path, setPath] = useState(() =>
+    normalizePath(window.location.pathname),
+  );
+  const [transitionKey, setTransitionKey] = useState(0);
+  const [transitionLabel, setTransitionLabel] = useState(null);
+  const pendingPathRef = useRef(null);
+  const Page = useMemo(() => routes[path] || NotFound, [path]);
 
-  return <Page />;
+  const beginNavigation = useCallback(
+    (nextPath, { push = true } = {}) => {
+      const normalizedPath = normalizePath(nextPath);
+      if (normalizedPath === path && !pendingPathRef.current) return;
+
+      pendingPathRef.current = { path: normalizedPath, push };
+      setTransitionLabel(routeLabels[normalizedPath] ?? "Page");
+      setTransitionKey((key) => key + 1);
+    },
+    [path],
+  );
+
+  useEffect(() => {
+    const onDocumentClick = (event) => {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.shiftKey
+      ) {
+        return;
+      }
+
+      const anchor = event.target.closest?.("a[href]");
+      if (!anchor) return;
+
+      const href = anchor.getAttribute("href");
+      if (
+        !href ||
+        href.startsWith("#") ||
+        anchor.target ||
+        anchor.hasAttribute("download")
+      ) {
+        return;
+      }
+
+      const url = new URL(href, window.location.href);
+      const currentUrl = new URL(window.location.href);
+      const hasFileExtension = /\.[a-z0-9]+$/i.test(url.pathname);
+
+      if (
+        url.origin !== currentUrl.origin ||
+        hasFileExtension ||
+        url.pathname === currentUrl.pathname
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      beginNavigation(url.pathname);
+    };
+
+    const onPopState = () => {
+      beginNavigation(window.location.pathname, { push: false });
+    };
+
+    document.addEventListener("click", onDocumentClick);
+    window.addEventListener("popstate", onPopState);
+    return () => {
+      document.removeEventListener("click", onDocumentClick);
+      window.removeEventListener("popstate", onPopState);
+    };
+  }, [beginNavigation]);
+
+  const handleCovered = useCallback(() => {
+    const pending = pendingPathRef.current;
+    if (!pending) return;
+
+    if (pending.push) {
+      window.history.pushState({}, "", pending.path);
+    }
+    setPath(pending.path);
+    window.scrollTo(0, 0);
+    window.dispatchEvent(new Event("knora:navigation"));
+    pendingPathRef.current = null;
+  }, []);
+
+  return (
+    <>
+      <Page />
+      <SplashScreen
+        transitionKey={transitionKey}
+        routeTitle={transitionLabel}
+        onCovered={handleCovered}
+      />
+    </>
+  );
 }

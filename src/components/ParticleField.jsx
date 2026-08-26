@@ -16,10 +16,10 @@ import {
 } from "@/lib/particleTargets";
 
 function useParticleCount() {
-  const [count, setCount] = useState(9000);
+  const [count, setCount] = useState(7000);
   useEffect(() => {
     const w = window.innerWidth;
-    setCount(w < 640 ? 3200 : w < 1024 ? 6000 : 10000);
+    setCount(w < 360 ? 1800 : w < 640 ? 2600 : w < 1024 ? 4800 : 7600);
   }, []);
   return count;
 }
@@ -561,7 +561,7 @@ export default function ParticleField({ heroAnchorRef, heroHoverRef }) {
     <div className="pointer-events-none fixed inset-0 z-0">
       <Canvas
         camera={{ position: [0, 0, 12], fov: 50 }}
-        dpr={[1, 1.75]}
+        dpr={[1, 1.35]}
         gl={{
           antialias: true,
           alpha: true,
