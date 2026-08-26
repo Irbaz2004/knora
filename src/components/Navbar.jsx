@@ -142,7 +142,7 @@ export default function Navbar() {
 
   return (
     <header className="fixed inset-x-0 top-2 z-50 flex justify-center px-3 sm:top-3 sm:px-6">
-      <nav className="glass flex w-full max-w-[1820px] items-center justify-between gap-4 rounded-full px-5 py-3 sm:px-6">
+      <nav className="knora-navbar flex w-full max-w-[1820px] items-center justify-between gap-4 rounded-full px-5 py-3 sm:px-6">
         <a href="/" className="flex shrink-0 items-center gap-2">
           <img
             src={logo}
