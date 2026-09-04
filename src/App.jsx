@@ -11,6 +11,9 @@ import Faculty from "@/pages/Faculty";
 import Gallery from "@/pages/Gallery";
 import Home from "@/pages/Home";
 import Placements from "@/pages/Placements";
+import ForgotPassword from "@/Auth/ForgotPassword";
+import Login from "@/Auth/Login";
+import SignUp from "@/Auth/SignUp";
 import StudentLogin from "@/pages/StudentLogin";
 import TeacherLogin from "@/pages/TeacherLogin";
 import Testimonials from "@/pages/Testimonials";
@@ -26,8 +29,11 @@ const routes = {
   "/courses": Courses,
   "/events-news": EventsNews,
   "/faculty": Faculty,
+  "/forgot-password": ForgotPassword,
   "/gallery": Gallery,
+  "/login": Login,
   "/placements": Placements,
+  "/signup": SignUp,
   "/student-login": StudentLogin,
   "/teacher-login": TeacherLogin,
   "/testimonials": Testimonials,
@@ -44,8 +50,11 @@ const routeLabels = {
   "/courses": "Courses",
   "/events-news": "Events & News",
   "/faculty": "Faculty",
+  "/forgot-password": "Forgot Password",
   "/gallery": "Gallery",
+  "/login": "Login",
   "/placements": "Placements",
+  "/signup": "Sign Up",
   "/student-login": "Student Login",
   "/teacher-login": "Teacher Login",
   "/testimonials": "Testimonials",

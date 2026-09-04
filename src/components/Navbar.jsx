@@ -171,24 +171,17 @@ export default function Navbar() {
             <SunMoon className="size-4.5" />
           </button>
           <a
-            href="/student-login"
+            href="/login"
             className="hidden items-center gap-1.5 rounded-full border border-border/80 px-4 py-2.5 text-[0.8rem] font-semibold text-foreground hover:border-primary/40 hover:text-primary lg:flex"
           >
             <UserRound className="size-4" />
-            Student Login
+            Login
           </a>
           <a
-            href="/teacher-login"
-            className="hidden items-center gap-1.5 rounded-full border border-border/80 px-4 py-2.5 text-[0.8rem] font-semibold text-foreground hover:border-primary/40 hover:text-primary lg:flex"
-          >
-            <UserRound className="size-4" />
-            Teacher Login
-          </a>
-          <a
-            href="/apply-online"
+            href="/signup"
             className="lift arrow-shift hidden items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground glow-soft sm:flex"
           >
-            Apply Now
+            Sign Up
             <ArrowRight className="arrow size-4" />
           </a>
           <button
@@ -240,25 +233,18 @@ export default function Navbar() {
 
           <div className="mt-4 grid gap-2 border-t border-border/70 pt-4">
             <a
-              href="/student-login"
+              href="/login"
               onClick={() => setOpen(false)}
               className="rounded-2xl border border-border/80 px-4 py-3 text-center text-sm font-semibold text-foreground"
             >
-              Student Login
+              Login
             </a>
             <a
-              href="/teacher-login"
-              onClick={() => setOpen(false)}
-              className="rounded-2xl border border-border/80 px-4 py-3 text-center text-sm font-semibold text-foreground"
-            >
-              Teacher Login
-            </a>
-            <a
-              href="/apply-online"
+              href="/signup"
               onClick={() => setOpen(false)}
               className="rounded-2xl bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground glow-soft"
             >
-              Apply Now
+              Sign Up
             </a>
           </div>
         </div>

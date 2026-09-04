@@ -1,12 +1,3 @@
-import PageShell from "./PageShell";
+import Login from "@/Auth/Login";
 
-export default function TeacherLogin() {
-  return (
-    <PageShell
-      eyebrow="Login"
-      title="Teacher Login"
-      description="Access faculty tools for batches, lessons, student reviews, assignments, and mentorship workflows."
-      primaryAction="Go Home"
-    />
-  );
-}
+export default Login;
