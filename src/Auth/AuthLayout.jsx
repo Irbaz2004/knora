@@ -9,10 +9,26 @@ import logo from "@/assets/knora-logo-transparent.png";
 import authRight from "@/assets/authright.png";
 
 const features = [
-  { Icon: VerifiedOutlinedIcon, title: "Role-Based Access", copy: "Secure dashboards for every role" },
-  { Icon: GroupOutlinedIcon, title: "Smart & Efficient", copy: "Automated academic workflows" },
-  { Icon: BarChartOutlinedIcon, title: "Real-Time Insights", copy: "Data-driven decision making" },
-  { Icon: SchoolOutlinedIcon, title: "Built for Education", copy: "Designed for academic excellence" },
+  {
+    Icon: VerifiedOutlinedIcon,
+    title: "Role-Based Access",
+    copy: "Secure dashboards for every role",
+  },
+  {
+    Icon: GroupOutlinedIcon,
+    title: "Smart & Efficient",
+    copy: "Automated academic workflows",
+  },
+  {
+    Icon: BarChartOutlinedIcon,
+    title: "Real-Time Insights",
+    copy: "Data-driven decision making",
+  },
+  {
+    Icon: SchoolOutlinedIcon,
+    title: "Built for Education",
+    copy: "Designed for academic excellence",
+  },
 ];
 
 // Shared sx styles — imported by Login.jsx, SignUp.jsx, ForgotPassword.jsx
@@ -168,7 +184,7 @@ export default function AuthLayout({ children }) {
         display: "flex",
         justifyContent: "center",
         background: "#ffffff",
-        fontFamily: '"Segoe UI", Roboto, Arial, sans-serif',
+        fontFamily: "var(--font-sans)",
       }}
     >
       <Box
@@ -197,9 +213,19 @@ export default function AuthLayout({ children }) {
           <Box
             component="a"
             href="/"
-            sx={{ display: "flex", alignItems: "center", mb: 4, textDecoration: "none" }}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              mb: 4,
+              textDecoration: "none",
+            }}
           >
-            <Box component="img" src={logo} alt="Knora Edu Academy" sx={{ height: 44, width: "auto", display: "block" }} />
+            <Box
+              component="img"
+              src={logo}
+              alt="Knora Edu Academy"
+              sx={{ height: 44, width: "auto", display: "block" }}
+            />
           </Box>
 
           <Box
@@ -230,7 +256,10 @@ export default function AuthLayout({ children }) {
             }}
           >
             {features.map(({ Icon, title, copy }) => (
-              <Box key={title} sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
+              <Box
+                key={title}
+                sx={{ display: "flex", alignItems: "center", gap: 1.25 }}
+              >
                 <Box
                   sx={{
                     width: 34,
@@ -247,17 +276,31 @@ export default function AuthLayout({ children }) {
                   <Icon fontSize="small" />
                 </Box>
                 <Box>
-                  <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#10182b" }}>{title}</Typography>
-                  <Typography sx={{ fontSize: 12, color: "#8b93a3" }}>{copy}</Typography>
+                  <Typography
+                    sx={{ fontSize: 13, fontWeight: 700, color: "#10182b" }}
+                  >
+                    {title}
+                  </Typography>
+                  <Typography sx={{ fontSize: 12, color: "#8b93a3" }}>
+                    {copy}
+                  </Typography>
                 </Box>
               </Box>
             ))}
 
             <Box sx={{ ml: "auto", textAlign: "right" }}>
               <Typography sx={{ fontSize: 12, color: "#8b93a3" }}>
-                © 2025 <Box component="span" sx={{ color: "#1e5feb", fontWeight: 600 }}>Knora Edu Academy.</Box>
+                © 2025{" "}
+                <Box
+                  component="span"
+                  sx={{ color: "#1e5feb", fontWeight: 600 }}
+                >
+                  Knora Edu Academy.
+                </Box>
               </Typography>
-              <Typography sx={{ fontSize: 12, color: "#8b93a3" }}>All rights reserved.</Typography>
+              <Typography sx={{ fontSize: 12, color: "#8b93a3" }}>
+                All rights reserved.
+              </Typography>
             </Box>
           </Box>
         </Box>
@@ -307,7 +350,10 @@ export default function AuthLayout({ children }) {
               <b>Smart</b>
               <b>•</b>
               <b>Seamless</b>
-              <Box component="span" sx={{ width: "100%", opacity: 0.85, fontWeight: 400 }}>
+              <Box
+                component="span"
+                sx={{ width: "100%", opacity: 0.85, fontWeight: 400 }}
+              >
                 Academic Management Simplified
               </Box>
             </Typography>
@@ -317,7 +363,12 @@ export default function AuthLayout({ children }) {
             component="img"
             src={authRight}
             alt="Knora academic management dashboard"
-            sx={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            sx={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block",
+            }}
           />
         </Box>
       </Box>

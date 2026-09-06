@@ -12,18 +12,25 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   Box,
   Button as MuiButton,
+  Card as MuiCard,
   Chip as MuiChip,
   GlobalStyles,
   IconButton as MuiIconButton,
+  Stack as MuiStack,
   Typography,
 } from "@mui/material";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
-import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
+import CodeIcon from "@mui/icons-material/Code";
+import DataObjectIcon from "@mui/icons-material/DataObject";
 import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 import FormatQuoteRoundedIcon from "@mui/icons-material/FormatQuoteRounded";
-import LocalPhoneRoundedIcon from "@mui/icons-material/LocalPhoneRounded";
+import LaptopMacIcon from "@mui/icons-material/LaptopMac";
+import PsychologyIcon from "@mui/icons-material/Psychology";
+import SchoolIcon from "@mui/icons-material/School";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import {
   ArrowRight,
@@ -32,29 +39,16 @@ import {
   Building2,
   CalendarDays,
   CheckCircle2,
-  ClipboardCheck,
-  CreditCard,
   Cpu,
-  FileCheck2,
   GraduationCap,
-  Instagram,
   Layers,
-  Linkedin,
-  Mail,
-  MapPin,
   MonitorPlay,
   Mouse,
-  Phone,
-  PlayCircle,
-  Rocket,
   Sparkles,
   Target,
-  UserRound,
   Users,
   Wifi,
-  Youtube,
 } from "lucide-react";
-import Navbar from "@/components/Navbar";
 import ParticleField from "@/components/ParticleField";
 import AiChip from "@/components/AiChip";
 import CursorEffect from "@/components/CursorEffect";
@@ -67,7 +61,7 @@ import facultyArjun from "@/assets/faculty-arjun.avif";
 import facultyAisha from "@/assets/faculty-aisha.avif";
 import facultyRahul from "@/assets/faculty-rahul.jpg";
 
-const SCENE_COUNT = 13;
+const SCENE_COUNT = 9;
 const SCENE_SCROLL_HEIGHT = 80;
 const SCENE_SLOT = 1.42;
 
@@ -140,32 +134,58 @@ const whyJoinCards = [
 
 const courseCards = [
   {
+    icon: PsychologyIcon,
     image: courseAiImage,
     name: "AI & Machine Learning Foundation",
     duration: "16 weeks",
     mode: "Hybrid",
+    level: "Beginner",
     copy: "Python, data handling, ML models, evaluation, and mini projects.",
   },
   {
+    icon: CodeIcon,
     image: coursePythonImage,
     name: "Python for Data & AI",
     duration: "12 weeks",
     mode: "Online / Offline",
+    level: "Starter",
     copy: "Programming basics, notebooks, APIs, and practical automation.",
   },
   {
+    icon: PsychologyIcon,
     image: courseGenAiImage,
     name: "Generative AI & LLMs",
     duration: "10 weeks",
     mode: "Live Online",
+    level: "Intermediate",
     copy: "Prompting, agents, RAG basics, and responsible AI workflows.",
   },
   {
+    icon: LaptopMacIcon,
     image: courseVisionImage,
     name: "Computer Vision Essentials",
     duration: "8 weeks",
     mode: "Weekend Hybrid",
+    level: "Intermediate",
     copy: "Image processing, detection concepts, and guided model demos.",
+  },
+  {
+    icon: DataObjectIcon,
+    image: courseAiImage,
+    name: "Data Analytics Portfolio Track",
+    duration: "14 weeks",
+    mode: "Hybrid",
+    level: "Career",
+    copy: "Dashboards, data cleaning, reporting, and presentation-ready insight.",
+  },
+  {
+    icon: SchoolIcon,
+    image: courseGenAiImage,
+    name: "AI Project Mentorship",
+    duration: "6 weeks",
+    mode: "Mentor-Led",
+    level: "Project",
+    copy: "Build, review, and polish a practical AI project for your portfolio.",
   },
 ];
 
@@ -217,29 +237,6 @@ const facultySpotlights = [
   },
 ];
 
-const admissionSteps = [
-  {
-    icon: ClipboardCheck,
-    title: "Enquire",
-    copy: "Share your goal and course interest.",
-  },
-  {
-    icon: FileCheck2,
-    title: "Register",
-    copy: "Complete the short admission form.",
-  },
-  {
-    icon: CreditCard,
-    title: "Pay Fee",
-    copy: "Confirm your seat in the batch.",
-  },
-  {
-    icon: PlayCircle,
-    title: "Start Classes",
-    copy: "Join orientation and begin learning.",
-  },
-];
-
 const facilityTiles = [
   { icon: Building2, title: "New Campus", copy: "Fresh institute setup" },
   { icon: Users, title: "Classrooms", copy: "Small batch seating" },
@@ -252,27 +249,92 @@ const facilityTiles = [
 const launchEvents = [
   {
     date: "24 Sep 2026",
-    title: "Orientation Day",
-    copy: "Meet mentors and understand the learning path.",
+    iso: "2026-09-24",
+    time: "6:00 PM IST",
+    type: "Orientation",
+    title: "Founding Batch Orientation",
+    copy: "Meet mentors, understand the roadmap, and see how classes begin.",
   },
   {
     date: "27 Sep 2026",
-    title: "Open House",
-    copy: "Visit the campus and speak with the team.",
+    iso: "2026-09-27",
+    time: "11:00 AM IST",
+    type: "Campus Visit",
+    title: "Campus Open House",
+    copy: "Visit classrooms, explore the lab setup, and speak with the team.",
   },
   {
     date: "01 Oct 2026",
-    title: "Free Demo Class",
-    copy: "Experience a live hybrid AI session.",
+    iso: "2026-10-01",
+    time: "7:00 PM IST",
+    type: "Demo Class",
+    title: "Free AI Demo Class",
+    copy: "Experience a live hybrid AI session before choosing your track.",
   },
 ];
 
-const footerLinks = [
-  ["About Us", "/about-us"],
-  ["Courses", "/courses"],
-  ["Faculty", "/faculty"],
-  ["Apply Online", "/apply-online"],
-  ["Contact", "/contact-us"],
+const launchEventByDate = launchEvents.reduce((events, event) => {
+  events[event.iso] = event;
+  return events;
+}, {});
+
+const calendarMonths = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+const launchCalendarDays = Array.from({ length: 35 }, (_, index) => {
+  const date = new Date(2026, 7, 31 + index);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const dateNumber = date.getDate();
+
+  return {
+    key: `${year}-${month}-${day}`,
+    label:
+      index === 0 || dateNumber === 1
+        ? `${calendarMonths[date.getMonth()].toUpperCase()} ${dateNumber}`
+        : String(dateNumber),
+    isMuted: date.getMonth() !== 8,
+  };
+});
+
+const hybridMetrics = [
+  ["Live cohorts", "Zoom + Meet"],
+  ["Campus support", "Offline labs"],
+  ["Replay library", "Recordings"],
+];
+
+const hybridHighlights = [
+  {
+    number: "01",
+    title: "Attend from anywhere",
+    copy: "Live online classes with mentor-led explanation and active doubt clearing.",
+    variant: "orbit",
+  },
+  {
+    number: "02",
+    title: "Practice on campus",
+    copy: "Offline classroom guidance for students who want face-to-face support.",
+    variant: "sprout",
+  },
+  {
+    number: "03",
+    title: "Revise without pressure",
+    copy: "Recorded sessions and practice tasks stay available for steady progress.",
+    variant: "screen",
+  },
 ];
 
 const HERO_LETTERS = ["K", "N", "O", "R", "A"];
@@ -429,26 +491,193 @@ function SceneTitle({ eyebrow, title, copy, center = false }) {
   );
 }
 
+function HybridIllustration({ variant }) {
+  if (variant === "sprout") {
+    return (
+      <svg viewBox="0 0 220 160" aria-hidden="true">
+        <path d="M110 142V64" />
+        <path d="M88 142h44l22-14-44-26-44 26 22 14Z" />
+        <path d="M110 68c-18-16-34-19-50-10 22 2 33 11 50 10Z" />
+        <path d="M111 82c18-20 39-26 62-18-27 5-41 16-62 18Z" />
+        <path d="M111 100c-17-13-32-14-46-5 18 0 30 7 46 5Z" />
+        <path d="M112 46c13-16 30-22 50-17-23 6-35 15-50 17Z" />
+      </svg>
+    );
+  }
+
+  if (variant === "screen") {
+    return (
+      <svg viewBox="0 0 220 160" aria-hidden="true">
+        <path d="M76 30 168 74v70L76 100V30Z" />
+        <path d="M92 57 148 84v36L92 94V57Z" />
+        <path d="M104 75 136 91" />
+        <path d="M104 88 130 101" />
+        <path d="M52 66l16 10-16 10-16-10 16-10Z" />
+        <path d="M52 86v38" />
+        <path d="M44 128c15 8 31 8 46 0" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 220 160" aria-hidden="true">
+      <path d="M110 16 146 80l-36 24-36-24 36-64Z" />
+      <path d="M110 16v88" />
+      <path d="M74 80l36-18 36 18" />
+      <path d="M56 92c0 28 24 48 54 48s54-20 54-48" />
+      <path d="M38 102c0 38 32 58 72 58s72-20 72-58" />
+      <path d="M110 104v22" />
+    </svg>
+  );
+}
+
+function CourseRoadmap({ viewportRef, trackRef }) {
+  const stepWidth = 520;
+  const viewWidth = courseCards.length * stepWidth;
+  const points = courseCards.map((_, index) => ({
+    x: stepWidth / 2 + index * stepWidth,
+    y: index % 2 === 0 ? 230 : 300,
+  }));
+  const path = points
+    .map((point, index) => {
+      if (index === 0) return `M ${point.x} ${point.y}`;
+
+      const previous = points[index - 1];
+      const curve = stepWidth * 0.42;
+      return `C ${previous.x + curve} ${previous.y}, ${point.x - curve} ${
+        point.y
+      }, ${point.x} ${point.y}`;
+    })
+    .join(" ");
+
+  return (
+    <Box className="motion-card course-roadmap-wrap">
+      <Box className="course-roadmap-viewport" ref={viewportRef}>
+        <Box
+          className="course-roadmap-track"
+          ref={trackRef}
+          sx={{ "--course-count": courseCards.length }}
+        >
+          <svg
+            className="course-roadmap-wave"
+            viewBox={`0 0 ${viewWidth} 520`}
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <defs>
+              <linearGradient
+                id="course-roadmap-gradient"
+                x1="0"
+                y1="0"
+                x2="1"
+                y2="0"
+              >
+                <stop offset="0%" stopColor="var(--primary)" />
+                <stop offset="48%" stopColor="var(--glow)" />
+                <stop offset="100%" stopColor="var(--electric)" />
+              </linearGradient>
+            </defs>
+            <path className="course-roadmap-wave-shadow" d={path} />
+            <path className="course-roadmap-wave-path" d={path} />
+          </svg>
+
+          {courseCards.map((course, index) => {
+            const Icon = course.icon;
+            const isAbove = index % 2 === 0;
+
+            return (
+              <Box
+                key={course.name}
+                className={`course-roadmap-node ${
+                  isAbove
+                    ? "course-roadmap-node-above"
+                    : "course-roadmap-node-below"
+                }`}
+              >
+                <span className="course-roadmap-connector" aria-hidden="true" />
+                <span className="course-roadmap-dot" aria-hidden="true" />
+                <MuiCard className="course-roadmap-card">
+                  <MuiStack spacing={2}>
+                    <MuiStack
+                      direction="row"
+                      alignItems="center"
+                      justifyContent="space-between"
+                      spacing={2}
+                    >
+                      <span className="course-roadmap-icon">
+                        <Icon fontSize="small" />
+                      </span>
+                      <MuiChip
+                        label={`Course ${String(index + 1).padStart(2, "0")}`}
+                        size="small"
+                        className="course-roadmap-chip"
+                      />
+                    </MuiStack>
+
+                    <Box>
+                      <Typography
+                        component="h3"
+                        className="course-roadmap-title"
+                      >
+                        {course.name}
+                      </Typography>
+                      <Typography component="p" className="course-roadmap-copy">
+                        {course.copy}
+                      </Typography>
+                    </Box>
+
+                    <MuiStack
+                      direction="row"
+                      spacing={1}
+                      useFlexGap
+                      flexWrap="wrap"
+                    >
+                      <span className="course-roadmap-meta">
+                        <AccessTimeIcon fontSize="inherit" />
+                        {course.duration}
+                      </span>
+                      <span className="course-roadmap-meta">
+                        <LaptopMacIcon fontSize="inherit" />
+                        {course.mode}
+                      </span>
+                      <span className="course-roadmap-meta">
+                        <SchoolIcon fontSize="inherit" />
+                        {course.level}
+                      </span>
+                    </MuiStack>
+
+                    <MuiButton
+                      component="a"
+                      href="/courses"
+                      endIcon={<ArrowForwardIcon />}
+                      className="course-roadmap-button"
+                    >
+                      More Details
+                    </MuiButton>
+                  </MuiStack>
+                </MuiCard>
+              </Box>
+            );
+          })}
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
 export default function Home() {
   const wrapper = useRef(null);
   const sceneRefs = useRef([]);
   const heroVisualRef = useRef(null);
   const heroCoreRef = useRef(null);
-  const [activeCourse, setActiveCourse] = useState(0);
+  const courseRoadmapViewportRef = useRef(null);
+  const courseRoadmapTrackRef = useRef(null);
   const [activeFaculty, setActiveFaculty] = useState(0);
   const [heroLetterIndex, setHeroLetterIndex] = useState(0);
   const facultyScrollIndexRef = useRef(0);
 
   const setSceneRef = (index) => (el) => {
     sceneRefs.current[index] = el;
-  };
-  const rotateCourse = (direction) => {
-    setActiveCourse((current) => {
-      return (current + direction + courseCards.length) % courseCards.length;
-    });
-  };
-  const getCoursePosition = (index) => {
-    return (index - activeCourse + courseCards.length) % courseCards.length;
   };
   const rotateFaculty = (direction) => {
     setActiveFaculty((current) => {
@@ -482,8 +711,19 @@ export default function Home() {
       const proxy = { p: 0 };
       const sceneSlot = SCENE_SLOT;
       const scenes = sceneRefs.current.slice(0, SCENE_COUNT).filter(Boolean);
+      const roadmapTrack = courseRoadmapTrackRef.current;
+      const roadmapViewport = courseRoadmapViewportRef.current;
+      const getRoadmapDistance = () =>
+        Math.max(
+          0,
+          (roadmapTrack?.scrollWidth ?? 0) -
+            (roadmapViewport?.clientWidth ?? 0),
+        );
       gsap.set(scenes, { pointerEvents: "none" });
       gsap.set(scenes.slice(1), { autoAlpha: 0, y: 56, zIndex: 0 });
+      if (roadmapTrack) {
+        gsap.set(roadmapTrack, { x: 0 });
+      }
       gsap.set(scenes[0], {
         autoAlpha: 1,
         y: 0,
@@ -688,8 +928,10 @@ export default function Home() {
             );
           }
           if (i < scenes.length - 1) {
-            const exitAt = i === 5 ? start + 1.4 : start + 0.9;
-            const hideAt = i === 5 ? start + 1.54 : start + 1.42;
+            const exitAt =
+              i === 5 ? start + 1.4 : i === 4 ? start + 1.34 : start + 0.9;
+            const hideAt =
+              i === 5 ? start + 1.54 : i === 4 ? start + 1.42 : start + 1.42;
             if (i === 5) {
               facultySectionOut(scene, exitAt);
             } else {
@@ -708,6 +950,18 @@ export default function Home() {
             tl.set(scene, { zIndex: 0, pointerEvents: "none" }, hideAt + 0.24);
           }
         });
+
+        if (roadmapTrack) {
+          tl.to(
+            roadmapTrack,
+            {
+              x: () => -getRoadmapDistance(),
+              duration: 0.92,
+              ease: "none",
+            },
+            4 * sceneSlot + 0.42,
+          );
+        }
       }
     }, wrapper);
 
@@ -765,23 +1019,356 @@ export default function Home() {
             {
               opacity: 1,
             },
+          ".launch-calendar-section": {
+            isolation: "isolate",
+            background:
+              "radial-gradient(circle at 50% 18%, color-mix(in oklab, var(--primary) 14%, transparent), transparent 34%), linear-gradient(180deg, var(--background) 0%, color-mix(in oklab, var(--primary) 7%, var(--background)) 54%, var(--background) 100%)",
+          },
+          ".launch-calendar-section::before": {
+            content: '""',
+            position: "absolute",
+            inset: 0,
+            zIndex: -2,
+            backgroundImage:
+              "linear-gradient(90deg, color-mix(in oklab, var(--primary) 11%, transparent) 1px, transparent 1px), linear-gradient(180deg, color-mix(in oklab, var(--primary) 9%, transparent) 1px, transparent 1px)",
+            backgroundSize: "12.5vw 100%, 100% 25%",
+            opacity: 0.64,
+          },
+          ".launch-calendar-section::after": {
+            content: '""',
+            position: "absolute",
+            inset: 0,
+            zIndex: -1,
+            background:
+              "radial-gradient(ellipse at 50% 68%, color-mix(in oklab, var(--primary) 12%, transparent), transparent 58%)",
+            opacity: 0.78,
+          },
+          ".launch-calendar-grid-bg": {
+            position: "absolute",
+            inset: "9% 5% 5%",
+            border:
+              "1px solid color-mix(in oklab, var(--border) 64%, transparent)",
+            backgroundImage:
+              "radial-gradient(color-mix(in oklab, var(--primary) 18%, transparent) 0.7px, transparent 0.7px)",
+            backgroundSize: "3px 3px",
+            opacity: 0.22,
+            maskImage:
+              "radial-gradient(ellipse at 50% 55%, black 0%, transparent 72%)",
+          },
+          ".launch-calendar-heading": {
+            position: "relative",
+            zIndex: 2,
+            marginBottom: "1.35rem",
+          },
+          ".launch-calendar-heading .hero-badge": {
+            marginInline: "auto",
+            border:
+              "1px solid color-mix(in oklab, var(--primary) 18%, var(--border))",
+            background: "color-mix(in oklab, var(--card) 72%, transparent)",
+            color: "var(--primary)",
+          },
+          ".launch-calendar-heading h2": {
+            color: "var(--foreground)",
+            fontSize: "clamp(2.45rem, 5vw, 4.7rem)",
+            letterSpacing: 0,
+          },
+          ".launch-calendar-panel": {
+            position: "relative",
+            zIndex: 2,
+            width: "min(1120px, calc(100vw - 2rem))",
+            borderRadius: "10px",
+            border:
+              "1px solid color-mix(in oklab, var(--primary) 18%, var(--border))",
+            background:
+              "linear-gradient(180deg, color-mix(in oklab, var(--card) 92%, transparent), color-mix(in oklab, var(--card) 72%, transparent)), linear-gradient(135deg, color-mix(in oklab, var(--primary) 5%, var(--background)), var(--background))",
+            padding: "clamp(0.8rem, 1.5vw, 1rem)",
+            overflow: "hidden",
+          },
+          ".launch-calendar-panel::before": {
+            content: '""',
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            backgroundImage:
+              "radial-gradient(color-mix(in oklab, var(--primary) 17%, transparent) 0.7px, transparent 0.7px), linear-gradient(180deg, color-mix(in oklab, var(--primary) 7%, transparent), transparent 28%)",
+            backgroundSize: "3px 3px, 100% 100%",
+            opacity: 0.28,
+          },
+          ".launch-calendar-toolbar": {
+            position: "relative",
+            zIndex: 1,
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 1fr) auto minmax(0, 1fr)",
+            alignItems: "center",
+            gap: "0.75rem",
+            borderBottom:
+              "1px solid color-mix(in oklab, var(--border) 78%, transparent)",
+            paddingBottom: "0.8rem",
+          },
+          ".launch-calendar-range.MuiTypography-root": {
+            color: "var(--foreground)",
+            fontFamily: "var(--font-display) !important",
+            fontSize: "clamp(1.05rem, 1.8vw, 1.45rem)",
+            fontWeight: 700,
+            lineHeight: 1.05,
+          },
+          ".launch-calendar-actions": {
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.35rem",
+            justifySelf: "center",
+          },
+          ".launch-calendar-actions button": {
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "1.8rem",
+            height: "1.8rem",
+            borderRadius: "7px",
+            border: "1px solid var(--border)",
+            background: "color-mix(in oklab, var(--card) 82%, transparent)",
+            color: "var(--foreground)",
+          },
+          ".launch-calendar-actions span": {
+            display: "inline-flex",
+            minHeight: "1.8rem",
+            alignItems: "center",
+            borderRadius: "7px",
+            border: "1px solid var(--border)",
+            paddingInline: "0.7rem",
+            color: "var(--muted-foreground)",
+            fontSize: "0.62rem",
+            fontWeight: 800,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+          },
+          ".launch-calendar-tags": {
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "flex-end",
+            gap: "0.35rem",
+            minWidth: 0,
+          },
+          ".launch-calendar-tags span": {
+            display: "inline-flex",
+            minHeight: "1.65rem",
+            alignItems: "center",
+            borderRadius: "6px",
+            border: "1px solid var(--border)",
+            background: "color-mix(in oklab, var(--card) 78%, transparent)",
+            paddingInline: "0.55rem",
+            color: "var(--muted-foreground)",
+            fontSize: "0.62rem",
+            fontWeight: 800,
+            letterSpacing: "0.04em",
+            textTransform: "uppercase",
+            whiteSpace: "nowrap",
+          },
+          ".launch-calendar-tag-live::before, .launch-calendar-tag-workshop::before, .launch-calendar-tag-demo::before":
+            {
+              content: '""',
+              width: "0.42rem",
+              height: "0.42rem",
+              borderRadius: "999px",
+              marginRight: "0.38rem",
+              background: "var(--primary)",
+            },
+          ".launch-calendar-tag-workshop::before": {
+            background:
+              "color-mix(in oklab, var(--primary) 66%, var(--foreground))",
+          },
+          ".launch-calendar-tag-demo::before": {
+            background:
+              "color-mix(in oklab, var(--primary) 42%, var(--foreground))",
+          },
+          ".launch-calendar-weekdays": {
+            position: "relative",
+            zIndex: 1,
+            display: "grid",
+            gridTemplateColumns: "repeat(7, minmax(0, 1fr))",
+            gap: "0.38rem",
+            paddingBlock: "0.85rem 0.5rem",
+          },
+          ".launch-calendar-weekdays span": {
+            color: "var(--muted-foreground)",
+            fontSize: "0.64rem",
+            fontWeight: 900,
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+          },
+          ".launch-calendar-cells": {
+            position: "relative",
+            zIndex: 1,
+            display: "grid",
+            gridTemplateColumns: "repeat(7, minmax(0, 1fr))",
+            gridTemplateRows: "repeat(5, minmax(0, 1fr))",
+            gap: "0.38rem",
+            minHeight: "clamp(19rem, 49vh, 30.5rem)",
+          },
+          ".launch-calendar-cell": {
+            position: "relative",
+            minWidth: 0,
+            overflow: "hidden",
+            borderRadius: "8px",
+            border: "1px solid var(--border)",
+            background:
+              "linear-gradient(180deg, color-mix(in oklab, var(--card) 78%, transparent), color-mix(in oklab, var(--background) 88%, transparent))",
+            padding: "0.5rem",
+          },
+          ".launch-calendar-cell-muted": {
+            opacity: 0.62,
+          },
+          ".launch-calendar-date": {
+            display: "block",
+            color: "var(--foreground)",
+            fontSize: "0.66rem",
+            fontWeight: 900,
+            letterSpacing: "0.04em",
+            lineHeight: 1,
+            textTransform: "uppercase",
+          },
+          ".launch-calendar-event": {
+            position: "absolute",
+            left: "0.48rem",
+            right: "0.48rem",
+            bottom: "0.48rem",
+            display: "grid",
+            gap: "0.18rem",
+            borderRadius: "7px",
+            border:
+              "1px solid color-mix(in oklab, var(--primary) 44%, var(--border))",
+            background:
+              "linear-gradient(180deg, color-mix(in oklab, var(--primary) 16%, var(--card)), color-mix(in oklab, var(--primary) 7%, var(--background)))",
+            padding: "0.48rem",
+            color: "var(--foreground)",
+            textDecoration: "none",
+          },
+          ".launch-calendar-event-workshop": {
+            borderColor:
+              "color-mix(in oklab, var(--primary) 32%, var(--border))",
+            background:
+              "linear-gradient(180deg, color-mix(in oklab, var(--primary) 10%, var(--card)), color-mix(in oklab, var(--primary) 4%, var(--background)))",
+          },
+          ".launch-calendar-event-demo": {
+            borderColor:
+              "color-mix(in oklab, var(--primary) 56%, var(--border))",
+            background:
+              "linear-gradient(180deg, color-mix(in oklab, var(--primary) 22%, var(--card)), color-mix(in oklab, var(--primary) 10%, var(--background)))",
+          },
+          ".launch-calendar-event strong": {
+            display: "-webkit-box",
+            overflow: "hidden",
+            WebkitBoxOrient: "vertical",
+            WebkitLineClamp: 2,
+            fontFamily: "var(--font-display)",
+            fontSize: "0.78rem",
+            lineHeight: 1.1,
+          },
+          ".launch-calendar-event span": {
+            color: "var(--primary)",
+            fontSize: "0.58rem",
+            fontWeight: 800,
+            letterSpacing: "0.04em",
+            textTransform: "uppercase",
+          },
+          ".launch-calendar-event small": {
+            display: "-webkit-box",
+            overflow: "hidden",
+            WebkitBoxOrient: "vertical",
+            WebkitLineClamp: 1,
+            color: "var(--muted-foreground)",
+            fontSize: "0.62rem",
+            lineHeight: 1.25,
+          },
+          "@media (max-width: 900px)": {
+            ".launch-calendar-section": {
+              justifyContent: "flex-start",
+              paddingTop: "5.75rem",
+            },
+            ".launch-calendar-heading": {
+              marginBottom: "0.95rem",
+            },
+            ".launch-calendar-toolbar": {
+              gridTemplateColumns: "1fr",
+              justifyItems: "start",
+            },
+            ".launch-calendar-actions": {
+              justifySelf: "start",
+            },
+            ".launch-calendar-tags": {
+              justifyContent: "flex-start",
+            },
+            ".launch-calendar-cells": {
+              minHeight: "clamp(20rem, 52vh, 26rem)",
+            },
+          },
+          "@media (max-width: 640px)": {
+            ".launch-calendar-section": {
+              paddingInline: "0.75rem",
+              paddingTop: "5.4rem",
+            },
+            ".launch-calendar-heading h2": {
+              fontSize: "clamp(2rem, 9vw, 2.65rem)",
+            },
+            ".launch-calendar-panel": {
+              width: "calc(100vw - 1rem)",
+              padding: "0.62rem",
+            },
+            ".launch-calendar-tags span:first-of-type": {
+              display: "none",
+            },
+            ".launch-calendar-weekdays": {
+              gap: "0.22rem",
+              paddingBlock: "0.6rem 0.35rem",
+            },
+            ".launch-calendar-weekdays span": {
+              fontSize: "0.52rem",
+            },
+            ".launch-calendar-cells": {
+              gap: "0.22rem",
+              minHeight: "20rem",
+            },
+            ".launch-calendar-cell": {
+              borderRadius: "6px",
+              padding: "0.34rem",
+            },
+            ".launch-calendar-date": {
+              fontSize: "0.56rem",
+            },
+            ".launch-calendar-event": {
+              left: "0.25rem",
+              right: "0.25rem",
+              bottom: "0.25rem",
+              gap: "0.12rem",
+              padding: "0.3rem",
+            },
+            ".launch-calendar-event strong": {
+              fontSize: "0.58rem",
+              WebkitLineClamp: 2,
+            },
+            ".launch-calendar-event span": {
+              fontSize: "0.48rem",
+            },
+            ".launch-calendar-event small": {
+              display: "none",
+            },
+          },
         }}
       />
       <CursorEffect />
-      <Navbar />
       <ParticleField heroAnchorRef={heroCoreRef} heroHoverRef={heroVisualRef} />
 
       <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-background" />
         <div className="bloom absolute left-1/2 top-1/3 size-[70vw] -translate-x-1/2 rounded-full opacity-50 blur-3xl" />
         <div
-          className="absolute inset-0 opacity-[0.35]"
+          className="absolute inset-0 opacity-[0.22]"
           style={{
             backgroundImage:
-              "radial-gradient(color-mix(in oklab, var(--electric) 30%, transparent) 1px, transparent 1px)",
-            backgroundSize: "46px 46px",
+              "linear-gradient(color-mix(in oklab, var(--electric) 10%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in oklab, var(--electric) 10%, transparent) 1px, transparent 1px)",
+            backgroundSize: "20vw 20vh",
             maskImage:
-              "radial-gradient(circle at 50% 45%, black, transparent 72%)",
+              "radial-gradient(circle at 50% 42%, black, transparent 74%)",
           }}
         />
       </div>
@@ -1102,7 +1689,7 @@ export default function Home() {
           <section
             id="courses"
             ref={setSceneRef(4)}
-            className="section-5 hologram-section absolute inset-0 mx-auto flex max-w-7xl flex-col items-center justify-start px-6 pt-32 lg:px-10 lg:pt-36"
+            className="section-5 hologram-section absolute inset-0 mx-auto flex w-full max-w-none flex-col items-center justify-start overflow-hidden px-0 pt-28 sm:pt-30 lg:pt-32"
           >
             <SceneTitle
               eyebrow="Courses Offered"
@@ -1116,86 +1703,16 @@ export default function Home() {
               }
               copy="Focused AI and data courses with clear duration, mode, mentor support, and recordings for revision."
             />
-            <div className="motion-card course-deck-wrap relative mt-16 w-full max-w-6xl">
-              <div className="course-deck-stage relative mx-auto grid w-full gap-4 lg:block lg:h-[25rem]">
-                <MuiIconButton
-                  type="button"
-                  aria-label="Previous course"
-                  onClick={() => rotateCourse(1)}
-                  className="course-nav-button course-nav-left glass"
-                  sx={{ color: "var(--primary)" }}
-                >
-                  <ChevronLeftRoundedIcon fontSize="small" />
-                </MuiIconButton>
-                <MuiIconButton
-                  type="button"
-                  aria-label="Next course"
-                  onClick={() => rotateCourse(-1)}
-                  className="course-nav-button course-nav-right glass"
-                  sx={{ color: "var(--primary)" }}
-                >
-                  <ChevronRightRoundedIcon fontSize="small" />
-                </MuiIconButton>
-
-                {courseCards.map((course, index) => {
-                  const position = getCoursePosition(index);
-                  return (
-                    <div
-                      key={course.name}
-                      className={`course-track-card course-position-${position} relative flex min-h-[22rem] flex-col justify-end rounded-[2rem] p-5 text-left lg:absolute lg:min-h-[22rem] ${position === 0 ? "course-track-card-featured" : ""}`}
-                    >
-                      <div
-                        className="course-particle-border"
-                        aria-hidden="true"
-                      >
-                        <span className="course-particle-side course-particle-top" />
-                        <span className="course-particle-side course-particle-right" />
-                        <span className="course-particle-side course-particle-bottom" />
-                        <span className="course-particle-side course-particle-left" />
-                      </div>
-                      <div className="course-card-orb absolute left-1/2 top-8 flex size-28 -translate-x-1/2 items-center justify-center rounded-full">
-                        <img
-                          src={course.image}
-                          alt=""
-                          aria-hidden="true"
-                          className="course-card-image"
-                          loading="lazy"
-                        />
-                      </div>
-                      <MuiChip
-                        label={course.mode}
-                        size="small"
-                        className="course-mode-chip"
-                      />
-                      <div className="relative z-10">
-                        <h3 className="font-display text-xl font-semibold leading-tight text-foreground">
-                          {course.name}
-                        </h3>
-                        <p className="mt-3 flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-                          <CalendarMonthRoundedIcon className="course-duration-icon" />
-                          {course.duration}
-                        </p>
-                        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                          {course.copy}
-                        </p>
-                        <MuiButton
-                          component="a"
-                          href="/courses"
-                          endIcon={<ArrowForwardRoundedIcon />}
-                          className="course-more-button"
-                        >
-                          More Details
-                        </MuiButton>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+            <div className="relative mt-6 w-full sm:mt-8 lg:mt-10">
+              <CourseRoadmap
+                viewportRef={courseRoadmapViewportRef}
+                trackRef={courseRoadmapTrackRef}
+              />
               <MuiButton
                 component="a"
                 href="/courses"
                 endIcon={<ArrowForwardRoundedIcon />}
-                className="course-all-button glass"
+                className="course-all-button glass relative z-20"
               >
                 View All Courses
               </MuiButton>
@@ -1353,96 +1870,61 @@ export default function Home() {
           <section
             id="hybrid-learning"
             ref={setSceneRef(6)}
-            className="section-7 hologram-section absolute inset-0 mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-6 pt-24 lg:grid-cols-[1fr_1fr] lg:px-10"
+            className="section-7 hybrid-editorial-section hologram-section absolute inset-0 mx-auto flex w-full max-w-none items-center overflow-hidden px-4 pt-24 sm:px-6 lg:px-7"
           >
-            <SceneTitle
-              eyebrow="Online + Offline Learning Highlight"
-              title={
-                <>
-                  Live Classes.
-                  <br />
-                  Recordings After.
-                </>
-              }
-              copy="Join interactive classes via Zoom or Google Meet, learn offline on campus, and revisit recordings whenever you need revision."
-            />
-            <div className="motion-card glass relative z-10 rounded-3xl p-6">
-              <div className="mb-5 flex items-center gap-3">
-                <MonitorPlay className="size-6 text-primary" />
-                <h3 className="font-display text-xl font-semibold text-foreground">
-                  Hybrid Learning Console
-                </h3>
+            <div className="hybrid-editorial-grid relative z-10">
+              <div className="holo-text hybrid-copy-column">
+                <span className="hybrid-kicker">
+                  Online + Offline Learning Highlight
+                </span>
+                <h2 className="letter-fade-parent hybrid-title-large">
+                  <LetterFadeText
+                    text={
+                      <>
+                        Learn Live.
+                        <br />
+                        Practice Offline.
+                        <br />
+                        Revise Anytime.
+                      </>
+                    }
+                  />
+                </h2>
+                <p>
+                  Knora blends live online teaching, campus support, and
+                  recorded revision into one focused learning rhythm for AI and
+                  data students.
+                </p>
               </div>
-              <div className="grid gap-3">
-                {[
-                  "Live interactive Zoom / Google Meet sessions",
-                  "Offline classroom support for local students",
-                  "Recorded video library for later viewing",
-                  "Practice tasks and doubt-clearing support",
-                ].map((item) => (
-                  <div
-                    key={item}
-                    className="flex items-center gap-3 rounded-2xl border border-border/70 bg-background/30 p-3 text-sm text-muted-foreground"
-                  >
-                    <CheckCircle2 className="size-4 shrink-0 text-primary" />
-                    {item}
+
+              <div className="hybrid-highlight-list">
+                {hybridHighlights.map((item) => (
+                  <div key={item.number} className="motion-card hybrid-row">
+                    <div>
+                      <span className="hybrid-row-number">+ {item.number}</span>
+                      <h3>{item.title}</h3>
+                      <p>{item.copy}</p>
+                    </div>
+                    <HybridIllustration variant={item.variant} />
                   </div>
                 ))}
               </div>
-            </div>
-          </section>
 
-          <section
-            id="admissions"
-            ref={setSceneRef(7)}
-            className="section-8 hologram-section absolute inset-0 mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-6 pt-24 lg:grid-cols-[0.8fr_1.2fr] lg:px-10"
-          >
-            <SceneTitle
-              eyebrow="Admission Process"
-              title={
-                <>
-                  Join In Four
-                  <br />
-                  Simple Steps
-                </>
-              }
-              copy="Make joining feel easy, clear, and low-risk for students and parents."
-            />
-            <div className="grid gap-3 sm:grid-cols-2">
-              {admissionSteps.map((step, i) => (
-                <div
-                  key={step.title}
-                  className="motion-card glass rounded-3xl p-5 text-left"
-                >
-                  <div className="mb-4 flex items-center justify-between gap-3">
-                    <span className="flex size-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                      <step.icon className="size-5" />
-                    </span>
-                    <span className="font-display text-2xl font-semibold text-primary/35">
-                      0{i + 1}
-                    </span>
+              <dl className="motion-card hybrid-metrics">
+                {hybridMetrics.map(([value, label]) => (
+                  <div key={value}>
+                    <dt>{value}</dt>
+                    <dd>{label}</dd>
                   </div>
-                  <h3 className="text-sm font-semibold text-foreground">
-                    {step.title}
-                  </h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {step.copy}
-                  </p>
-                </div>
-              ))}
-              <a
-                href="/apply-online"
-                className="motion-card lift arrow-shift flex items-center justify-between rounded-3xl bg-primary p-5 text-sm font-semibold text-primary-foreground glow-soft"
-              >
-                Apply Now <Rocket className="arrow size-4" />
-              </a>
+                ))}
+              </dl>
             </div>
           </section>
 
           <section
             id="campus"
-            ref={setSceneRef(8)}
-            className="section-9 hologram-section absolute inset-0 flex flex-col items-center justify-center px-6 pt-24 text-center"
+            ref={setSceneRef(7)}
+            className="section-8 hologram-section absolute inset-0 flex flex-col items-center justify-center px-6 pt-24 text-center"
           >
             <SceneTitle
               eyebrow="Campus / Facility Preview"
@@ -1476,213 +1958,95 @@ export default function Home() {
 
           <section
             id="events"
-            ref={setSceneRef(9)}
-            className="section-10 hologram-section absolute inset-0 mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-6 pt-24 lg:grid-cols-[0.9fr_1.1fr] lg:px-10"
+            ref={setSceneRef(8)}
+            className="section-9 launch-calendar-section hologram-section absolute inset-0 flex flex-col items-center justify-center overflow-hidden px-4 pt-20 sm:px-6 lg:px-10"
           >
-            <SceneTitle
-              eyebrow="Upcoming Events / Launch Highlights"
-              title={
-                <>
-                  Activity Around
-                  <br />
-                  The Launch
-                </>
-              }
-              copy="Orientation, open house, and demo sessions create confidence and urgency for the founding batch."
-            />
-            <div className="grid gap-3">
-              {launchEvents.map((event) => (
-                <div
-                  key={event.title}
-                  className="motion-card glass flex items-start gap-4 rounded-3xl p-5"
-                >
-                  <CalendarDays className="mt-1 size-6 shrink-0 text-primary" />
-                  <div>
-                    <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                      {event.date}
-                    </p>
-                    <h3 className="mt-1 font-display text-xl font-semibold text-foreground">
-                      {event.title}
-                    </h3>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      {event.copy}
-                    </p>
-                  </div>
-                </div>
-              ))}
+            <div className="launch-calendar-grid-bg" aria-hidden="true" />
+            <div className="holo-text launch-calendar-heading text-center">
+              <Badge>Upcoming Events / Launch Highlights</Badge>
+              <h2 className="letter-fade-parent mt-4 font-display text-4xl leading-[0.96] font-semibold text-white sm:text-5xl lg:text-6xl">
+                <LetterFadeText
+                  text={
+                    <>
+                      Upcoming Launch Events
+                      <br />
+                      Batch Highlights.
+                    </>
+                  }
+                />
+              </h2>
             </div>
-          </section>
 
-          <section
-            id="contact"
-            ref={setSceneRef(10)}
-            className="section-11 hologram-section absolute inset-0 mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-6 pt-24 lg:grid-cols-[0.85fr_1.15fr] lg:px-10"
-          >
-            <SceneTitle
-              eyebrow="Enquiry / Contact Form"
-              title={
-                <>
-                  Capture Leads
-                  <br />
-                  From Home
-                </>
-              }
-              copy="For a new launch, students should not have to hunt for Contact Us."
-            />
-            <form
-              onSubmit={(event) => event.preventDefault()}
-              className="motion-card glass relative z-10 grid gap-3 rounded-3xl p-5"
-            >
-              <h3 className="font-display text-xl font-semibold text-foreground">
-                Enquiry Form
-              </h3>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <input
-                  aria-label="Name"
-                  className="rounded-2xl border border-border/80 bg-background/70 px-4 py-3 text-sm outline-none focus:border-primary"
-                  placeholder="Name"
-                  type="text"
-                />
-                <input
-                  aria-label="Phone"
-                  className="rounded-2xl border border-border/80 bg-background/70 px-4 py-3 text-sm outline-none focus:border-primary"
-                  placeholder="Phone"
-                  type="tel"
-                />
-                <input
-                  aria-label="Email"
-                  className="rounded-2xl border border-border/80 bg-background/70 px-4 py-3 text-sm outline-none focus:border-primary"
-                  placeholder="Email"
-                  type="email"
-                />
-                <select
-                  aria-label="Course interested in"
-                  className="rounded-2xl border border-border/80 bg-background/70 px-4 py-3 text-sm outline-none focus:border-primary"
-                  defaultValue=""
-                >
-                  <option value="" disabled>
-                    Course Interested In
-                  </option>
-                  {courseCards.map((course) => (
-                    <option key={course.name} value={course.name}>
-                      {course.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <button
-                type="submit"
-                className="lift arrow-shift mt-1 inline-flex w-fit items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground glow-soft"
-              >
-                Submit Enquiry <ArrowRight className="arrow size-4" />
-              </button>
-            </form>
-          </section>
-
-          <section
-            id="apply-now"
-            ref={setSceneRef(11)}
-            className="section-12 hologram-section absolute inset-0 flex flex-col items-center justify-center px-6 pt-24 text-center"
-          >
-            <SceneTitle
-              eyebrow="Call-To-Action Banner"
-              title={
-                <>
-                  Limited Seats For
-                  <br />
-                  Founding Batch
-                </>
-              }
-              copy="Apply now and reserve your place in the September 2026 launch batch."
-              center
-            />
-            <div className="motion-card glass mt-10 flex w-full max-w-4xl flex-wrap items-center justify-between gap-4 rounded-3xl p-6 text-left">
-              <div>
-                <p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase">
-                  Admissions Open
-                </p>
-                <h3 className="mt-1 font-display text-2xl font-semibold text-foreground">
-                  Start with extra mentoring and founding-batch benefits.
-                </h3>
-              </div>
-              <a
-                href="/apply-online"
-                className="lift arrow-shift flex items-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground glow-soft"
-              >
-                Apply Now <ArrowRight className="arrow size-4" />
-              </a>
-            </div>
-          </section>
-
-          <section
-            id="footer"
-            ref={setSceneRef(12)}
-            className="section-13 hologram-section absolute inset-0 mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-6 pt-24 lg:grid-cols-[0.9fr_1.1fr] lg:px-10"
-          >
-            <SceneTitle
-              eyebrow="Footer"
-              title={
-                <>
-                  Knora Edu
-                  <br />
-                  Academy
-                </>
-              }
-              copy="Quick links, address, phone, email, social links, and copyright in one final homepage section."
-            />
-            <footer className="motion-card glass relative z-10 rounded-3xl p-6">
-              <div className="grid gap-6">
-                <div>
-                  <h3 className="font-display text-2xl font-semibold text-foreground">
-                    Knora Edu Academy
-                  </h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    New campus, hybrid classes, and practical AI courses.
-                  </p>
+            <div className="motion-card launch-calendar-panel">
+              <div className="launch-calendar-toolbar">
+                <Typography component="h3" className="launch-calendar-range">
+                  Aug 31, 2026 - Oct 4, 2026
+                </Typography>
+                <div className="launch-calendar-actions">
+                  <button type="button" aria-label="Previous week">
+                    <ChevronLeftRoundedIcon fontSize="small" />
+                  </button>
+                  <span>Today</span>
+                  <button type="button" aria-label="Next week">
+                    <ChevronRightRoundedIcon fontSize="small" />
+                  </button>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-3">
-                  {[
-                    [Phone, "+91 98765 43210"],
-                    [Mail, "admissions@knora.edu"],
-                    [MapPin, "Knora Edu Academy"],
-                  ].map(([Icon, label]) => (
+                <div className="launch-calendar-tags">
+                  <span>Launch window - IST</span>
+                  <span className="launch-calendar-tag-live">Orientation</span>
+                  <span className="launch-calendar-tag-workshop">
+                    Campus Visit
+                  </span>
+                  <span className="launch-calendar-tag-demo">Demo Class</span>
+                </div>
+              </div>
+
+              <div className="launch-calendar-weekdays" aria-hidden="true">
+                {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
+                  (day) => (
+                    <span key={day}>{day}</span>
+                  ),
+                )}
+              </div>
+
+              <div
+                className="launch-calendar-cells"
+                role="grid"
+                aria-label="Launch event calendar"
+              >
+                {launchCalendarDays.map((day) => {
+                  const event = launchEventByDate[day.key];
+
+                  return (
                     <div
-                      key={label}
-                      className="flex items-center gap-2 rounded-2xl border border-border/70 bg-background/30 p-3 text-sm text-muted-foreground"
+                      key={day.key}
+                      className={`launch-calendar-cell ${
+                        day.isMuted ? "launch-calendar-cell-muted" : ""
+                      }`}
+                      role="gridcell"
                     >
-                      <Icon className="size-4 shrink-0 text-primary" />
-                      <span>{label}</span>
+                      <span className="launch-calendar-date">{day.label}</span>
+                      {event && (
+                        <a
+                          href="/courses"
+                          className={`launch-calendar-event ${
+                            event.type === "Campus Visit"
+                              ? "launch-calendar-event-workshop"
+                              : event.type === "Demo Class"
+                                ? "launch-calendar-event-demo"
+                                : "launch-calendar-event-live"
+                          }`}
+                        >
+                          <strong>{event.title}</strong>
+                          <span>{event.time}</span>
+                          <small>{event.copy}</small>
+                        </a>
+                      )}
                     </div>
-                  ))}
-                </div>
-                <div className="flex flex-wrap gap-3 text-sm">
-                  {footerLinks.map(([label, href]) => (
-                    <a
-                      key={label}
-                      href={href}
-                      className="text-muted-foreground hover:text-primary"
-                    >
-                      {label}
-                    </a>
-                  ))}
-                </div>
-                <div className="flex gap-2">
-                  {[Instagram, Linkedin, Youtube].map((Icon, i) => (
-                    <a
-                      key={i}
-                      href="#contact"
-                      aria-label="social link"
-                      className="icon-aura flex size-9 items-center justify-center rounded-full border border-border/80 text-primary"
-                    >
-                      <Icon className="size-4" />
-                    </a>
-                  ))}
-                </div>
-                <p className="border-t border-border/70 pt-4 text-xs text-muted-foreground">
-                  Copyright 2026 Knora Edu Academy. All rights reserved.
-                </p>
+                  );
+                })}
               </div>
-            </footer>
+            </div>
           </section>
         </div>
       </main>

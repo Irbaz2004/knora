@@ -4,15 +4,17 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { journey } from "@/lib/journey";
 import {
+  annNetworkFormation,
+  buildAnnLayerEdges,
   buildNeighborEdges,
   chipConvergence,
+  directorMessageFormation,
   eventCalendarFormation,
   hybridLearningConsole,
   makeRandom,
   morphParticles,
   neuralSphere,
   radialDelays,
-  scatterCloud,
 } from "@/lib/particleTargets";
 
 function useParticleCount() {
@@ -102,14 +104,14 @@ const fragmentShader = /* glsl */ `
     }
     if (mask <= 0.001) discard;
 
-    vec3 deep = vec3(0.055, 0.235, 0.55);
-    vec3 electric = vec3(0.153, 0.462, 0.98);
-    vec3 pale = vec3(0.62, 0.80, 1.0);
+    vec3 deep = vec3(0.02, 0.19, 0.42);
+    vec3 electric = vec3(0.02, 0.45, 0.92);
+    vec3 pale = vec3(0.66, 0.82, 1.0);
     vec3 col = mix(pale, electric, smoothstep(0.15, 0.9, vSeed));
     col = mix(col, deep, 0.18 * (1.0 - vGlow));
     col = mix(col, vec3(1.0), vGlow * 0.35);
 
-    float alpha = mask * (0.55 + 0.4 * vGlow) * uGlobalAlpha;
+    float alpha = mask * (0.48 + 0.34 * vGlow) * uGlobalAlpha;
     gl_FragColor = vec4(col, alpha);
   }
 `;
@@ -118,6 +120,8 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
   const { viewport, size } = useThree();
   const pointsRef = useRef(null);
   const linesRef = useRef(null);
+  const annLinesRef = useRef(null);
+  const campusLinesRef = useRef(null);
   const groupRef = useRef(null);
   const hoverRef = useRef(0);
   const pointerWorldRef = useRef({ x: 0, y: 0 });
@@ -206,12 +210,21 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
       [courseCenter[0], courseCenter[1] + 0.18, 0],
       2028,
     );
-    const spreadPositions = scatterCloud(
+    const spreadPositions = annNetworkFormation(
+      count,
+      Math.min(vw * 0.98, 13),
+      Math.min(vh * 0.76, 6.2),
+      5.4,
+      [0, -0.02, 0],
+      5151,
+    );
+    const directorPositions = directorMessageFormation(
       count,
       vw * 1.02,
-      vh * 0.94,
-      6.5,
-      9021,
+      vh * 0.82,
+      5.6,
+      [0, 0.04, 0],
+      3030,
     );
     const wavePositions = hybridLearningConsole(
       count,
@@ -221,6 +234,14 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
       4242,
     );
     const chipPositions = chipConvergence(count, vw * 0.95, 7777);
+    const campusPositions = annNetworkFormation(
+      count,
+      Math.min(vw * 0.92, 12.2),
+      Math.min(vh * 0.7, 5.8),
+      5.2,
+      [0, -0.04, 0],
+      6262,
+    );
     const eventPositions = eventCalendarFormation(
       count,
       Math.min(vw * 0.82, 10.8),
@@ -242,18 +263,22 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
     return {
       spherePositions,
       leftSpherePositions,
+      directorPositions,
       spreadPositions,
       wavePositions,
       chipPositions,
+      campusPositions,
       eventPositions,
       sizes,
       shapes,
       seeds,
       explodeDelays: radialDelays(leftSpherePositions, false),
+      spreadDelays: radialDelays(directorPositions, false),
       travelDelays: radialDelays(spherePositions, true),
       waveDelays: radialDelays(spreadPositions, false),
       chipDelays: radialDelays(wavePositions, true),
-      eventDelays: radialDelays(chipPositions, false),
+      campusDelays: radialDelays(chipPositions, false),
+      eventDelays: radialDelays(campusPositions, false),
       live: new Float32Array(spherePositions),
       render: new Float32Array(spherePositions),
     };
@@ -266,6 +291,8 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
     () => buildNeighborEdges(data.spherePositions, 420, 3, 1.15),
     [data],
   );
+  const annEdgeIndices = useMemo(() => buildAnnLayerEdges(), []);
+  const campusEdgeIndices = useMemo(() => buildAnnLayerEdges(), []);
 
   const geometry = useMemo(() => {
     const g = new THREE.BufferGeometry();
@@ -284,6 +311,22 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
     g.attributes.position.setUsage(THREE.DynamicDrawUsage);
     return g;
   }, [data, edgeIndices]);
+
+  const annLineGeometry = useMemo(() => {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(data.render, 3));
+    g.setIndex(new THREE.BufferAttribute(annEdgeIndices, 1));
+    g.attributes.position.setUsage(THREE.DynamicDrawUsage);
+    return g;
+  }, [data, annEdgeIndices]);
+
+  const campusLineGeometry = useMemo(() => {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(data.render, 3));
+    g.setIndex(new THREE.BufferAttribute(campusEdgeIndices, 1));
+    g.attributes.position.setUsage(THREE.DynamicDrawUsage);
+    return g;
+  }, [data, campusEdgeIndices]);
 
   const material = useMemo(
     () =>
@@ -314,10 +357,38 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
     [],
   );
 
+  const annLineMaterial = useMemo(
+    () =>
+      new THREE.LineBasicMaterial({
+        color: new THREE.Color(0x0572ea),
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      }),
+    [],
+  );
+
+  const campusLineMaterial = useMemo(
+    () =>
+      new THREE.LineBasicMaterial({
+        color: new THREE.Color(0x0572ea),
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      }),
+    [],
+  );
+
   useEffect(() => () => geometry.dispose(), [geometry]);
   useEffect(() => () => lineGeometry.dispose(), [lineGeometry]);
+  useEffect(() => () => annLineGeometry.dispose(), [annLineGeometry]);
+  useEffect(() => () => campusLineGeometry.dispose(), [campusLineGeometry]);
   useEffect(() => () => material.dispose(), [material]);
   useEffect(() => () => lineMaterial.dispose(), [lineMaterial]);
+  useEffect(() => () => annLineMaterial.dispose(), [annLineMaterial]);
+  useEffect(() => () => campusLineMaterial.dispose(), [campusLineMaterial]);
 
   useFrame((state, delta) => {
     const targetProgress = journey.reducedMotion
@@ -330,21 +401,23 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
     const t = state.clock.elapsedTime;
     material.uniforms.uPixelRatio.value = Math.min(state.gl.getPixelRatio(), 2);
     material.uniforms.uTime.value = t;
-    const facultyQuiet =
-      THREE.MathUtils.smoothstep(p, 0.145, 0.17) *
-      (1 - THREE.MathUtils.smoothstep(p, 0.265, 0.3));
+    const directorQuiet =
+      THREE.MathUtils.smoothstep(p, 0.145, 0.18) *
+      (1 - THREE.MathUtils.smoothstep(p, 0.3, 0.34));
     material.uniforms.uGlobalAlpha.value = THREE.MathUtils.lerp(
       1,
-      0.42,
-      facultyQuiet,
+      0.32,
+      directorQuiet,
     );
 
     const {
       spherePositions,
       leftSpherePositions,
+      directorPositions,
       spreadPositions,
       wavePositions,
       chipPositions,
+      campusPositions,
       eventPositions,
       live,
       render,
@@ -352,16 +425,26 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
 
     const travelStart = 0.068;
     const travelEnd = 0.145;
-    const spreadStart = 0.17;
-    const spreadEnd = 0.255;
-    const waveStart = 0.34;
-    const waveEnd = 0.48;
+    const directorStart = 0.17;
+    const directorEnd = 0.235;
+    const spreadStart = 0.3;
+    const spreadEnd = 0.34;
+    const waveStart = 0.41;
+    const waveEnd = 0.5;
     const chipStart = 0.56;
     const chipEnd = 0.64;
-    const eventStart = 0.64;
-    const eventEnd = 0.69;
+    const campusStart = 0.74;
+    const campusEnd = 0.8;
+    // Keep campus dedicated to ANN particles; events form on the next scene.
+    const eventStart = 0.9;
+    const eventEnd = 0.96;
     const travelProgress = THREE.MathUtils.clamp(
       (p - travelStart) / (travelEnd - travelStart),
+      0,
+      1,
+    );
+    const directorProgress = THREE.MathUtils.clamp(
+      (p - directorStart) / (directorEnd - directorStart),
       0,
       1,
     );
@@ -385,6 +468,11 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
       0,
       1,
     );
+    const campusProgress = THREE.MathUtils.clamp(
+      (p - campusStart) / (campusEnd - campusStart),
+      0,
+      1,
+    );
 
     if (p < travelStart) {
       live.set(spherePositions);
@@ -397,16 +485,27 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
         data.travelDelays,
         0.22,
       );
-    } else if (p < spreadStart) {
+    } else if (p < directorStart) {
       live.set(leftSpherePositions);
-    } else if (p < spreadEnd) {
+    } else if (p < directorEnd) {
       morphParticles(
         leftSpherePositions,
-        spreadPositions,
-        spreadProgress,
+        directorPositions,
+        directorProgress,
         live,
         data.explodeDelays,
         0.3,
+      );
+    } else if (p < spreadStart) {
+      live.set(directorPositions);
+    } else if (p < spreadEnd) {
+      morphParticles(
+        directorPositions,
+        spreadPositions,
+        spreadProgress,
+        live,
+        data.spreadDelays,
+        0.28,
       );
     } else if (p < waveStart) {
       live.set(spreadPositions);
@@ -430,11 +529,22 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
         data.chipDelays,
         0.32,
       );
-    } else if (p < eventStart) {
+    } else if (p < campusStart) {
       live.set(chipPositions);
-    } else if (p < eventEnd) {
+    } else if (p < campusEnd) {
       morphParticles(
         chipPositions,
+        campusPositions,
+        campusProgress,
+        live,
+        data.campusDelays,
+        0.3,
+      );
+    } else if (p < eventStart) {
+      live.set(campusPositions);
+    } else if (p < eventEnd) {
+      morphParticles(
+        campusPositions,
         eventPositions,
         eventProgress,
         live,
@@ -527,11 +637,21 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
     }
     geometry.attributes.position.needsUpdate = true;
     lineGeometry.attributes.position.needsUpdate = true;
+    annLineGeometry.attributes.position.needsUpdate = true;
+    campusLineGeometry.attributes.position.needsUpdate = true;
 
     // Keep connection lines only while the particle structure is sphere-like.
     // The spread/wave states are dot-driven so they stay clean behind content.
     lineMaterial.opacity =
       p < travelEnd ? THREE.MathUtils.lerp(0.18, 0.045, travelProgress) : 0;
+    annLineMaterial.opacity =
+      THREE.MathUtils.smoothstep(p, 0.305, 0.34) *
+      (1 - THREE.MathUtils.smoothstep(p, 0.405, 0.47)) *
+      0.2;
+    campusLineMaterial.opacity =
+      THREE.MathUtils.smoothstep(p, 0.765, 0.8) *
+      (1 - THREE.MathUtils.smoothstep(p, 0.885, 0.93)) *
+      0.15;
   });
 
   return (
@@ -546,6 +666,18 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
         ref={linesRef}
         geometry={lineGeometry}
         material={lineMaterial}
+        frustumCulled={false}
+      />
+      <lineSegments
+        ref={annLinesRef}
+        geometry={annLineGeometry}
+        material={annLineMaterial}
+        frustumCulled={false}
+      />
+      <lineSegments
+        ref={campusLinesRef}
+        geometry={campusLineGeometry}
+        material={campusLineMaterial}
         frustumCulled={false}
       />
     </group>

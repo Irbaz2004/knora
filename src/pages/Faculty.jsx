@@ -12,7 +12,6 @@ import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import LocalPhoneOutlinedIcon from "@mui/icons-material/LocalPhoneOutlined";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import WorkOutlineRoundedIcon from "@mui/icons-material/WorkOutlineRounded";
-import Navbar from "@/components/Navbar";
 import CursorEffect from "@/components/CursorEffect";
 import facultyArjun from "@/assets/faculty-arjun.avif";
 import facultyAisha from "@/assets/faculty-aisha.avif";
@@ -263,7 +262,6 @@ export default function Faculty() {
         }}
       />
       <CursorEffect />
-      <Navbar />
 
       <Box
         component="main"

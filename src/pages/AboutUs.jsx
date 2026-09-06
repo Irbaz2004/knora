@@ -13,7 +13,6 @@ import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
 import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import VerifiedRoundedIcon from "@mui/icons-material/VerifiedRounded";
-import Navbar from "@/components/Navbar";
 import CursorEffect from "@/components/CursorEffect";
 
 const wavePositions = {
@@ -482,8 +481,6 @@ export default function AboutUs() {
         }}
       />
       <CursorEffect />
-      <Navbar />
-
     </>
   );
 }

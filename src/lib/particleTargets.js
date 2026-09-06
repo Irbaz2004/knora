@@ -62,17 +62,239 @@ export function neuralSphere(count, radius, center = [0, 0, 0], seed = 1337) {
   return out;
 }
 
-/** Wide, elegant scattered cloud filling the viewport with a bright dense core. */
+/** Wide orbital particle ribbon inspired by a techno-particle sample background. */
 export function scatterCloud(count, width, height, depth, seed = 9021) {
   const out = new Float32Array(count * 3);
   const rnd = makeRandom(seed);
   for (let i = 0; i < count; i++) {
-    const bx = Math.pow(rnd(), 1.55) * (rnd() > 0.5 ? 1 : -1);
-    const by = Math.pow(rnd(), 1.35) * (rnd() > 0.5 ? 1 : -1);
-    out[i * 3] = bx * width * 0.5;
-    out[i * 3 + 1] = by * height * 0.5;
-    out[i * 3 + 2] = (rnd() - 0.5) * depth;
+    const i3 = i * 3;
+    const bucket = i % 14;
+
+    if (bucket < 8) {
+      const ring = bucket % 5;
+      const t = rnd();
+      const angle =
+        t * Math.PI * 2 + ring * 0.62 + Math.sin(t * Math.PI * 2.5) * 0.18;
+      const rx = width * (0.17 + ring * 0.035);
+      const ry = height * (0.055 + ring * 0.014);
+      const swirl = Math.sin(angle * 2.1 + ring) * height * 0.018;
+      out[i3] = Math.cos(angle) * rx + Math.sin(angle * 0.58) * width * 0.03;
+      out[i3 + 1] =
+        height * 0.13 + Math.sin(angle) * ry + swirl + (rnd() - 0.5) * 0.055;
+      out[i3 + 2] = Math.cos(angle + ring) * depth * 0.22;
+    } else if (bucket < 10) {
+      const side = bucket === 8 ? -1 : 1;
+      const t = rnd();
+      const x = side * width * (0.24 + t * 0.23);
+      const wave =
+        Math.sin(t * Math.PI * 2.3 + side * 0.85) * height * 0.05 +
+        Math.sin(t * Math.PI * 5.2) * height * 0.014;
+      out[i3] = x;
+      out[i3 + 1] =
+        height * 0.08 + wave + side * Math.sin(t * Math.PI) * height * 0.02;
+      out[i3 + 2] = (rnd() - 0.5) * depth * 0.34;
+    } else if (bucket < 12) {
+      const angle = rnd() * Math.PI * 2;
+      const radius = Math.pow(rnd(), 0.42) * Math.min(width, height) * 0.085;
+      out[i3] = Math.cos(angle) * radius * 0.9;
+      out[i3 + 1] = height * 0.02 + Math.sin(angle) * radius * 0.95;
+      out[i3 + 2] = (rnd() - 0.5) * depth * 0.2;
+    } else {
+      const angle = rnd() * Math.PI * 2;
+      const radius = Math.pow(rnd(), 0.58) * Math.min(width, height) * 0.44;
+      out[i3] = Math.cos(angle) * radius * 1.34;
+      out[i3 + 1] = height * 0.08 + Math.sin(angle) * radius * 0.44;
+      out[i3 + 2] = (rnd() - 0.5) * depth * 0.5;
+    }
   }
+  return out;
+}
+
+/** Quiet director-section constellation: soft diagonal threads, no large swirl. */
+export function directorMessageFormation(
+  count,
+  width,
+  height,
+  depth,
+  center = [0, 0, 0],
+  seed = 3030,
+) {
+  const out = new Float32Array(count * 3);
+  const rnd = makeRandom(seed);
+
+  const put = (i, x, y, z = 0) => {
+    const i3 = i * 3;
+    out[i3] = center[0] + x;
+    out[i3 + 1] = center[1] + y;
+    out[i3 + 2] = center[2] + z;
+  };
+
+  for (let i = 0; i < count; i++) {
+    const bucket = i % 12;
+
+    if (bucket < 5) {
+      const lane = bucket - 2;
+      const t = rnd();
+      const x = (t - 0.5) * width * 0.92;
+      const diagonal = (t - 0.5) * height * 0.16;
+      const y =
+        height * 0.08 +
+        diagonal +
+        lane * height * 0.026 +
+        Math.sin(t * Math.PI * 2.2 + lane) * height * 0.018;
+      put(i, x, y, (rnd() - 0.5) * depth * 0.34);
+    } else if (bucket < 8) {
+      const cluster = bucket === 5 ? -1 : bucket === 6 ? 0 : 1;
+      const angle = rnd() * Math.PI * 2;
+      const radius = Math.pow(rnd(), 0.52) * Math.min(width, height) * 0.075;
+      const anchorX = width * (0.2 + cluster * 0.12);
+      const anchorY = height * (-0.02 + cluster * 0.035);
+      put(
+        i,
+        anchorX + Math.cos(angle) * radius * 1.2,
+        anchorY + Math.sin(angle) * radius * 0.72,
+        Math.sin(angle) * depth * 0.12,
+      );
+    } else if (bucket < 10) {
+      const angle = rnd() * Math.PI * 2;
+      const radius = Math.pow(rnd(), 0.5) * Math.min(width, height) * 0.095;
+      const anchorX = -width * 0.27;
+      const anchorY = -height * 0.06;
+      put(
+        i,
+        anchorX + Math.cos(angle) * radius,
+        anchorY + Math.sin(angle) * radius * 0.65,
+        Math.cos(angle) * depth * 0.1,
+      );
+    } else {
+      const side = rnd() > 0.5 ? 1 : -1;
+      const x = side * width * (0.34 + rnd() * 0.2);
+      const y = (rnd() - 0.5) * height * 0.62;
+      put(i, x, y, (rnd() - 0.5) * depth * 0.55);
+    }
+  }
+
+  return out;
+}
+
+const ANN_LAYER_COUNTS = [5, 7, 6, 4, 3];
+
+export function buildAnnLayerEdges() {
+  const edges = [];
+  let fromStart = 0;
+
+  for (let layer = 0; layer < ANN_LAYER_COUNTS.length - 1; layer++) {
+    const fromCount = ANN_LAYER_COUNTS[layer];
+    const toCount = ANN_LAYER_COUNTS[layer + 1];
+    const toStart = fromStart + fromCount;
+
+    for (let from = 0; from < fromCount; from++) {
+      for (let to = 0; to < toCount; to++) {
+        edges.push(fromStart + from, toStart + to);
+      }
+    }
+
+    fromStart = toStart;
+  }
+
+  return new Uint32Array(edges);
+}
+
+function annLayers(width, height) {
+  const layerGap = 0.84 / Math.max(1, ANN_LAYER_COUNTS.length - 1);
+
+  return ANN_LAYER_COUNTS.map((nodeCount, layerIndex) => {
+    const x = (-0.42 + layerIndex * layerGap) * width;
+    const verticalSpan = 0.64;
+
+    return {
+      x,
+      nodes: Array.from({ length: nodeCount }, (_, nodeIndex) => {
+        const ratio = nodeCount === 1 ? 0.5 : nodeIndex / (nodeCount - 1);
+        return (0.5 - ratio) * verticalSpan * height;
+      }),
+    };
+  });
+}
+
+/** ANN-style network: clean input/hidden/output layers with feed-forward paths. */
+export function annNetworkFormation(
+  count,
+  width,
+  height,
+  depth,
+  center = [0, 0, 0],
+  seed = 5151,
+) {
+  const out = new Float32Array(count * 3);
+  const rnd = makeRandom(seed);
+  const layers = annLayers(width, height);
+  const nodes = layers.flatMap((layer, layerIndex) =>
+    layer.nodes.map((y, nodeIndex) => ({
+      layerIndex,
+      nodeIndex,
+      x: layer.x,
+      y,
+    })),
+  );
+  const nodeCount = Math.min(nodes.length, count);
+
+  const put = (i, x, y, z = 0) => {
+    const i3 = i * 3;
+    out[i3] = center[0] + x;
+    out[i3 + 1] = center[1] + y;
+    out[i3 + 2] = center[2] + z;
+  };
+
+  for (let i = 0; i < nodeCount; i++) {
+    const node = nodes[i];
+    put(i, node.x, node.y, 0);
+  }
+
+  for (let i = nodeCount; i < count; i++) {
+    const bucket = i % 18;
+
+    if (bucket < 11) {
+      const fromLayerIndex = bucket % (layers.length - 1);
+      const fromLayer = layers[fromLayerIndex];
+      const toLayer = layers[fromLayerIndex + 1];
+      const fromNode =
+        fromLayer.nodes[Math.floor(rnd() * fromLayer.nodes.length)];
+      const toNode = toLayer.nodes[Math.floor(rnd() * toLayer.nodes.length)];
+      const t = rnd();
+      const ease = t * t * (3 - 2 * t);
+      const bow = Math.sin(t * Math.PI) * (rnd() - 0.5) * height * 0.012;
+      const x =
+        fromLayer.x +
+        (toLayer.x - fromLayer.x) * ease +
+        (rnd() - 0.5) * width * 0.003;
+      const y =
+        fromNode +
+        (toNode - fromNode) * ease +
+        bow +
+        (rnd() - 0.5) * height * 0.004;
+      put(i, x, y, (rnd() - 0.5) * depth * 0.18);
+    } else if (bucket < 17) {
+      const layer = layers[(bucket - 9) % layers.length];
+      const node = layer.nodes[Math.floor(rnd() * layer.nodes.length)];
+      const angle = rnd() * Math.PI * 2;
+      const ring =
+        Math.min(width, height) * (0.034 + Math.pow(rnd(), 0.8) * 0.018);
+      put(
+        i,
+        layer.x + Math.cos(angle) * ring,
+        node + Math.sin(angle) * ring,
+        Math.cos(angle) * depth * 0.06,
+      );
+    } else {
+      const layer = layers[Math.floor(rnd() * layers.length)];
+      const node = layer.nodes[Math.floor(rnd() * layer.nodes.length)];
+      const x = layer.x + (rnd() - 0.5) * width * 0.075;
+      const y = node + (rnd() - 0.5) * height * 0.075;
+      put(i, x, y, (rnd() - 0.5) * depth * 0.22);
+    }
+  }
+
   return out;
 }
 

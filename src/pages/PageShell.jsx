@@ -1,5 +1,4 @@
 import { ArrowRight } from "lucide-react";
-import Navbar from "@/components/Navbar";
 import CursorEffect from "@/components/CursorEffect";
 
 export default function PageShell({
@@ -11,7 +10,6 @@ export default function PageShell({
   return (
     <>
       <CursorEffect />
-      <Navbar />
       <main className="relative min-h-screen overflow-hidden bg-background px-6 py-32 text-foreground sm:px-10 lg:px-20">
         <div className="pointer-events-none absolute inset-0 -z-10">
           <div className="bloom absolute left-1/2 top-1/4 size-[56rem] -translate-x-1/2 rounded-full opacity-55 blur-3xl" />

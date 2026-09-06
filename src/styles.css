@@ -48,8 +48,8 @@
 }
 
 @theme {
-  --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Archivo";
+  --font-sans: "Inter";
   --color-ice: var(--ice);
   --color-navy: var(--navy);
   --color-electric: var(--electric);
@@ -192,6 +192,32 @@
     font-family: var(--font-display);
     letter-spacing: 0;
   }
+
+  button,
+  input,
+  textarea,
+  select {
+    font-family: var(--font-sans);
+  }
+}
+
+.MuiButton-root,
+.MuiChip-root,
+.MuiInputBase-root,
+.MuiFormLabel-root,
+.MuiMenuItem-root,
+.MuiTab-root,
+.MuiTableCell-root,
+.MuiTooltip-tooltip,
+.MuiTypography-root {
+  font-family: var(--font-sans) !important;
+}
+
+.MuiTypography-root.hologram-title,
+.course-roadmap-title.MuiTypography-root,
+.font-display,
+.font-display.MuiTypography-root {
+  font-family: var(--font-display) !important;
 }
 
 html.dark {
@@ -840,6 +866,564 @@ html.dark body {
 
 .course-particle-right {
   right: 0.55rem;
+}
+
+.course-roadmap-wrap {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  overflow: hidden;
+  padding-block: 0.5rem 1.2rem;
+  text-align: left;
+}
+
+.course-roadmap-viewport {
+  width: 100%;
+  overflow: hidden;
+  padding-inline: clamp(1.25rem, 5.5vw, 7rem);
+}
+
+.course-roadmap-track {
+  --course-roadmap-step: clamp(26rem, 32vw, 31rem);
+  position: relative;
+  display: grid;
+  width: max-content;
+  height: clamp(29rem, 54vh, 35rem);
+  grid-template-columns: repeat(
+    var(--course-count),
+    var(--course-roadmap-step)
+  );
+  padding-inline: clamp(0.5rem, 2vw, 1.5rem);
+  will-change: transform;
+}
+
+.course-roadmap-wave {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.course-roadmap-wave-path,
+.course-roadmap-wave-shadow {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.course-roadmap-wave-shadow {
+  stroke: color-mix(in oklab, var(--primary) 24%, transparent);
+  stroke-width: 18;
+  opacity: 0.2;
+}
+
+.course-roadmap-wave-path {
+  stroke: url("#course-roadmap-gradient");
+  stroke-width: 7;
+  filter: drop-shadow(
+    0 12px 22px color-mix(in oklab, var(--primary) 18%, transparent)
+  );
+}
+
+.course-roadmap-node {
+  position: relative;
+  min-width: 0;
+}
+
+.course-roadmap-card.MuiCard-root {
+  position: absolute;
+  left: 50%;
+  z-index: 4;
+  display: flex;
+  width: clamp(20rem, 22vw, 22.5rem);
+  min-height: clamp(13.2rem, 22vh, 15rem);
+  transform: translateX(-50%);
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, var(--primary) 22%, white);
+  border-radius: 1.35rem;
+  background:
+    radial-gradient(
+      circle at 82% 8%,
+      color-mix(in oklab, var(--primary) 18%, transparent),
+      transparent 34%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, white 90%, var(--primary) 4%),
+      color-mix(in oklab, white 72%, var(--primary) 7%)
+    );
+  padding: clamp(1rem, 1.5vw, 1.25rem);
+}
+
+.dark .course-roadmap-card.MuiCard-root {
+  border-color: color-mix(in oklab, var(--primary) 24%, transparent);
+  background:
+    radial-gradient(
+      circle at 82% 8%,
+      color-mix(in oklab, var(--primary) 18%, transparent),
+      transparent 34%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--card) 92%, var(--primary) 4%),
+      color-mix(in oklab, var(--background) 82%, var(--primary) 6%)
+    );
+}
+
+.course-roadmap-node-above .course-roadmap-card {
+  top: 0;
+}
+
+.course-roadmap-node-below .course-roadmap-card {
+  bottom: 0;
+}
+
+.course-roadmap-dot {
+  position: absolute;
+  left: 50%;
+  z-index: 3;
+  width: 1.05rem;
+  height: 1.05rem;
+  transform: translate(-50%, -50%);
+  border: 3px solid var(--background);
+  border-radius: 999px;
+  background: var(--primary);
+  outline: 1px solid color-mix(in oklab, var(--primary) 34%, white);
+}
+
+.course-roadmap-node-above .course-roadmap-dot {
+  top: 44%;
+}
+
+.course-roadmap-node-below .course-roadmap-dot {
+  top: 58%;
+}
+
+.course-roadmap-connector {
+  position: absolute;
+  left: 50%;
+  z-index: 2;
+  width: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    180deg,
+    transparent,
+    color-mix(in oklab, var(--primary) 66%, white),
+    transparent
+  );
+}
+
+.course-roadmap-node-above .course-roadmap-connector {
+  top: clamp(13.2rem, 22vh, 15rem);
+  height: max(1.4rem, calc(44% - clamp(13.2rem, 22vh, 15rem)));
+}
+
+.course-roadmap-node-below .course-roadmap-connector {
+  top: 58%;
+  height: max(1.4rem, calc(42% - clamp(13.2rem, 22vh, 15rem)));
+}
+
+.course-roadmap-icon {
+  display: inline-flex;
+  width: 2.55rem;
+  height: 2.55rem;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--primary) 11%, white);
+  color: var(--primary);
+}
+
+.dark .course-roadmap-icon {
+  background: color-mix(in oklab, var(--primary) 13%, var(--card));
+}
+
+.course-roadmap-chip.MuiChip-root {
+  height: 1.65rem;
+  border: 1px solid color-mix(in oklab, var(--primary) 24%, transparent);
+  background: color-mix(in oklab, var(--primary) 9%, white);
+  color: var(--primary);
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.dark .course-roadmap-chip.MuiChip-root {
+  background: color-mix(in oklab, var(--primary) 12%, var(--card));
+}
+
+.course-roadmap-title.MuiTypography-root {
+  color: var(--foreground);
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 1.35vw, 1.28rem);
+  font-weight: 800;
+  line-height: 1.16;
+  letter-spacing: 0;
+}
+
+.course-roadmap-copy.MuiTypography-root {
+  margin-top: 0.55rem;
+  color: var(--muted-foreground);
+  font-size: clamp(0.82rem, 0.95vw, 0.92rem);
+  line-height: 1.45;
+}
+
+.course-roadmap-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.36rem;
+  border: 1px solid color-mix(in oklab, var(--primary) 15%, transparent);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--primary) 5%, var(--card));
+  padding: 0.34rem 0.55rem;
+  color: var(--muted-foreground);
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.course-roadmap-meta svg {
+  color: var(--primary);
+  font-size: 0.95rem;
+}
+
+.course-roadmap-button.MuiButton-root {
+  justify-content: space-between;
+  width: 100%;
+  border: 1px solid color-mix(in oklab, var(--primary) 28%, transparent);
+  border-radius: 999px;
+  color: var(--primary);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 900;
+  padding: 0.58rem 0.92rem;
+  text-transform: none;
+}
+
+.course-roadmap-button.MuiButton-root:hover {
+  border-color: color-mix(in oklab, var(--primary) 46%, transparent);
+  background: color-mix(in oklab, var(--primary) 8%, transparent);
+}
+
+@media (max-width: 1024px) {
+  .course-roadmap-track {
+    --course-roadmap-step: clamp(22.5rem, 45vw, 24rem);
+  }
+
+  .course-roadmap-card.MuiCard-root {
+    width: clamp(18.5rem, 37vw, 19.5rem);
+  }
+}
+
+@media (max-width: 720px) {
+  .course-roadmap-viewport {
+    padding-inline: 1rem;
+  }
+
+  .course-roadmap-track {
+    --course-roadmap-step: clamp(21rem, 92vw, 22.5rem);
+    height: 33.5rem;
+    padding-inline: 0.4rem;
+  }
+
+  .course-roadmap-card.MuiCard-root {
+    width: clamp(17.5rem, 86vw, 18.75rem);
+    min-height: 13.8rem;
+  }
+
+  .course-roadmap-node-above .course-roadmap-connector {
+    top: 13.8rem;
+    height: max(1.1rem, calc(44% - 13.8rem));
+  }
+
+  .course-roadmap-node-below .course-roadmap-connector {
+    height: max(1.1rem, calc(42% - 13.8rem));
+  }
+}
+
+.hybrid-editorial-section {
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--primary) 8%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      color-mix(in oklab, var(--primary) 6%, transparent) 1px,
+      transparent 1px
+    );
+  background-size:
+    33vw 100%,
+    100% 26%;
+}
+
+.hybrid-editorial-grid {
+  position: relative;
+  display: grid;
+  width: min(100%, 92rem);
+  min-height: min(34rem, calc(100vh - 7.5rem));
+  max-height: calc(100vh - 6.75rem);
+  grid-template-columns: minmax(19rem, 0.82fr) minmax(28rem, 1.18fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: clamp(1rem, 2.3vw, 3rem);
+  margin-inline: auto;
+  color: var(--foreground);
+}
+
+.hybrid-editorial-grid::before,
+.hybrid-editorial-grid::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: -1;
+  border-top: 1px dotted color-mix(in oklab, var(--primary) 20%, transparent);
+}
+
+.hybrid-editorial-grid::before {
+  top: 0;
+}
+
+.hybrid-editorial-grid::after {
+  bottom: 0;
+}
+
+.hybrid-copy-column {
+  display: flex;
+  min-width: 0;
+  grid-column: 1;
+  grid-row: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  border-top: 1px dotted color-mix(in oklab, var(--primary) 18%, transparent);
+  border-bottom: 1px dotted color-mix(in oklab, var(--primary) 18%, transparent);
+  padding: clamp(1.1rem, 2.2vw, 1.8rem) 0;
+}
+
+.hybrid-kicker {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--primary);
+  font-size: clamp(0.68rem, 0.8vw, 0.78rem);
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.hybrid-kicker::before {
+  content: "";
+  width: 0.42rem;
+  height: 0.42rem;
+  background: var(--primary);
+}
+
+.hybrid-title-large {
+  max-width: 12ch;
+  margin: clamp(1rem, 2.4vh, 1.55rem) 0;
+  color: var(--foreground);
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 4.45vw, 5rem);
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.hybrid-copy-column p {
+  max-width: 27rem;
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: clamp(0.88rem, 0.98vw, 1rem);
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.hybrid-highlight-list {
+  display: grid;
+  min-height: 0;
+  grid-column: 2;
+  grid-row: 1 / 3;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  gap: clamp(0.8rem, 1.4vw, 1.1rem);
+}
+
+.hybrid-row {
+  position: relative;
+  display: grid;
+  min-height: 0;
+  grid-template-columns: minmax(10rem, 0.9fr) minmax(8rem, 1fr);
+  align-items: start;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, var(--primary) 12%, transparent);
+  background:
+    radial-gradient(
+      circle at 94% 16%,
+      color-mix(in oklab, var(--primary) 7%, transparent),
+      transparent 34%
+    ),
+    color-mix(in oklab, var(--card) 76%, transparent);
+  padding: clamp(0.95rem, 1.35vw, 1.25rem);
+}
+
+.hybrid-row-number {
+  display: inline-flex;
+  align-items: center;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1;
+  padding: 0.38rem 0.48rem;
+}
+
+.hybrid-row h3 {
+  margin: 0.85rem 0 0;
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: clamp(0.98rem, 1.1vw, 1.15rem);
+  font-weight: 700;
+  line-height: 1.22;
+}
+
+.hybrid-row p {
+  max-width: 17rem;
+  margin: 0.55rem 0 0;
+  color: var(--muted-foreground);
+  font-size: clamp(0.78rem, 0.88vw, 0.88rem);
+  line-height: 1.4;
+}
+
+.hybrid-row svg {
+  width: min(100%, 14rem);
+  justify-self: end;
+  align-self: center;
+  opacity: 0.42;
+}
+
+.hybrid-row svg path {
+  fill: none;
+  stroke: color-mix(in oklab, var(--primary) 56%, transparent);
+  stroke-dasharray: 2.4 3.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+
+.hybrid-metrics {
+  display: grid;
+  grid-column: 1;
+  grid-row: 2;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border-top: 1px dotted color-mix(in oklab, var(--primary) 18%, transparent);
+}
+
+.hybrid-metrics div {
+  min-width: 0;
+  border: 1px solid color-mix(in oklab, var(--primary) 10%, transparent);
+  background: color-mix(in oklab, var(--primary) 5%, var(--card));
+  padding: clamp(0.7rem, 1vw, 0.85rem);
+}
+
+.hybrid-metrics dt {
+  color: var(--foreground);
+  font-family: var(--font-display);
+  font-size: clamp(0.82rem, 0.95vw, 0.95rem);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.hybrid-metrics dd {
+  margin: 0.32rem 0 0;
+  color: var(--muted-foreground);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+@media (max-width: 1180px) {
+  .hybrid-editorial-grid {
+    min-height: min(36rem, calc(100vh - 6.75rem));
+    grid-template-columns: minmax(17rem, 0.86fr) minmax(22rem, 1.14fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .hybrid-copy-column {
+    grid-column: 1;
+    grid-row: 1;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    padding-block: 0.9rem 1rem;
+  }
+
+  .hybrid-title-large {
+    max-width: 12ch;
+    margin-block: 0.8rem;
+    font-size: clamp(2.15rem, 4.4vw, 3.5rem);
+  }
+
+  .hybrid-highlight-list {
+    grid-column: 2;
+    grid-row: 1 / 3;
+  }
+
+  .hybrid-metrics {
+    grid-column: 1;
+    grid-row: 2;
+  }
+}
+
+@media (max-width: 760px) {
+  .hybrid-editorial-section {
+    align-items: flex-start;
+    overflow-y: auto;
+    padding-top: 5.8rem;
+    padding-bottom: 1.4rem;
+  }
+
+  .hybrid-editorial-grid {
+    display: flex;
+    min-height: 0;
+    max-height: none;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .hybrid-copy-column {
+    display: block;
+    padding-block: 0.9rem 1rem;
+  }
+
+  .hybrid-title-large {
+    max-width: 12ch;
+    font-size: clamp(2.05rem, 10vw, 3rem);
+  }
+
+  .hybrid-row {
+    min-height: 10.5rem;
+    grid-template-columns: minmax(0, 1fr) 7.5rem;
+  }
+
+  .hybrid-row svg {
+    width: 8.5rem;
+  }
+
+  .hybrid-metrics {
+    grid-template-columns: 1fr;
+  }
 }
 
 .faculty-hologram-visual {
@@ -2656,7 +3240,11 @@ html.dark body {
   justify-content: center;
   padding: clamp(2rem, 4.8vw, 4.6rem) clamp(2rem, 6.2vw, 7.2rem);
   background:
-    radial-gradient(circle at 14% 92%, rgba(5, 114, 234, 0.08), transparent 28%),
+    radial-gradient(
+      circle at 14% 92%,
+      rgba(5, 114, 234, 0.08),
+      transparent 28%
+    ),
     radial-gradient(circle at 78% 0%, rgba(5, 114, 234, 0.08), transparent 28%),
     #ffffff;
 }
@@ -2673,7 +3261,10 @@ html.dark body {
   inset: 0 auto auto 35%;
   width: 21rem;
   height: 10rem;
-  background-image: radial-gradient(rgba(5, 114, 234, 0.22) 1px, transparent 1.5px);
+  background-image: radial-gradient(
+    rgba(5, 114, 234, 0.22) 1px,
+    transparent 1.5px
+  );
   background-size: 17px 17px;
   transform: rotate(-16deg);
   mask-image: linear-gradient(to bottom, black, transparent);
@@ -2958,7 +3549,11 @@ html.dark body {
   overflow: hidden;
   background:
     linear-gradient(180deg, rgba(7, 46, 112, 0.1), rgba(5, 61, 143, 0.26)),
-    radial-gradient(circle at 54% 39%, rgba(74, 181, 255, 0.56), transparent 28%),
+    radial-gradient(
+      circle at 54% 39%,
+      rgba(74, 181, 255, 0.56),
+      transparent 28%
+    ),
     linear-gradient(135deg, #0d58b9, #0b2d70 82%);
   color: #ffffff;
   clip-path: polygon(13% 0, 100% 0, 100% 100%, 0 100%);
@@ -2971,10 +3566,22 @@ html.dark body {
   inset: 0;
   z-index: -2;
   background:
-    radial-gradient(circle at 72% 18%, rgba(255, 255, 255, 0.2), transparent 3%),
-    radial-gradient(circle at 89% 7%, rgba(255, 255, 255, 0.16), transparent 9%),
+    radial-gradient(
+      circle at 72% 18%,
+      rgba(255, 255, 255, 0.2),
+      transparent 3%
+    ),
+    radial-gradient(
+      circle at 89% 7%,
+      rgba(255, 255, 255, 0.16),
+      transparent 9%
+    ),
     linear-gradient(90deg, rgba(255, 255, 255, 0.12), transparent 18%),
-    repeating-radial-gradient(circle at 62% 36%, rgba(67, 194, 255, 0.38) 0 1px, transparent 1px 15px);
+    repeating-radial-gradient(
+      circle at 62% 36%,
+      rgba(67, 194, 255, 0.38) 0 1px,
+      transparent 1px 15px
+    );
   opacity: 0.95;
 }
 
@@ -2985,7 +3592,12 @@ html.dark body {
   z-index: -1;
   background:
     linear-gradient(90deg, rgba(0, 17, 51, 0.18), transparent 36%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 48%, rgba(0, 18, 66, 0.28));
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.08),
+      transparent 48%,
+      rgba(0, 18, 66, 0.28)
+    );
 }
 
 .auth-secure-chip {
@@ -3095,7 +3707,11 @@ html.dark body {
   place-items: center;
   border: 2px solid rgba(111, 213, 255, 0.86);
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.28), rgba(5, 114, 234, 0.26));
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.28),
+    rgba(5, 114, 234, 0.26)
+  );
 }
 
 .auth-orbit-top {
@@ -3135,7 +3751,11 @@ html.dark body {
   position: absolute;
   inset: auto -10% 0 -14%;
   height: 34%;
-  background: linear-gradient(180deg, rgba(207, 229, 255, 0.72), rgba(29, 86, 164, 0.45));
+  background: linear-gradient(
+    180deg,
+    rgba(207, 229, 255, 0.72),
+    rgba(29, 86, 164, 0.45)
+  );
 }
 
 .auth-laptop {

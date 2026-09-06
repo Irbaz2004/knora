@@ -8,6 +8,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
 import AssignmentTurnedInRoundedIcon from "@mui/icons-material/AssignmentTurnedInRounded";
@@ -15,16 +16,18 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import CodeRoundedIcon from "@mui/icons-material/CodeRounded";
 import DataObjectRoundedIcon from "@mui/icons-material/DataObjectRounded";
 import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
+import FolderRoundedIcon from "@mui/icons-material/FolderRounded";
 import FolderOpenRoundedIcon from "@mui/icons-material/FolderOpenRounded";
 import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import PsychologyRoundedIcon from "@mui/icons-material/PsychologyRounded";
 import RocketLaunchRoundedIcon from "@mui/icons-material/RocketLaunchRounded";
 import SmartToyRoundedIcon from "@mui/icons-material/SmartToyRounded";
+import VideocamRoundedIcon from "@mui/icons-material/VideocamRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
-import Navbar from "@/components/Navbar";
 import CursorEffect from "@/components/CursorEffect";
 import courseAiImage from "@/assets/course-ai.svg";
 import courseGenAiImage from "@/assets/course-genai.svg";
+import courseImage from "@/assets/courseimg.webp";
 import coursePythonImage from "@/assets/course-python.svg";
 import courseVisionImage from "@/assets/course-vision.svg";
 
@@ -241,6 +244,114 @@ const courses = [
   },
 ];
 
+const courseThumbnailImages = [courseImage];
+
+const courseAuthors = [
+  "by Knora Faculty",
+  "by Rahul Mehra",
+  "by Aisha Khan",
+  "by Arjun Patel",
+];
+
+const courseFeatures = [
+  {
+    title: "Live Classes",
+    copy: "Interactive sessions with expert mentors",
+    icon: VideocamRoundedIcon,
+  },
+  {
+    title: "Projects",
+    copy: "Build real-world projects and strengthen skills",
+    icon: FolderRoundedIcon,
+  },
+  {
+    title: "Recordings",
+    copy: "Watch anytime, anywhere at your convenience",
+    icon: VideocamRoundedIcon,
+  },
+];
+
+function slugifyCourseName(value) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function getCoursePath(course) {
+  return `/course/${slugifyCourseName(course.name)}`;
+}
+
+function getCourseLessonPath(course, lesson) {
+  return `${getCoursePath(course)}/${slugifyCourseName(lesson.title)}`;
+}
+
+function getSelectedCourseFromPath() {
+  const [, section, rawSlug] = window.location.pathname.split("/");
+  if (section !== "course" || !rawSlug) return null;
+
+  const selectedSlug = decodeURIComponent(rawSlug).toLowerCase();
+  return (
+    courses.find((course) => slugifyCourseName(course.name) === selectedSlug) ??
+    null
+  );
+}
+
+function navigateToCourse(course) {
+  window.dispatchEvent(
+    new CustomEvent("knora:navigate", {
+      detail: { path: getCoursePath(course) },
+    }),
+  );
+}
+
+function getCourseLessons(course) {
+  const baseLessons = course.files.map((file, index) => ({
+    ...file,
+    author: courseAuthors[index % courseAuthors.length],
+    badge: index < 3 ? "New" : course.tag,
+    duration: index % 2 === 0 ? "Early access" : course.duration,
+    image: courseThumbnailImages[index % courseThumbnailImages.length],
+    lessons: `${index + 4} lessons`,
+  }));
+
+  return [
+    ...baseLessons,
+    {
+      title: `${course.name} Build Sprint`,
+      copy: `Turn ${course.highlights[0].toLowerCase()} into a guided portfolio workflow.`,
+      icon: RocketLaunchRoundedIcon,
+      author: "by Knora Faculty",
+      badge: "New",
+      duration: course.duration,
+      image: courseImage,
+      lessons: "6 lessons",
+    },
+    {
+      title: `${course.name} Project Review`,
+      copy: `Review common mistakes, stronger decisions, and clean delivery habits.`,
+      icon: AssignmentTurnedInRoundedIcon,
+      author: "by Mentor Team",
+      badge: course.level,
+      duration: "1 hour",
+      image: courseThumbnailImages[2],
+      lessons: "5 lessons",
+    },
+    {
+      title: `${course.name} Capstone Lab`,
+      copy: `Build, explain, and package a final ${course.category.toLowerCase()} project.`,
+      icon: VisibilityRoundedIcon,
+      author: "by Knora Academy",
+      badge: "New",
+      duration: "3.8 hours",
+      image: courseThumbnailImages[3],
+      lessons: "8 lessons",
+    },
+  ].slice(0, 8);
+}
+
 function CourseFolderStack({ activeCourse, onSelect, onSendBack, onOpen }) {
   const [hoveredCourse, setHoveredCourse] = useState(null);
   const [drag, setDrag] = useState({
@@ -301,7 +412,7 @@ function CourseFolderStack({ activeCourse, onSelect, onSendBack, onOpen }) {
     <Box
       className="course-stack-stage"
       sx={{
-        height: { xs: 350, sm: 400, md: "clamp(330px, 33vw, 410px)" },
+        height: { xs: 340, sm: 380, md: "clamp(330px, 31vw, 430px)" },
         position: "relative",
         width: "100%",
       }}
@@ -314,19 +425,19 @@ function CourseFolderStack({ activeCourse, onSelect, onSendBack, onOpen }) {
         const hoverLift = isHovered ? -16 : 0;
         const baseTransform =
           offset === 0
-            ? `translate3d(0, ${hoverLift}px, 0) rotate(0deg) scale(${
+            ? `translate3d(-50%, ${hoverLift}px, 42px) rotateX(0deg) rotateY(0deg) scale(${
                 isHovered ? 1.012 : 1
               })`
-            : `translate3d(${offset * 30}px, ${
-                offset * -8 + hoverLift
-              }px, 0) rotate(${
-                -4 + offset * 1.8
+            : `translate3d(calc(-50% + ${offset * 74}px), ${
+                offset * -36 + hoverLift
+              }px, ${-offset * 34}px) rotateX(${offset * 1.4}deg) rotateY(${
+                -offset * 5
               }deg) scale(${1 - offset * 0.045 + (isHovered ? 0.008 : 0)})`;
         const dragTransform =
           isActive && drag.active
-            ? `translate3d(${drag.x}px, ${drag.y}px, 0) rotate(${
-                drag.x * 0.03
-              }deg) scale(0.98)`
+            ? `translate3d(calc(-50% + ${drag.x}px), ${drag.y}px, 42px) rotateY(${
+                drag.x * 0.035
+              }deg) rotateZ(${drag.x * 0.018}deg) scale(0.98)`
             : baseTransform;
 
         return (
@@ -344,9 +455,12 @@ function CourseFolderStack({ activeCourse, onSelect, onSendBack, onOpen }) {
             className={`course-folder ${isActive ? "course-folder-active" : ""}`}
             sx={{
               "--folder-gradient": course.color,
-              left: { xs: "2%", md: `${offset * 4.2}%` },
+              left: "50%",
               opacity: offset > 3 ? 0 : 1,
-              top: { xs: `${48 - offset * 14}px`, md: `${58 - offset * 24}px` },
+              top: {
+                xs: `${78 - offset * 18}px`,
+                md: `${112 - offset * 12}px`,
+              },
               transform: dragTransform,
               zIndex: courses.length - offset,
             }}
@@ -359,14 +473,13 @@ function CourseFolderStack({ activeCourse, onSelect, onSendBack, onOpen }) {
             </Box>
             <Box className="course-folder-body">
               <Box className="course-card-orbit" />
+              {!isActive && (
+                <Box className="course-folder-side-tab">
+                  <ArrowForwardRoundedIcon />
+                </Box>
+              )}
               <Box className="course-folder-icon-ring">
-                <Box
-                  component="img"
-                  alt=""
-                  aria-hidden="true"
-                  className="course-folder-main-image"
-                  src={course.image}
-                />
+                <Icon className="course-folder-main-icon" />
               </Box>
               <Stack className="course-folder-copy" spacing={1.4}>
                 <Typography
@@ -384,18 +497,10 @@ function CourseFolderStack({ activeCourse, onSelect, onSendBack, onOpen }) {
                 >
                   {String(index + 1).padStart(2, "0")}
                 </Typography>
-                <Typography
-                  sx={{
-                    color: "var(--muted-foreground)",
-                    fontSize: {
-                      xs: "clamp(13px, 4vw, 15px)",
-                      md: "clamp(14px, 1.15vw, 16px)",
-                    },
-                    fontWeight: 800,
-                  }}
-                >
+                <Typography className="course-folder-name">
                   {course.fullName}
                 </Typography>
+                <Box className="course-folder-rule" />
                 <Typography
                   sx={{
                     color: "var(--primary)",
@@ -410,7 +515,13 @@ function CourseFolderStack({ activeCourse, onSelect, onSendBack, onOpen }) {
                 >
                   {course.tag}
                 </Typography>
+                <Typography className="course-folder-description">
+                  {course.copy}
+                </Typography>
               </Stack>
+              <Box className="course-folder-open-icon">
+                <ArrowForwardRoundedIcon />
+              </Box>
             </Box>
           </Box>
         );
@@ -419,172 +530,92 @@ function CourseFolderStack({ activeCourse, onSelect, onSendBack, onOpen }) {
   );
 }
 
-function CourseInfiniteMenu({ course, onClose }) {
-  const [rotation, setRotation] = useState(0);
-  const [axis, setAxis] = useState({ x: 0, y: 0 });
-  const [hasFocused, setHasFocused] = useState(false);
-  const [drag, setDrag] = useState({
-    active: false,
-    pointerId: null,
-    startX: 0,
-    startY: 0,
-    x: 0,
-    y: 0,
-  });
-  const files = course.files;
-  const clampAxis = (value) => Math.max(-12, Math.min(12, value));
-  const liveRotation = rotation + drag.x * 0.006 + drag.y * 0.002;
-  const liveAxis = {
-    x: clampAxis(axis.x + drag.x * 0.026),
-    y: clampAxis(axis.y + drag.y * 0.026),
-  };
-  const step = (Math.PI * 2) / files.length;
-  const activeFileIndex =
-    ((Math.round(-liveRotation / step) % files.length) + files.length) %
-    files.length;
-  const activeFile = files[activeFileIndex];
-  const ActiveIcon = activeFile.icon;
-
-  const startDrag = (event) => {
-    if (event.button !== 0) return;
-
-    event.currentTarget.setPointerCapture(event.pointerId);
-    setDrag({
-      active: true,
-      pointerId: event.pointerId,
-      startX: event.clientX,
-      startY: event.clientY,
-      x: 0,
-      y: 0,
-    });
-  };
-
-  const moveDrag = (event) => {
-    if (!drag.active || drag.pointerId !== event.pointerId) return;
-
-    setDrag((current) => ({
-      ...current,
-      x: event.clientX - current.startX,
-      y: event.clientY - current.startY,
-    }));
-  };
-
-  const stopDrag = (event) => {
-    if (!drag.active || drag.pointerId !== event.pointerId) return;
-
-    const moved = Math.hypot(drag.x, drag.y);
-    setRotation((current) => current + drag.x * 0.006 + drag.y * 0.002);
-    setAxis((current) => ({
-      x: clampAxis(current.x + drag.x * 0.026),
-      y: clampAxis(current.y + drag.y * 0.026),
-    }));
-    setHasFocused(moved > 8);
-    setDrag({
-      active: false,
-      pointerId: null,
-      startX: 0,
-      startY: 0,
-      x: 0,
-      y: 0,
-    });
-  };
-
-  const scrollMenu = (event) => {
-    event.preventDefault();
-    const wheelX = event.deltaX || 0;
-    const wheelY = event.deltaY || 0;
-
-    setRotation((current) => current + wheelX * 0.004 + wheelY * 0.0028);
-    setAxis((current) => ({
-      x: clampAxis(current.x - wheelX * 0.018),
-      y: clampAxis(current.y - wheelY * 0.018),
-    }));
-    setHasFocused(true);
+function CourseLessonList({ course }) {
+  const lessons = getCourseLessons(course);
+  const moveCardGlow = (event) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    event.currentTarget.style.setProperty(
+      "--glow-x",
+      `${event.clientX - rect.left}px`,
+    );
+    event.currentTarget.style.setProperty(
+      "--glow-y",
+      `${event.clientY - rect.top}px`,
+    );
   };
 
   return (
-    <Box
-      className={`course-menu-view ${drag.active ? "course-menu-zoomed" : ""} ${
-        hasFocused ? "course-menu-focused" : ""
-      }`}
-      onWheel={scrollMenu}
-    >
-      <Button
-        onClick={onClose}
-        startIcon={<CloseRoundedIcon />}
-        className="course-menu-close"
+    <Box className="course-list-view">
+      <Stack
+        className="course-list-header"
+        direction={{ xs: "column", md: "row" }}
+        spacing={2}
       >
-        Folders
-      </Button>
-
-      <Stack className="course-menu-title" spacing={1.4}>
-        <Chip
-          label={course.category}
-          sx={{
-            bgcolor: "var(--primary)",
-            border: "1px solid var(--primary)",
-            color: "var(--primary-foreground)",
-            fontWeight: 900,
-            width: "fit-content",
-          }}
-        />
-        <Typography
-          sx={{
-            color: "var(--foreground)",
-            fontFamily: "var(--font-display)",
-            fontSize: { xs: 38, sm: 54, md: 72 },
-            fontWeight: 900,
-            letterSpacing: 0,
-            lineHeight: 0.95,
-          }}
+        <Stack spacing={1}>
+          <Chip
+            label={course.category}
+            className="course-list-chip"
+            sx={{ width: "fit-content" }}
+          />
+          <Typography component="h1" className="course-list-title">
+            {course.fullName}
+          </Typography>
+        </Stack>
+        <Button
+          href="/courses"
+          startIcon={<CloseRoundedIcon />}
+          className="course-list-back"
         >
-          {activeFile.title}
-        </Typography>
+          Folders
+        </Button>
       </Stack>
 
-      <Typography className="course-menu-copy">{activeFile.copy}</Typography>
-
-      <Box
-        component="button"
-        type="button"
-        aria-label="Drag course file menu"
-        className="course-menu-drag"
-        onPointerDown={startDrag}
-        onPointerMove={moveDrag}
-        onPointerUp={stopDrag}
-        onPointerCancel={stopDrag}
-      >
-        <ActiveIcon className="course-menu-center-icon" />
-        <ArrowForwardRoundedIcon className="course-menu-arrow" />
-      </Box>
-
-      <Box className="course-menu-orbit" aria-hidden="true">
-        {Array.from({ length: files.length * 2 }).map((_, orbitIndex) => {
-          const file = files[orbitIndex % files.length];
-          const Icon = file.icon;
-          const angle = orbitIndex * step + liveRotation;
-          const x = Math.cos(angle) * 42;
-          const y = Math.sin(angle) * 30;
-          const depth = (Math.sin(angle) + 1) / 2;
-          const scale = 0.66 + depth * 0.42;
+      <Box className="course-list-grid">
+        {lessons.map((lesson, index) => {
+          const Icon = lesson.icon;
 
           return (
             <Box
-              key={`${file.title}-${orbitIndex}`}
-              className={`course-menu-node ${
-                orbitIndex % files.length === activeFileIndex
-                  ? "course-menu-node-active"
-                  : ""
-              }`}
-              sx={{
-                opacity: 0.24 + depth * 0.62,
-                transform: `translate(calc(-50% + ${x + liveAxis.x}vw), calc(-50% + ${
-                  y + liveAxis.y
-                }vh)) rotate(${angle}rad) scale(${scale})`,
-                zIndex: Math.round(depth * 10),
-              }}
+              key={`${course.name}-${lesson.title}`}
+              href={getCourseLessonPath(course, lesson)}
+              component="a"
+              className="course-list-card"
+              onPointerMove={moveCardGlow}
+              sx={{ "--card-index": String(index + 1).padStart(2, "0") }}
             >
-              <Icon />
+              <Box className="course-list-card-top">
+                <Stack className="course-list-number" spacing={0.4}>
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <b>{lesson.badge}</b>
+                </Stack>
+              </Box>
+
+              <Typography component="h2" className="course-list-card-title">
+                {lesson.title}
+              </Typography>
+              <Typography className="course-list-card-copy">
+                {lesson.copy}
+              </Typography>
+
+              <Stack className="course-list-meta" direction="row" spacing={1.1}>
+                <span>
+                  <MenuBookRoundedIcon />
+                  {lesson.lessons}
+                </span>
+                <span>
+                  <AccessTimeRoundedIcon />
+                  {lesson.duration}
+                </span>
+                <span>
+                  <i />
+                  {lesson.author}
+                </span>
+              </Stack>
+
+              <Box className="course-list-thumb">
+                <Box component="img" src={lesson.image} alt="" />
+                <Icon className="course-list-thumb-icon" />
+              </Box>
             </Box>
           );
         })}
@@ -595,9 +626,7 @@ function CourseInfiniteMenu({ course, onClose }) {
 
 export default function Courses() {
   const [activeCourse, setActiveCourse] = useState(0);
-  const [openedCourse, setOpenedCourse] = useState(null);
-  const active = courses[activeCourse];
-  const opened = openedCourse === null ? null : courses[openedCourse];
+  const opened = getSelectedCourseFromPath();
 
   const sendFrontFolderBack = () => {
     setActiveCourse((current) => (current + 1) % courses.length);
@@ -616,28 +645,78 @@ export default function Courses() {
             "50%": { opacity: 0.82, transform: "scale(1.06)" },
           },
           ".courses-page": {
-            background: "var(--background)",
+            background:
+              "radial-gradient(circle at 63% 40%, color-mix(in oklab, var(--primary) 16%, transparent), transparent 34%), var(--background)",
           },
           ".dark .courses-page": {
-            background: "var(--background)",
+            background:
+              "radial-gradient(circle at 66% 38%, color-mix(in oklab, var(--primary) 18%, transparent), transparent 34%), var(--background)",
+          },
+          ".courses-home-shell": {
+            border: "0 !important",
+            minHeight: "calc(100vh - 104px)",
+          },
+          ".courses-hero-title.MuiTypography-root": {
+            color: "var(--foreground)",
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(44px, 5vw, 82px)",
+            fontWeight: 900,
+            letterSpacing: 0,
+            lineHeight: 0.98,
+            maxWidth: "620px",
+          },
+          ".dark .courses-hero-title.MuiTypography-root": {
+            color: "var(--foreground)",
+          },
+          ".courses-hero-title span": {
+            color: "var(--primary)",
+            display: "inline-block",
+            position: "relative",
+          },
+          ".courses-hero-title span::after": {
+            background: "var(--primary)",
+            borderRadius: "999px",
+            bottom: "-8px",
+            content: '""',
+            height: "5px",
+            left: "4px",
+            position: "absolute",
+            transform: "rotate(-3deg)",
+            width: "92%",
+          },
+          ".courses-hero-copy.MuiTypography-root": {
+            color: "var(--muted-foreground)",
+            fontSize: "clamp(16px, 1.25vw, 20px)",
+            fontWeight: 650,
+            lineHeight: 1.55,
+            maxWidth: "560px",
+          },
+          ".dark .courses-hero-copy.MuiTypography-root": {
+            color: "var(--muted-foreground)",
           },
           ".course-stack-stage::before": {
             animation: "courseGlow 4.8s ease-in-out infinite",
             background:
-              "radial-gradient(circle, color-mix(in oklab, var(--electric) 42%, transparent), transparent 68%)",
+              "radial-gradient(circle, color-mix(in oklab, var(--primary) 25%, transparent), transparent 68%)",
             content: '""',
-            filter: "blur(38px)",
-            inset: "12% 0 8% 14%",
+            filter: "blur(34px)",
+            inset: "28% 0 -6% 0",
             position: "absolute",
+          },
+          ".course-stack-stage": {
+            perspective: "1400px",
+            transformStyle: "preserve-3d",
           },
           ".course-folder": {
             background: "transparent",
             border: 0,
             color: "inherit",
             cursor: "pointer",
-            height: "clamp(260px, 29vw, 340px)",
-            maxWidth: "clamp(390px, 38vw, 550px)",
-            minHeight: "260px",
+            filter:
+              "drop-shadow(0 30px 28px color-mix(in oklab, var(--primary) 12%, transparent)) drop-shadow(0 18px 38px rgba(0,0,0,0.16))",
+            height: "clamp(230px, 22vw, 318px)",
+            maxWidth: "clamp(410px, 41vw, 590px)",
+            minHeight: "230px",
             outline: "none",
             padding: 0,
             position: "absolute",
@@ -647,7 +726,26 @@ export default function Courses() {
               "transform 920ms cubic-bezier(.16,1,.3,1), top 920ms cubic-bezier(.16,1,.3,1), left 920ms cubic-bezier(.16,1,.3,1), opacity 520ms ease",
             userSelect: "none",
             willChange: "transform, top, left, opacity",
-            width: "min(86vw, clamp(390px, 38vw, 550px))",
+            width: "min(88vw, clamp(410px, 41vw, 590px))",
+          },
+          ".dark .course-folder": {
+            filter:
+              "drop-shadow(0 28px 30px color-mix(in oklab, var(--primary) 18%, transparent)) drop-shadow(0 24px 44px rgba(0,0,0,0.44))",
+          },
+          ".course-folder::before": {
+            background:
+              "linear-gradient(90deg, transparent, color-mix(in oklab, var(--foreground) 10%, transparent), transparent)",
+            borderRadius: "18px",
+            bottom: "-12px",
+            content: '""',
+            height: "28px",
+            left: "8%",
+            opacity: 0.3,
+            position: "absolute",
+            right: "8%",
+            transform: "rotateX(72deg)",
+            transformOrigin: "top",
+            zIndex: -1,
           },
           ".course-folder:focus-visible .course-folder-body": {
             outline:
@@ -657,123 +755,283 @@ export default function Courses() {
           ".course-folder-active": {
             animation: "courseSwapPop 560ms ease both",
           },
+          ".course-folder-active .course-folder-body": {
+            transform: "translateZ(22px)",
+          },
           ".course-folder-tab": {
             alignItems: "center",
             background:
               "linear-gradient(135deg, var(--primary), color-mix(in oklab, var(--primary) 72%, white))",
-            border: "1px solid color-mix(in oklab, var(--electric) 42%, white)",
+            border:
+              "1px solid color-mix(in oklab, var(--primary) 28%, transparent)",
             borderBottom: 0,
-            borderRadius: "10px 10px 0 0",
+            borderRadius: "14px 14px 0 0",
             color: "var(--primary-foreground)",
             display: "flex",
-            fontSize: "14px",
-            fontWeight: 800,
-            height: "42px",
-            padding: "0 16px",
+            fontSize: "clamp(13px, 1vw, 16px)",
+            fontWeight: 900,
+            height: "clamp(44px, 3.8vw, 56px)",
+            padding: "0 clamp(16px, 1.6vw, 24px)",
             position: "relative",
-            width: "44%",
+            width: "54%",
+            zIndex: 5,
           },
           ".course-folder-tab::after": {
             borderBottom:
-              "42px solid color-mix(in oklab, var(--primary) 72%, white)",
-            borderRight: "34px solid transparent",
+              "clamp(44px, 3.8vw, 56px) solid color-mix(in oklab, var(--primary) 72%, white)",
+            borderRight: "36px solid transparent",
             content: '""',
             position: "absolute",
-            right: "-34px",
+            right: "-36px",
             top: "-1px",
           },
           ".course-folder-body": {
             background:
-              "linear-gradient(145deg, var(--card), color-mix(in oklab, var(--primary) 9%, var(--card)) 48%, var(--card))",
+              "linear-gradient(135deg, color-mix(in oklab, var(--card) 96%, white), color-mix(in oklab, var(--primary) 8%, var(--card)))",
             border:
-              "1px solid color-mix(in oklab, var(--electric) 24%, transparent)",
-            borderRadius: "0 14px 14px 14px",
-            boxShadow: "none",
-            height: "calc(100% - 41px)",
+              "1px solid color-mix(in oklab, var(--primary) 16%, transparent)",
+            borderRadius: "0 18px 18px 18px",
+            height: "calc(100% - clamp(43px, 3.8vw, 55px))",
             overflow: "hidden",
             position: "relative",
             transition:
-              "box-shadow 520ms ease, border-color 520ms ease, filter 520ms ease",
+              "transform 520ms ease, border-color 520ms ease, filter 520ms ease",
+            transformStyle: "preserve-3d",
+          },
+          ".course-folder-body::before, .course-folder-body::after": {
+            pointerEvents: "none",
+          },
+          ".dark .course-folder-body": {
+            background:
+              "linear-gradient(135deg, color-mix(in oklab, var(--card) 94%, white), color-mix(in oklab, var(--primary) 9%, var(--background)))",
+            borderColor: "color-mix(in oklab, var(--primary) 22%, transparent)",
           },
           ".course-folder:hover .course-folder-body": {
-            borderColor: "color-mix(in oklab, var(--electric) 70%, white)",
+            borderColor: "color-mix(in oklab, var(--primary) 42%, transparent)",
             boxShadow: "none",
-            filter: "brightness(1.05)",
+            filter: "brightness(1.02)",
           },
           ".course-folder-body::before": {
-            background: "var(--folder-gradient)",
+            background:
+              "radial-gradient(circle, color-mix(in oklab, var(--primary) 18%, transparent), transparent 58%), linear-gradient(120deg, color-mix(in oklab, var(--card) 74%, transparent), transparent 45%)",
             content: '""',
-            filter: "blur(44px)",
-            height: "52%",
-            opacity: 0.46,
+            filter: "blur(30px)",
+            height: "78%",
+            opacity: 0.82,
             position: "absolute",
-            right: "-8%",
-            top: "26%",
-            transform: "rotate(-12deg)",
-            width: "62%",
+            right: "-2%",
+            top: "18%",
+            width: "48%",
           },
           ".course-folder-body::after": {
             background:
-              "linear-gradient(90deg, transparent, color-mix(in oklab, var(--primary) 24%, transparent), transparent)",
+              "radial-gradient(circle at 70% 26%, color-mix(in oklab, var(--primary) 12%, transparent) 0 1px, transparent 1.2px), linear-gradient(160deg, rgba(255,255,255,0.18), transparent 34%, color-mix(in oklab, var(--primary) 8%, transparent) 100%)",
+            backgroundSize: "7px 7px",
             content: '""',
-            height: "1px",
-            left: 0,
-            opacity: 0.7,
+            inset: 0,
+            opacity: 0.42,
             position: "absolute",
-            right: 0,
-            top: "42%",
+          },
+          ".course-folder-body-edge": {
+            display: "none",
           },
           ".course-card-orbit": {
             border:
-              "16px solid color-mix(in oklab, var(--electric) 24%, transparent)",
+              "14px solid color-mix(in oklab, var(--primary) 8%, transparent)",
             borderRadius: "50%",
-            filter: "blur(2px)",
-            height: "clamp(160px, 14vw, 210px)",
+            filter:
+              "drop-shadow(0 0 18px color-mix(in oklab, var(--primary) 18%, transparent))",
+            height: "clamp(120px, 11vw, 170px)",
             position: "absolute",
-            right: "-58px",
-            top: "clamp(80px, 10vw, 120px)",
-            transform: "rotate(-18deg)",
-            width: "clamp(300px, 27vw, 430px)",
+            right: "10%",
+            top: "50%",
+            transform: "translateY(-50%)",
+            width: "clamp(120px, 11vw, 170px)",
           },
           ".course-folder-icon-ring": {
             alignItems: "center",
-            background: "transparent",
-            border: 0,
+            background:
+              "linear-gradient(145deg, var(--card), color-mix(in oklab, var(--primary) 8%, var(--card)))",
+            border:
+              "10px solid color-mix(in oklab, var(--card) 70%, transparent)",
             borderRadius: "999px",
-            boxShadow: "none",
-            color: "var(--primary)",
+            filter:
+              "drop-shadow(0 14px 16px color-mix(in oklab, var(--primary) 16%, transparent))",
             display: "flex",
-            height: "clamp(112px, 12vw, 180px)",
+            height: "clamp(94px, 10vw, 145px)",
             justifyContent: "center",
             position: "absolute",
-            right: "5%",
+            right: "10%",
             top: "50%",
             transform: "translateY(-50%)",
-            width: "clamp(112px, 12vw, 180px)",
+            width: "clamp(94px, 10vw, 145px)",
             zIndex: 2,
+          },
+          ".dark .course-folder-icon-ring": {
+            background:
+              "linear-gradient(145deg, var(--card), color-mix(in oklab, var(--primary) 10%, var(--card)))",
+            borderColor:
+              "color-mix(in oklab, var(--foreground) 8%, transparent)",
           },
           ".course-folder-icon-ring .course-folder-main-icon": {
             color: "var(--primary)",
             filter: "none",
-            fontSize: "clamp(78px, 7.8vw, 122px) !important",
+            fontSize: "clamp(52px, 5.4vw, 82px) !important",
             height: "1em",
             width: "1em",
           },
-          ".course-folder-main-image": {
-            display: "block",
-            height: "108%",
-            objectFit: "contain",
-            pointerEvents: "none",
-            width: "108%",
-          },
           ".course-folder-active .course-folder-main-icon": {
-            color: "var(--primary-foreground)",
+            color: "var(--primary)",
           },
           ".course-folder-copy": {
-            bottom: "32px",
-            left: "32px",
+            left: "clamp(24px, 3vw, 42px)",
             position: "absolute",
-            width: "min(58%, 340px)",
+            top: "50%",
+            transform: "translateY(-48%)",
+            width: "min(50%, 320px)",
+            zIndex: 3,
+          },
+          ".course-folder-name.MuiTypography-root": {
+            color: "var(--foreground)",
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(14px, 1vw, 18px)",
+            fontWeight: 900,
+            letterSpacing: 0,
+            lineHeight: 1.12,
+          },
+          ".dark .course-folder-name.MuiTypography-root": {
+            color: "var(--foreground)",
+          },
+          ".course-folder-rule": {
+            background: "var(--primary)",
+            borderRadius: "999px",
+            height: "5px",
+            width: "54px",
+          },
+          ".course-folder-description.MuiTypography-root": {
+            color: "var(--muted-foreground)",
+            fontSize: "clamp(12px, 0.9vw, 14px)",
+            fontWeight: 650,
+            lineHeight: 1.45,
+          },
+          ".dark .course-folder-description.MuiTypography-root": {
+            color: "var(--muted-foreground)",
+          },
+          ".course-folder-open-icon": {
+            alignItems: "center",
+            background: "color-mix(in oklab, var(--card) 86%, transparent)",
+            border:
+              "1px solid color-mix(in oklab, var(--primary) 12%, transparent)",
+            borderRadius: "999px",
+            bottom: "22px",
+            color: "var(--primary)",
+            display: "flex",
+            height: "44px",
+            justifyContent: "center",
+            position: "absolute",
+            right: "26px",
+            width: "44px",
+            zIndex: 4,
+          },
+          ".dark .course-folder-open-icon": {
+            background: "rgba(255,255,255,0.08)",
+            borderColor: "rgba(255,255,255,0.12)",
+          },
+          ".course-folder-open-icon svg": {
+            fontSize: "24px",
+          },
+          ".course-folder-side-tab": {
+            alignItems: "center",
+            background: "var(--primary)",
+            borderRadius: "8px 0 0 8px",
+            color: "var(--primary-foreground)",
+            display: "flex",
+            height: "46px",
+            justifyContent: "center",
+            position: "absolute",
+            right: "-1px",
+            top: "48%",
+            transform: "translateY(-50%)",
+            width: "22px",
+            zIndex: 4,
+          },
+          ".course-folder-side-tab svg": {
+            fontSize: "18px",
+          },
+          ".course-feature-grid": {
+            display: "grid",
+            gap: "clamp(16px, 2vw, 28px)",
+            gridColumn: "1 / -1",
+            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+            marginTop: "clamp(8px, 1.5vw, 22px)",
+          },
+          ".course-feature-card": {
+            alignItems: "center",
+            background: "color-mix(in oklab, var(--card) 86%, transparent)",
+            border:
+              "1px solid color-mix(in oklab, var(--primary) 9%, transparent)",
+            borderRadius: "18px",
+            display: "grid",
+            gap: "22px",
+            gridTemplateColumns: "86px minmax(0, 1fr) 52px",
+            minHeight: "126px",
+            padding: "22px",
+          },
+          ".dark .course-feature-card": {
+            background: "color-mix(in oklab, var(--card) 90%, transparent)",
+            borderColor: "color-mix(in oklab, var(--primary) 14%, transparent)",
+          },
+          ".course-feature-icon": {
+            alignItems: "center",
+            background:
+              "linear-gradient(145deg, var(--card), color-mix(in oklab, var(--primary) 8%, var(--card)))",
+            borderRadius: "18px",
+            color: "var(--primary)",
+            display: "flex",
+            height: "76px",
+            justifyContent: "center",
+            width: "76px",
+          },
+          ".dark .course-feature-icon": {
+            background: "rgba(255,255,255,0.08)",
+          },
+          ".course-feature-icon svg": {
+            fontSize: "36px",
+          },
+          ".course-feature-title.MuiTypography-root": {
+            color: "var(--foreground)",
+            fontFamily: "var(--font-display)",
+            fontSize: "20px",
+            fontWeight: 900,
+            letterSpacing: 0,
+          },
+          ".dark .course-feature-title.MuiTypography-root": {
+            color: "var(--foreground)",
+          },
+          ".course-feature-copy.MuiTypography-root": {
+            color: "var(--muted-foreground)",
+            fontSize: "15px",
+            fontWeight: 650,
+            lineHeight: 1.4,
+          },
+          ".dark .course-feature-copy.MuiTypography-root": {
+            color: "var(--muted-foreground)",
+          },
+          ".course-feature-arrow": {
+            alignItems: "center",
+            background: "color-mix(in oklab, var(--card) 82%, transparent)",
+            border:
+              "1px solid color-mix(in oklab, var(--primary) 10%, transparent)",
+            borderRadius: "999px",
+            color: "var(--foreground)",
+            display: "flex",
+            height: "48px",
+            justifyContent: "center",
+            width: "48px",
+          },
+          ".dark .course-feature-arrow": {
+            background: "rgba(255,255,255,0.08)",
+            color: "var(--foreground)",
           },
           ".course-opened": {
             background:
@@ -941,7 +1199,345 @@ export default function Courses() {
           ".course-menu-node svg": {
             fontSize: "clamp(64px, 7vw, 118px) !important",
           },
+          ".course-list-view": {
+            background:
+              "radial-gradient(circle at 50% 18%, color-mix(in oklab, var(--primary) 11%, transparent), transparent 34%), var(--background)",
+            color: "var(--foreground)",
+            minHeight: "100vh",
+            overflow: "hidden",
+            padding:
+              "clamp(118px, 13vh, 150px) clamp(16px, 3.4vw, 48px) clamp(36px, 5vw, 72px)",
+            position: "relative",
+          },
+          ".dark .course-list-view": {
+            background:
+              "radial-gradient(circle at 50% 14%, color-mix(in oklab, var(--primary) 16%, transparent), transparent 34%), var(--background)",
+            color: "var(--foreground)",
+          },
+          ".course-list-view::before": {
+            background:
+              "radial-gradient(circle at 18% 14%, color-mix(in oklab, var(--primary) 16%, transparent) 0 1px, transparent 1.2px), radial-gradient(circle at 72% 4%, color-mix(in oklab, var(--primary) 10%, transparent) 0 1px, transparent 1.3px)",
+            backgroundSize: "6px 6px, 9px 9px",
+            content: '""',
+            inset: 0,
+            opacity: 0.32,
+            pointerEvents: "none",
+            position: "absolute",
+          },
+          ".dark .course-list-view::before": {
+            background:
+              "radial-gradient(circle at 18% 14%, color-mix(in oklab, var(--foreground) 13%, transparent) 0 1px, transparent 1.2px), radial-gradient(circle at 72% 4%, color-mix(in oklab, var(--primary) 16%, transparent) 0 1px, transparent 1.3px)",
+          },
+          ".course-list-view::after": {
+            background:
+              "radial-gradient(circle at 50% 0%, color-mix(in oklab, var(--card) 72%, transparent), transparent 35%)",
+            content: '""',
+            inset: 0,
+            pointerEvents: "none",
+            position: "absolute",
+          },
+          ".dark .course-list-view::after": {
+            background:
+              "radial-gradient(circle at 50% 0%, color-mix(in oklab, var(--foreground) 6%, transparent), transparent 35%)",
+          },
+          ".course-list-header": {
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            margin: "0 auto clamp(18px, 3vw, 32px)",
+            maxWidth: "1280px",
+            position: "relative",
+            zIndex: 2,
+          },
+          ".course-list-chip.MuiChip-root": {
+            background: "color-mix(in oklab, var(--card) 90%, transparent)",
+            border:
+              "1px solid color-mix(in oklab, var(--primary) 12%, transparent)",
+            borderRadius: "999px",
+            color: "var(--primary)",
+            fontSize: "11px",
+            fontWeight: 900,
+            height: "28px",
+            textTransform: "uppercase",
+          },
+          ".dark .course-list-chip.MuiChip-root": {
+            background: "rgba(255,255,255,0.06)",
+            borderColor: "rgba(255,255,255,0.12)",
+            color: "#c9d7ff",
+          },
+          ".course-list-title.MuiTypography-root": {
+            color: "var(--foreground)",
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(28px, 4vw, 54px)",
+            fontWeight: 900,
+            letterSpacing: 0,
+            lineHeight: 1,
+            maxWidth: "760px",
+          },
+          ".dark .course-list-title.MuiTypography-root": {
+            color: "#f5f5f5",
+          },
+          ".course-list-back.MuiButton-root": {
+            alignSelf: "center",
+            background: "color-mix(in oklab, var(--card) 90%, transparent)",
+            border:
+              "1px solid color-mix(in oklab, var(--primary) 12%, transparent)",
+            borderRadius: "999px",
+            color: "var(--foreground)",
+            fontWeight: "900",
+            padding: "9px 16px",
+            textTransform: "none",
+          },
+          ".course-list-back.MuiButton-root:hover": {
+            background: "rgba(255,255,255,1)",
+          },
+          ".dark .course-list-back.MuiButton-root": {
+            background: "rgba(255,255,255,0.06)",
+            borderColor: "rgba(255,255,255,0.12)",
+            color: "#f6f6f6",
+          },
+          ".dark .course-list-back.MuiButton-root:hover": {
+            background: "rgba(255,255,255,0.1)",
+          },
+          ".course-list-grid": {
+            display: "grid",
+            gap: "16px",
+            gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+            margin: "0 auto",
+            maxWidth: "1280px",
+            position: "relative",
+            zIndex: 2,
+          },
+          ".course-list-card": {
+            "--glow-x": "50%",
+            "--glow-y": "24%",
+            background:
+              "linear-gradient(180deg, color-mix(in oklab, var(--card) 94%, transparent), color-mix(in oklab, var(--primary) 6%, var(--card)))",
+            border:
+              "1px solid color-mix(in oklab, var(--primary) 10%, transparent)",
+            borderRadius: "8px",
+            color: "var(--foreground)",
+            display: "flex",
+            flexDirection: "column",
+            minHeight: "356px",
+            overflow: "hidden",
+            padding: "22px 18px 16px",
+            position: "relative",
+            textDecoration: "none",
+            transition:
+              "transform 220ms ease, border-color 220ms ease, filter 220ms ease, background 220ms ease",
+          },
+          ".dark .course-list-card": {
+            background:
+              "linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.025))",
+            borderColor: "rgba(255,255,255,0.095)",
+            color: "#f5f5f5",
+          },
+          ".course-list-card::before": {
+            background:
+              "radial-gradient(210px circle at var(--glow-x) var(--glow-y), color-mix(in oklab, var(--primary) 30%, transparent), transparent 58%), radial-gradient(circle at 64% 0%, color-mix(in oklab, var(--primary) 13%, transparent) 0 1px, transparent 1px)",
+            backgroundSize: "100% 100%, 5px 5px",
+            content: '""',
+            inset: 0,
+            opacity: 0.28,
+            pointerEvents: "none",
+            position: "absolute",
+            transition: "opacity 220ms ease",
+            zIndex: 1,
+          },
+          ".dark .course-list-card::before": {
+            background:
+              "radial-gradient(230px circle at var(--glow-x) var(--glow-y), color-mix(in oklab, var(--primary) 34%, transparent), transparent 58%), radial-gradient(circle at 64% 0%, rgba(255,255,255,0.1) 0 1px, transparent 1px)",
+          },
+          ".course-list-card:hover::before": {
+            opacity: 0.92,
+          },
+          ".dark .course-list-card:hover::before": {
+            opacity: 0.86,
+          },
+          ".course-list-card::after": {
+            color: "var(--primary)",
+            content: '"*"',
+            fontFamily: "var(--font-display)",
+            fontSize: "34px",
+            fontWeight: 400,
+            lineHeight: 1,
+            opacity: 0.9,
+            position: "absolute",
+            right: "18px",
+            top: "calc(100% - 44px)",
+          },
+          ".course-list-card-top": {
+            alignItems: "flex-start",
+            display: "flex",
+            justifyContent: "flex-end",
+            minHeight: "28px",
+            position: "relative",
+            zIndex: 2,
+          },
+          ".course-list-number": {
+            alignItems: "flex-end",
+            color: "color-mix(in oklab, var(--foreground) 38%, transparent)",
+            fontSize: "10px",
+            fontWeight: 900,
+            lineHeight: 1,
+            textTransform: "uppercase",
+          },
+          ".dark .course-list-number": {
+            color: "rgba(255,255,255,0.36)",
+          },
+          ".course-list-number b": {
+            background: "color-mix(in oklab, var(--primary) 8%, transparent)",
+            border:
+              "1px solid color-mix(in oklab, var(--primary) 12%, transparent)",
+            borderRadius: "999px",
+            color: "var(--primary)",
+            display: "block",
+            fontSize: "8px",
+            lineHeight: 1,
+            padding: "3px 6px",
+          },
+          ".dark .course-list-number b": {
+            background: "rgba(255,255,255,0.12)",
+            borderColor: "rgba(255,255,255,0.16)",
+            color: "#d9d9d9",
+          },
+          ".course-list-card-title.MuiTypography-root": {
+            color: "var(--foreground)",
+            fontFamily: "var(--font-display)",
+            fontSize: "16px",
+            fontWeight: 900,
+            letterSpacing: 0,
+            lineHeight: 1.12,
+            marginTop: "18px",
+            minHeight: "38px",
+            position: "relative",
+            zIndex: 2,
+          },
+          ".dark .course-list-card-title.MuiTypography-root": {
+            color: "#f5f5f5",
+          },
+          ".course-list-card-copy.MuiTypography-root": {
+            color: "color-mix(in oklab, var(--foreground) 62%, transparent)",
+            fontSize: "12px",
+            fontWeight: 750,
+            lineHeight: 1.5,
+            marginTop: "8px",
+            minHeight: "54px",
+            position: "relative",
+            zIndex: 2,
+          },
+          ".dark .course-list-card-copy.MuiTypography-root": {
+            color: "rgba(255,255,255,0.58)",
+          },
+          ".course-list-meta": {
+            alignItems: "center",
+            color: "color-mix(in oklab, var(--foreground) 50%, transparent)",
+            flexWrap: "wrap",
+            fontSize: "9px",
+            fontWeight: 800,
+            marginTop: "16px",
+            minHeight: "30px",
+            position: "relative",
+            zIndex: 2,
+          },
+          ".dark .course-list-meta": {
+            color: "rgba(255,255,255,0.48)",
+          },
+          ".course-list-meta span": {
+            alignItems: "center",
+            display: "inline-flex",
+            gap: "4px",
+            minWidth: 0,
+          },
+          ".course-list-meta svg": {
+            color: "color-mix(in oklab, var(--foreground) 50%, transparent)",
+            fontSize: "12px",
+          },
+          ".dark .course-list-meta svg": {
+            color: "rgba(255,255,255,0.48)",
+          },
+          ".course-list-meta i": {
+            background:
+              "linear-gradient(135deg, var(--primary), color-mix(in oklab, var(--primary) 55%, var(--foreground)))",
+            borderRadius: "999px",
+            display: "inline-block",
+            height: "12px",
+            width: "12px",
+          },
+          ".course-list-thumb": {
+            alignItems: "center",
+            background:
+              "linear-gradient(135deg, color-mix(in oklab, var(--primary) 8%, transparent), color-mix(in oklab, var(--card) 82%, transparent))",
+            border:
+              "1px solid color-mix(in oklab, var(--primary) 8%, transparent)",
+            borderRadius: "4px",
+            display: "flex",
+            flex: "1 1 auto",
+            justifyContent: "center",
+            marginTop: "18px",
+            minHeight: "118px",
+            overflow: "hidden",
+            position: "relative",
+            zIndex: 2,
+          },
+          ".dark .course-list-thumb": {
+            background:
+              "linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025))",
+            borderColor: "rgba(255,255,255,0.07)",
+          },
+          ".course-list-thumb img": {
+            display: "block",
+            height: "100%",
+            inset: 0,
+            objectFit: "cover",
+            opacity: 0.72,
+            position: "absolute",
+            width: "100%",
+          },
+          ".course-list-thumb::after": {
+            background:
+              "linear-gradient(180deg, color-mix(in oklab, var(--card) 8%, transparent), color-mix(in oklab, var(--foreground) 30%, transparent))",
+            content: '""',
+            inset: 0,
+            position: "absolute",
+          },
+          ".dark .course-list-thumb::after": {
+            background:
+              "linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.54))",
+          },
+          ".course-list-thumb-icon": {
+            color: "color-mix(in oklab, var(--primary) 72%, transparent)",
+            fontSize: "58px !important",
+            position: "relative",
+            zIndex: 2,
+          },
+          ".dark .course-list-thumb-icon": {
+            color: "rgba(255,255,255,0.72)",
+          },
+          ".course-list-card:hover": {
+            borderColor: "color-mix(in oklab, var(--primary) 42%, transparent)",
+            filter:
+              "drop-shadow(0 0 22px color-mix(in oklab, var(--primary) 18%, transparent))",
+            transform: "translateY(-3px)",
+          },
+          "@media (max-width: 1180px)": {
+            ".course-list-grid": {
+              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+            },
+          },
           "@media (max-width: 899px)": {
+            ".course-list-grid": {
+              gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+            },
+            ".course-list-back.MuiButton-root": {
+              alignSelf: "flex-start",
+            },
+            ".course-feature-grid": {
+              gridTemplateColumns: "1fr",
+            },
+            ".course-feature-card": {
+              gridTemplateColumns: "76px minmax(0, 1fr) 48px",
+            },
             ".course-folder-tab": {
               width: "58%",
             },
@@ -961,6 +1557,7 @@ export default function Courses() {
             },
             ".course-folder-copy": {
               left: "24px",
+              top: "52%",
               width: "72%",
             },
             ".course-menu-title": {
@@ -998,10 +1595,56 @@ export default function Courses() {
               fontSize: "clamp(48px, 16vw, 78px) !important",
             },
           },
+          "@media (max-width: 620px)": {
+            ".course-list-view": {
+              padding: "112px 14px 34px",
+            },
+            ".course-list-grid": {
+              gridTemplateColumns: "1fr",
+            },
+            ".course-list-card": {
+              minHeight: "330px",
+            },
+            ".courses-hero-title.MuiTypography-root": {
+              fontSize: "42px",
+            },
+            ".course-feature-card": {
+              gap: "14px",
+              gridTemplateColumns: "64px minmax(0, 1fr) 42px",
+              minHeight: "108px",
+              padding: "16px",
+            },
+            ".course-feature-icon": {
+              borderRadius: "16px",
+              height: "60px",
+              width: "60px",
+            },
+            ".course-feature-icon svg": {
+              fontSize: "30px",
+            },
+            ".course-feature-title.MuiTypography-root": {
+              fontSize: "17px",
+            },
+            ".course-feature-copy.MuiTypography-root": {
+              fontSize: "13px",
+            },
+            ".course-folder": {
+              height: "330px",
+              minHeight: "330px",
+            },
+            ".course-folder-icon-ring": {
+              opacity: 0.18,
+            },
+            ".course-folder-open-icon": {
+              bottom: "20px",
+              height: "44px",
+              right: "22px",
+              width: "44px",
+            },
+          },
         }}
       />
       <CursorEffect />
-      <Navbar />
 
       <Box
         component="main"
@@ -1009,15 +1652,12 @@ export default function Courses() {
         sx={{
           color: "var(--foreground)",
           minHeight: "100vh",
-          overflow: "hidden",
+          overflow: opened ? "visible" : "hidden",
           pt: opened ? 0 : { xs: 13, md: 15 },
         }}
       >
         {opened ? (
-          <CourseInfiniteMenu
-            course={opened}
-            onClose={() => setOpenedCourse(null)}
-          />
+          <CourseLessonList course={opened} />
         ) : (
           <Container
             maxWidth={false}
@@ -1030,6 +1670,7 @@ export default function Courses() {
             }}
           >
             <Box
+              className="courses-home-shell"
               sx={{
                 border:
                   "1px solid color-mix(in oklab, var(--electric) 20%, transparent)",
@@ -1039,7 +1680,7 @@ export default function Courses() {
                 borderRight: 0,
                 display: "grid",
                 gap: { xs: 5, md: 10 },
-                gridTemplateColumns: { xs: "1fr", md: "0.82fr 1.18fr" },
+                gridTemplateColumns: { xs: "1fr", md: "0.72fr 1.28fr" },
                 minHeight: { xs: "auto", md: "calc(100vh - 120px)" },
                 overflow: "visible",
                 px: { xs: 3, sm: 5, md: 8, lg: 11 },
@@ -1079,28 +1720,10 @@ export default function Courses() {
                     width: "fit-content",
                   }}
                 />
-                <Typography
-                  component="h1"
-                  sx={{
-                    color: "var(--foreground)",
-                    fontFamily: "var(--font-display)",
-                    fontSize: { xs: 42, sm: 52, md: 60 },
-                    fontWeight: 800,
-                    letterSpacing: 0,
-                    lineHeight: 1,
-                    maxWidth: 520,
-                  }}
-                >
-                  Course folders that swap into real skills
+                <Typography component="h1" className="courses-hero-title">
+                  Course folders that swap into <span>real skills</span>
                 </Typography>
-                <Typography
-                  sx={{
-                    color: "var(--muted-foreground)",
-                    fontSize: { xs: 16, md: 19 },
-                    lineHeight: 1.6,
-                    maxWidth: 520,
-                  }}
-                >
+                <Typography className="courses-hero-copy">
                   Explore AI, Python, GenAI, computer vision, and analytics
                   tracks with mentor-led practice and portfolio outcomes.
                 </Typography>
@@ -1145,44 +1768,16 @@ export default function Courses() {
                     Next Folder
                   </Button>
                 </Stack>
-
-                <Box
-                  sx={{
-                    display: "grid",
-                    gap: 1.2,
-                    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-                    maxWidth: 520,
-                    pt: 2,
-                  }}
-                >
-                  {["Live classes", "Projects", "Recordings"].map((item) => (
-                    <Box
-                      key={item}
-                      sx={{
-                        bgcolor:
-                          "color-mix(in oklab, var(--primary) 6%, var(--card))",
-                        border:
-                          "1px solid color-mix(in oklab, var(--electric) 14%, transparent)",
-                        borderRadius: "16px",
-                        color: "var(--muted-foreground)",
-                        fontSize: { xs: 12, md: 14 },
-                        fontWeight: 800,
-                        px: 1.5,
-                        py: 1.4,
-                        textAlign: "center",
-                      }}
-                    >
-                      {item}
-                    </Box>
-                  ))}
-                </Box>
               </Stack>
 
               <Stack
                 spacing={2}
                 sx={{
+                  alignItems: "center",
+                  justifyContent: "center",
                   minWidth: 0,
                   position: "relative",
+                  pt: { xs: 2, md: 5 },
                   zIndex: 2,
                 }}
               >
@@ -1190,41 +1785,34 @@ export default function Courses() {
                   activeCourse={activeCourse}
                   onSelect={setActiveCourse}
                   onSendBack={sendFrontFolderBack}
-                  onOpen={setOpenedCourse}
+                  onOpen={(index) => navigateToCourse(courses[index])}
                 />
-
-                <Box
-                  sx={{
-                    bgcolor: "var(--card)",
-                    border:
-                      "1px solid color-mix(in oklab, var(--electric) 16%, transparent)",
-                    borderRadius: "20px",
-                    p: { xs: 2, md: 2.4 },
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      color: "var(--foreground)",
-                      fontFamily: "var(--font-display)",
-                      fontSize: { xs: 24, md: 28 },
-                      fontWeight: 800,
-                      letterSpacing: 0,
-                    }}
-                  >
-                    {active.fullName}
-                  </Typography>
-                  <Typography
-                    sx={{
-                      color: "var(--muted-foreground)",
-                      fontSize: 15,
-                      lineHeight: 1.55,
-                      mt: 1,
-                    }}
-                  >
-                    {active.copy}
-                  </Typography>
-                </Box>
               </Stack>
+
+              <Box className="course-feature-grid">
+                {courseFeatures.map((feature) => {
+                  const Icon = feature.icon;
+
+                  return (
+                    <Box key={feature.title} className="course-feature-card">
+                      <Box className="course-feature-icon">
+                        <Icon />
+                      </Box>
+                      <Box>
+                        <Typography className="course-feature-title">
+                          {feature.title}
+                        </Typography>
+                        <Typography className="course-feature-copy">
+                          {feature.copy}
+                        </Typography>
+                      </Box>
+                      <Box className="course-feature-arrow">
+                        <ArrowForwardRoundedIcon />
+                      </Box>
+                    </Box>
+                  );
+                })}
+              </Box>
             </Box>
           </Container>
         )}

@@ -4,7 +4,10 @@ import AdmissionProcess from "@/pages/AdmissionProcess";
 import ApplyOnline from "@/pages/ApplyOnline";
 import Career from "@/pages/Career";
 import ContactUs from "@/pages/ContactUs";
+import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
 import SplashScreen from "@/components/SplashScreen";
+import CourseDetails from "@/pages/CourseDetails";
 import Courses from "@/pages/Courses";
 import EventsNews from "@/pages/EventsNews";
 import Faculty from "@/pages/Faculty";
@@ -65,6 +68,25 @@ function normalizePath(path) {
   return path.replace(/\/$/, "") || "/";
 }
 
+function isCourseFolderPath(path) {
+  return /^\/course\/[^/]+$/.test(path);
+}
+
+function isCourseDetailsPath(path) {
+  return /^\/course\/[^/]+\/[^/]+$/.test(path);
+}
+
+function getRouteComponent(path) {
+  if (isCourseDetailsPath(path)) return CourseDetails;
+  if (isCourseFolderPath(path)) return Courses;
+  return routes[path] || NotFound;
+}
+
+function getRouteLabel(path) {
+  if (isCourseFolderPath(path) || isCourseDetailsPath(path)) return "Courses";
+  return routeLabels[path] ?? "Page";
+}
+
 function NotFound() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -94,7 +116,8 @@ export default function App() {
   const [transitionKey, setTransitionKey] = useState(0);
   const [transitionLabel, setTransitionLabel] = useState(null);
   const pendingPathRef = useRef(null);
-  const Page = useMemo(() => routes[path] || NotFound, [path]);
+  const Page = useMemo(() => getRouteComponent(path), [path]);
+  const isAuthRoute = ["/forgot-password", "/login", "/signup"].includes(path);
 
   const beginNavigation = useCallback(
     (nextPath, { push = true } = {}) => {
@@ -102,7 +125,7 @@ export default function App() {
       if (normalizedPath === path && !pendingPathRef.current) return;
 
       pendingPathRef.current = { path: normalizedPath, push };
-      setTransitionLabel(routeLabels[normalizedPath] ?? "Page");
+      setTransitionLabel(getRouteLabel(normalizedPath));
       setTransitionKey((key) => key + 1);
     },
     [path],
@@ -154,10 +177,19 @@ export default function App() {
       beginNavigation(window.location.pathname, { push: false });
     };
 
+    const onAppNavigate = (event) => {
+      const nextPath = event.detail?.path;
+      if (typeof nextPath === "string") {
+        beginNavigation(nextPath);
+      }
+    };
+
     document.addEventListener("click", onDocumentClick);
+    window.addEventListener("knora:navigate", onAppNavigate);
     window.addEventListener("popstate", onPopState);
     return () => {
       document.removeEventListener("click", onDocumentClick);
+      window.removeEventListener("knora:navigate", onAppNavigate);
       window.removeEventListener("popstate", onPopState);
     };
   }, [beginNavigation]);
@@ -177,7 +209,9 @@ export default function App() {
 
   return (
     <>
+      {!isAuthRoute && <Navbar />}
       <Page />
+      {!isAuthRoute && <Footer />}
       <SplashScreen
         transitionKey={transitionKey}
         routeTitle={transitionLabel}

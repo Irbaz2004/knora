@@ -7,7 +7,7 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import logo from "@/assets/knora-logo-transparent.png";
+import logo from "../assets/knoralogo.png";
 
 const menu = [
   { label: "Home", href: "/" },
@@ -109,6 +109,7 @@ export default function Navbar() {
       "/vision-mission": "About",
       "/faculty": "About",
       "/courses": "Courses",
+      "/course": "Courses",
       "/admission-process": "Admission",
       "/apply-online": "Admission",
       "/placements": "Placements",
@@ -120,7 +121,12 @@ export default function Navbar() {
     };
     const onScroll = () => {
       if (window.location.pathname !== "/") {
-        setActive(pathLabels[window.location.pathname] ?? "Home");
+        setActive(
+          pathLabels[window.location.pathname] ??
+            (window.location.pathname.startsWith("/course/")
+              ? "Courses"
+              : "Home"),
+        );
         return;
       }
       const doc = document.documentElement;

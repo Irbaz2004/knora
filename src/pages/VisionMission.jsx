@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -15,8 +15,47 @@ import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import TrackChangesRoundedIcon from "@mui/icons-material/TrackChangesRounded";
-import Navbar from "@/components/Navbar";
 import CursorEffect from "@/components/CursorEffect";
+
+// ---------------------------------------------------------------------------
+// Typography
+// ---------------------------------------------------------------------------
+const FONT_DISPLAY = "'Archivo', 'Helvetica Neue', sans-serif";
+const FONT_BODY = "'Inter', 'Helvetica Neue', sans-serif";
+
+// ---------------------------------------------------------------------------
+// Scroll-reveal hook — flips true once, the moment an element enters the
+// viewport, so sections animate in as the user scrolls instead of on mount.
+// ---------------------------------------------------------------------------
+function useInView(options) {
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node || typeof IntersectionObserver === "undefined") {
+      setInView(true);
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setInView(true);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.18, rootMargin: "0px 0px -8% 0px", ...options },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [options]);
+
+  return [ref, inView];
+}
 
 function hexToRgb(hex) {
   const clean = hex.replace("#", "");
@@ -324,12 +363,16 @@ function MoltenMetal({
   );
 }
 
+// ---------------------------------------------------------------------------
+// Content — glass tints are translucent so the frosted cards genuinely blur
+// whatever sits behind them (the hero, the ambient orbs, the previous card
+// in the stack) rather than sitting on top as flat color.
+// ---------------------------------------------------------------------------
 const stackCards = [
   {
-    eyebrow: "01 / Vision",
+    eyebrow: "Vision",
     title: "Future Ready Learning",
-    color:
-      "linear-gradient(135deg, var(--primary), color-mix(in oklab, var(--electric) 74%, var(--glow)))",
+    tint: "linear-gradient(135deg, color-mix(in oklab, var(--primary) 58%, transparent), color-mix(in oklab, var(--electric) 46%, transparent))",
     shadow: "color-mix(in oklab, var(--electric) 42%, transparent)",
     icon: AutoAwesomeRoundedIcon,
     visual: "lines",
@@ -341,10 +384,9 @@ const stackCards = [
     ],
   },
   {
-    eyebrow: "02 / Mission",
+    eyebrow: "Mission",
     title: "Build Real Capability",
-    color:
-      "linear-gradient(135deg, color-mix(in oklab, var(--electric) 86%, white), color-mix(in oklab, var(--navy) 54%, var(--primary)))",
+    tint: "linear-gradient(135deg, color-mix(in oklab, var(--electric) 60%, transparent), color-mix(in oklab, var(--navy) 40%, var(--primary) 40%))",
     shadow: "color-mix(in oklab, var(--primary) 46%, transparent)",
     icon: TrackChangesRoundedIcon,
     visual: "play",
@@ -356,10 +398,9 @@ const stackCards = [
     ],
   },
   {
-    eyebrow: "03 / Learning",
+    eyebrow: "Learning",
     title: "Practice Over Theory",
-    color:
-      "linear-gradient(135deg, color-mix(in oklab, var(--glow) 72%, var(--electric)), color-mix(in oklab, var(--primary) 82%, var(--navy)))",
+    tint: "linear-gradient(135deg, color-mix(in oklab, var(--glow) 52%, transparent), color-mix(in oklab, var(--primary) 58%, var(--navy) 20%))",
     shadow: "color-mix(in oklab, var(--glow) 36%, transparent)",
     icon: MenuBookRoundedIcon,
     visual: "book",
@@ -371,10 +412,9 @@ const stackCards = [
     ],
   },
   {
-    eyebrow: "04 / Community",
+    eyebrow: "Community",
     title: "Grow With Mentors",
-    color:
-      "linear-gradient(135deg, color-mix(in oklab, var(--electric) 68%, white), color-mix(in oklab, var(--navy) 70%, var(--electric)))",
+    tint: "linear-gradient(135deg, color-mix(in oklab, var(--electric) 50%, transparent), color-mix(in oklab, var(--navy) 50%, var(--electric) 20%))",
     shadow: "color-mix(in oklab, var(--electric) 34%, transparent)",
     icon: GroupsRoundedIcon,
     visual: "people",
@@ -439,11 +479,71 @@ function CardVisual({ type }) {
   );
 }
 
+// A single frosted "widget" tile used for the principles row — reveals on
+// scroll rather than on mount.
+function PrincipleTile({ item, delay }) {
+  const [ref, inView] = useInView();
+  const Icon = item.icon;
+
+  return (
+    <Stack
+      ref={ref}
+      spacing={2}
+      className="vm-glass vm-tile"
+      sx={{
+        color: "var(--foreground)",
+        opacity: inView ? 1 : 0,
+        p: 3,
+        transform: inView ? "translateY(0) scale(1)" : "translateY(28px) scale(0.97)",
+        transitionDelay: `${delay}ms`,
+      }}
+    >
+      <Box
+        className="vm-tile-icon"
+        sx={{
+          alignItems: "center",
+          borderRadius: "16px",
+          display: "flex",
+          height: 52,
+          justifyContent: "center",
+          width: 52,
+        }}
+      >
+        <Icon sx={{ color: "var(--primary)", fontSize: 26 }} />
+      </Box>
+      <Typography
+        sx={{
+          fontFamily: FONT_DISPLAY,
+          fontSize: 22,
+          fontWeight: 700,
+          letterSpacing: 0,
+        }}
+      >
+        {item.title}
+      </Typography>
+      <Typography
+        sx={{
+          color: "var(--muted-foreground)",
+          fontFamily: FONT_BODY,
+          fontSize: 16,
+          lineHeight: 1.6,
+        }}
+      >
+        {item.copy}
+      </Typography>
+    </Stack>
+  );
+}
+
 export default function VisionMission() {
+  const [ctaRef, ctaInView] = useInView();
+
   return (
     <>
       <GlobalStyles
         styles={{
+          "@import":
+            "url('https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap')",
           "@keyframes vmFadeUp": {
             "0%": {
               opacity: 0,
@@ -454,13 +554,14 @@ export default function VisionMission() {
               transform: "translateY(0)",
             },
           },
-          "@keyframes vmFloat": {
-            "0%, 100%": { transform: "translateY(0)" },
-            "50%": { transform: "translateY(-12px)" },
+          "@keyframes vmDrift": {
+            "0%, 100%": { transform: "translate3d(0, 0, 0) scale(1)" },
+            "50%": { transform: "translate3d(3%, -4%, 0) scale(1.06)" },
           },
           ".vm-page": {
             background:
               "radial-gradient(circle at 50% 10%, color-mix(in oklab, var(--electric) 12%, transparent), transparent 30%), linear-gradient(180deg, #ffffff 0%, var(--background) 48%, color-mix(in oklab, var(--primary) 5%, var(--background)) 100%)",
+            fontFamily: FONT_BODY,
           },
           ".dark .vm-page": {
             background:
@@ -469,12 +570,61 @@ export default function VisionMission() {
           ".vm-hero-copy": {
             animation: "vmFadeUp 700ms ease both",
           },
+          /* Ambient blurred orbs — the color source the glass panels blur */
+          ".vm-orb": {
+            animation: "vmDrift 16s ease-in-out infinite",
+            borderRadius: "50%",
+            filter: "blur(70px)",
+            position: "fixed",
+            willChange: "transform",
+            zIndex: 0,
+          },
+          /* Core iOS-style frosted glass surface */
+          ".vm-glass": {
+            backdropFilter: "blur(28px) saturate(180%)",
+            WebkitBackdropFilter: "blur(28px) saturate(180%)",
+            background: "rgba(255,255,255,0.14)",
+            border: "1px solid rgba(255,255,255,0.4)",
+            borderRadius: "26px",
+            boxShadow:
+              "0 20px 50px rgba(15,30,60,0.14), inset 0 1px 0 rgba(255,255,255,0.55)",
+            transition: "transform 420ms cubic-bezier(.2,.8,.2,1), opacity 420ms ease, box-shadow 300ms ease",
+          },
+          ".dark .vm-glass": {
+            background: "rgba(20,24,34,0.38)",
+            border: "1px solid rgba(255,255,255,0.1)",
+            boxShadow:
+              "0 20px 50px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)",
+          },
+          ".vm-tile": {
+            cursor: "default",
+          },
+          ".vm-tile:hover": {
+            boxShadow:
+              "0 26px 60px rgba(15,30,60,0.2), inset 0 1px 0 rgba(255,255,255,0.6)",
+            transform: "translateY(-6px)",
+          },
+          ".vm-tile-icon": {
+            background: "rgba(255,255,255,0.5)",
+            border: "1px solid rgba(255,255,255,0.5)",
+          },
+          ".dark .vm-tile-icon": {
+            background: "rgba(255,255,255,0.08)",
+            border: "1px solid rgba(255,255,255,0.14)",
+          },
+          /* Stacked vision/mission cards — tinted frosted glass */
           ".vm-card": {
-            animation: "vmFadeUp 700ms ease both",
+            backdropFilter: "blur(30px) saturate(190%)",
+            WebkitBackdropFilter: "blur(30px) saturate(190%)",
+            border: "1px solid rgba(255,255,255,0.4)",
+            boxShadow:
+              "inset 0 1px 0 rgba(255,255,255,0.5), inset 0 0 60px rgba(255,255,255,0.06)",
           },
           ".vm-card-visual": {
             alignItems: "center",
-            border: "8px solid rgba(255,255,255,0.96)",
+            background: "rgba(255,255,255,0.14)",
+            backdropFilter: "blur(10px)",
+            border: "1px solid rgba(255,255,255,0.4)",
             borderRadius: "22px",
             display: "flex",
             height: "clamp(140px, 18vw, 240px)",
@@ -484,7 +634,7 @@ export default function VisionMission() {
             width: "min(42vw, 430px)",
           },
           ".vm-line": {
-            background: "#fff",
+            background: "rgba(255,255,255,0.9)",
             borderRadius: "999px",
             height: "10px",
             left: "50%",
@@ -503,8 +653,26 @@ export default function VisionMission() {
             top: "65%",
             width: "44%",
           },
-          ".vm-floating-chip": {
-            animation: "vmFloat 4.5s ease-in-out infinite",
+          ".vm-cta": {
+            opacity: 0,
+            transform: "translateY(24px)",
+            transition: "opacity 650ms ease, transform 650ms cubic-bezier(.2,.8,.2,1)",
+          },
+          ".vm-cta.vm-in": {
+            opacity: 1,
+            transform: "translateY(0)",
+          },
+          ".vm-glass-btn": {
+            backdropFilter: "blur(20px) saturate(180%)",
+            WebkitBackdropFilter: "blur(20px) saturate(180%)",
+            background: "color-mix(in oklab, var(--primary) 70%, transparent)",
+            border: "1px solid rgba(255,255,255,0.4)",
+            boxShadow: "0 14px 30px color-mix(in oklab, var(--primary) 30%, transparent)",
+            transition: "transform 260ms ease, box-shadow 260ms ease",
+          },
+          ".vm-glass-btn:hover": {
+            boxShadow: "0 18px 40px color-mix(in oklab, var(--primary) 40%, transparent)",
+            transform: "translateY(-2px)",
           },
           "@media (max-width: 899px)": {
             ".vm-card-visual": {
@@ -512,10 +680,13 @@ export default function VisionMission() {
               width: "100%",
             },
           },
+          "@media (prefers-reduced-motion: reduce)": {
+            ".vm-orb": { animation: "none" },
+            ".vm-glass, .vm-cta, .vm-tile": { transition: "none" },
+          },
         }}
       />
       <CursorEffect />
-      <Navbar />
 
       <Box
         component="main"
@@ -527,6 +698,43 @@ export default function VisionMission() {
           position: "relative",
         }}
       >
+        {/* Ambient color orbs the glass surfaces blur through */}
+        <Box
+          className="vm-orb"
+          sx={{
+            background: "var(--electric)",
+            height: 480,
+            left: "-8%",
+            opacity: 0.35,
+            top: "6%",
+            width: 480,
+          }}
+        />
+        <Box
+          className="vm-orb"
+          sx={{
+            animationDelay: "-6s",
+            background: "var(--glow)",
+            height: 420,
+            opacity: 0.28,
+            right: "-6%",
+            top: "38%",
+            width: 420,
+          }}
+        />
+        <Box
+          className="vm-orb"
+          sx={{
+            animationDelay: "-11s",
+            background: "var(--primary)",
+            bottom: "4%",
+            height: 520,
+            left: "18%",
+            opacity: 0.22,
+            width: 520,
+          }}
+        />
+
         <Box
           sx={{
             background:
@@ -550,6 +758,7 @@ export default function VisionMission() {
             position: "relative",
             pt: 0,
             width: "100%",
+            zIndex: 1,
           }}
         >
           <Stack
@@ -611,21 +820,20 @@ export default function VisionMission() {
             >
               <Chip
                 label="Vision & Mission"
+                className="vm-glass"
                 sx={{
-                  bgcolor:
-                    "color-mix(in oklab, var(--primary) 8%, var(--card))",
-                  border:
-                    "1px solid color-mix(in oklab, var(--primary) 18%, transparent)",
                   color: "var(--primary)",
+                  fontFamily: FONT_BODY,
                   fontWeight: 700,
                   letterSpacing: 0,
+                  px: 0.5,
                 }}
               />
               <Typography
                 component="h1"
                 sx={{
                   color: "var(--foreground)",
-                  fontFamily: "var(--font-display)",
+                  fontFamily: FONT_DISPLAY,
                   fontSize: { xs: 52, sm: 76, md: 96 },
                   fontWeight: 800,
                   letterSpacing: 0,
@@ -640,6 +848,7 @@ export default function VisionMission() {
               <Typography
                 sx={{
                   color: "var(--muted-foreground)",
+                  fontFamily: FONT_BODY,
                   fontSize: { xs: 18, md: 24 },
                   lineHeight: 1.55,
                   maxWidth: 780,
@@ -667,9 +876,9 @@ export default function VisionMission() {
               return (
                 <Box
                   key={card.title}
-                  className="vm-card"
+                  className="vm-card vm-hero-copy"
                   sx={{
-                    background: card.color,
+                    background: card.tint,
                     borderRadius: { xs: "28px", md: "40px" },
                     boxShadow: `0 40px 90px ${card.shadow}`,
                     color: "#fff",
@@ -699,8 +908,8 @@ export default function VisionMission() {
                         <Box
                           sx={{
                             alignItems: "center",
-                            bgcolor: "rgba(255,255,255,0.16)",
-                            border: "1px solid rgba(255,255,255,0.24)",
+                            bgcolor: "rgba(255,255,255,0.18)",
+                            border: "1px solid rgba(255,255,255,0.3)",
                             borderRadius: "18px",
                             display: "flex",
                             height: 48,
@@ -712,11 +921,11 @@ export default function VisionMission() {
                         </Box>
                         <Typography
                           sx={{
-                            color: "rgba(255,255,255,0.76)",
+                            color: "rgba(255,255,255,0.82)",
+                            fontFamily: FONT_BODY,
                             fontSize: 13,
-                            fontWeight: 800,
-                            letterSpacing: "0.14em",
-                            textTransform: "uppercase",
+                            fontWeight: 700,
+                            letterSpacing: "0.02em",
                           }}
                         >
                           {card.eyebrow}
@@ -726,7 +935,7 @@ export default function VisionMission() {
                       <Typography
                         component="h2"
                         sx={{
-                          fontFamily: "var(--font-display)",
+                          fontFamily: FONT_DISPLAY,
                           fontSize: { xs: 40, sm: 52, md: 62 },
                           fontWeight: 800,
                           letterSpacing: 0,
@@ -738,7 +947,8 @@ export default function VisionMission() {
                       </Typography>
                       <Typography
                         sx={{
-                          color: "rgba(255,255,255,0.78)",
+                          color: "rgba(255,255,255,0.82)",
+                          fontFamily: FONT_BODY,
                           fontSize: { xs: 17, md: 21 },
                           lineHeight: 1.55,
                           maxWidth: 650,
@@ -755,12 +965,14 @@ export default function VisionMission() {
                           key={point}
                           sx={{
                             alignItems: "center",
-                            bgcolor: "rgba(255,255,255,0.12)",
-                            border: "1px solid rgba(255,255,255,0.18)",
+                            backdropFilter: "blur(6px)",
+                            bgcolor: "rgba(255,255,255,0.14)",
+                            border: "1px solid rgba(255,255,255,0.22)",
                             borderRadius: "16px",
                             display: "flex",
+                            fontFamily: FONT_BODY,
                             fontSize: { xs: 14, md: 16 },
-                            fontWeight: 700,
+                            fontWeight: 600,
                             gap: 1.5,
                             p: 1.6,
                           }}
@@ -793,62 +1005,31 @@ export default function VisionMission() {
               gap: 2,
               gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
               mt: { xs: 10, md: 14 },
+              position: "relative",
+              zIndex: 1,
             }}
           >
-            {principles.map((item, index) => {
-              const Icon = item.icon;
-
-              return (
-                <Stack
-                  key={item.title}
-                  className={index === 1 ? "vm-floating-chip" : ""}
-                  spacing={2}
-                  sx={{
-                    bgcolor: "rgba(255,255,255,0.06)",
-                    border:
-                      "1px solid color-mix(in oklab, var(--primary) 16%, transparent)",
-                    borderRadius: "24px",
-                    color: "var(--foreground)",
-                    p: 3,
-                  }}
-                >
-                  <Icon sx={{ color: "var(--primary)", fontSize: 34 }} />
-                  <Typography
-                    sx={{
-                      fontFamily: "var(--font-display)",
-                      fontSize: 24,
-                      fontWeight: 800,
-                      letterSpacing: 0,
-                    }}
-                  >
-                    {item.title}
-                  </Typography>
-                  <Typography
-                    sx={{
-                      color: "var(--muted-foreground)",
-                      fontSize: 16,
-                      lineHeight: 1.6,
-                    }}
-                  >
-                    {item.copy}
-                  </Typography>
-                </Stack>
-              );
-            })}
+            {principles.map((item, index) => (
+              <PrincipleTile key={item.title} item={item} delay={index * 110} />
+            ))}
           </Box>
 
           <Stack
+            ref={ctaRef}
+            className={`vm-cta${ctaInView ? " vm-in" : ""}`}
             spacing={3}
             sx={{
               alignItems: "center",
               mt: { xs: 10, md: 14 },
+              position: "relative",
               textAlign: "center",
+              zIndex: 1,
             }}
           >
             <Typography
               component="h2"
               sx={{
-                fontFamily: "var(--font-display)",
+                fontFamily: FONT_DISPLAY,
                 fontSize: { xs: 36, md: 56 },
                 fontWeight: 800,
                 letterSpacing: 0,
@@ -860,6 +1041,7 @@ export default function VisionMission() {
             <Typography
               sx={{
                 color: "var(--muted-foreground)",
+                fontFamily: FONT_BODY,
                 fontSize: { xs: 17, md: 20 },
                 lineHeight: 1.55,
                 maxWidth: 720,
@@ -872,17 +1054,15 @@ export default function VisionMission() {
             <Button
               href="/courses"
               endIcon={<ArrowForwardRoundedIcon />}
+              className="vm-glass-btn"
               sx={{
-                bgcolor: "var(--primary)",
                 borderRadius: "999px",
                 color: "#fff",
-                fontWeight: 800,
+                fontFamily: FONT_BODY,
+                fontWeight: 700,
                 px: 4,
                 py: 1.5,
                 textTransform: "none",
-                "&:hover": {
-                  bgcolor: "color-mix(in oklab, var(--primary) 86%, white)",
-                },
               }}
             >
               Explore Courses
