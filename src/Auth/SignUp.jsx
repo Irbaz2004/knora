@@ -31,8 +31,10 @@ import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
 import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import logo from "@/assets/knora-logo-transparent.png";
+import { toast } from "sonner";
+import logo from "../assets/knoralogo.png";
 import authRight from "@/assets/authright.png";
+import AuthThemeToggle from "@/Auth/AuthThemeToggle";
 import {
   appleProvider,
   facebookProvider,
@@ -228,9 +230,10 @@ const signUpStyles = {
     "& .MuiOutlinedInput-notchedOutline": {
       borderColor: "#d7dfea",
     },
-    "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline, & .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#0572ea",
-    },
+    "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline, & .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+      {
+        borderColor: "#0572ea",
+      },
     "& .MuiInputAdornment-positionStart": {
       mr: "0.8rem",
     },
@@ -283,7 +286,7 @@ const signUpStyles = {
     fontSize: "0.72rem",
     fontWeight: 900,
     lineHeight: 1,
-    
+
     "&::before, &::after": {
       borderColor: "#d6e1ef",
     },
@@ -546,6 +549,7 @@ export default function SignUp() {
       authProvider,
     });
     setStatus("Account created. Redirecting...");
+    toast.success("Account created. Redirecting...");
     window.setTimeout(() => {
       window.location.href = "/";
     }, 700);
@@ -569,7 +573,9 @@ export default function SignUp() {
       });
       await completeSignUp(credential.user);
     } catch (signUpError) {
-      setError(getAuthMessage(signUpError));
+      const message = getAuthMessage(signUpError);
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -591,20 +597,24 @@ export default function SignUp() {
         authProvider: item.label.toLowerCase(),
       });
       setStatus("Account connected. Redirecting...");
+      toast.success("Account connected. Redirecting...");
       window.setTimeout(() => {
         window.location.href = "/";
       }, 700);
     } catch (socialError) {
-      setError(getAuthMessage(socialError));
+      const message = getAuthMessage(socialError);
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Box component="main" sx={signUpStyles.page}>
+    <Box component="main" className="auth-screen" sx={signUpStyles.page}>
       <Box sx={signUpStyles.shell}>
         <Box component="section" sx={signUpStyles.formSide}>
+          <AuthThemeToggle />
           <Box
             component="a"
             href="/"

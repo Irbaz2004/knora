@@ -22,8 +22,10 @@ import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import VerifiedUserOutlinedIcon from "@mui/icons-material/VerifiedUserOutlined";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import logo from "@/assets/knora-logo-transparent.png";
+import { toast } from "sonner";
+import logo from "../assets/knoralogo.png";
 import authRight from "@/assets/authright.png";
+import AuthThemeToggle from "@/Auth/AuthThemeToggle";
 import { requireFirebaseAuth, saveUserProfile } from "@/firebase";
 
 const features = [
@@ -185,9 +187,10 @@ const loginStyles = {
     "& .MuiOutlinedInput-notchedOutline": {
       borderColor: "#d7dfea",
     },
-    "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline, & .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#0572ea",
-    },
+    "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline, & .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+      {
+        borderColor: "#0572ea",
+      },
     "& .MuiInputAdornment-positionStart": {
       mr: "0.8rem",
     },
@@ -450,9 +453,9 @@ function getAuthMessage(error) {
   if (!error?.code) return "Something went wrong. Please try again.";
 
   const messages = {
-    "auth/invalid-credential": "Invalid username/ID or password.",
-    "auth/user-not-found": "No account was found with that username/ID.",
-    "auth/wrong-password": "Invalid username/ID or password.",
+    "auth/invalid-credential": "No account found or the password is incorrect.",
+    "auth/user-not-found": "No account was found with that email.",
+    "auth/wrong-password": "No account found or the password is incorrect.",
     "auth/popup-closed-by-user": "Sign in was cancelled.",
     "auth/configuration-not-found":
       "Firebase is not configured yet. Add your Vite Firebase env values.",
@@ -478,6 +481,7 @@ export default function Login() {
   const completeLogin = async (user, authProvider = "password") => {
     await saveUserProfile(user, { authProvider });
     setStatus("Login successful. Redirecting...");
+    toast.success("Login successful. Redirecting...");
     window.setTimeout(() => {
       window.location.href = "/";
     }, 700);
@@ -500,16 +504,19 @@ export default function Login() {
       );
       await completeLogin(credential.user);
     } catch (loginError) {
-      setError(getAuthMessage(loginError));
+      const message = getAuthMessage(loginError);
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Box component="main" sx={loginStyles.page}>
+    <Box component="main" className="auth-screen" sx={loginStyles.page}>
       <Box sx={loginStyles.shell}>
         <Box component="section" sx={loginStyles.formSide}>
+          <AuthThemeToggle />
           <Box
             component="a"
             href="/"
@@ -543,9 +550,9 @@ export default function Login() {
                 name="identifier"
                 value={form.identifier}
                 onChange={updateField}
-                placeholder="Username / Registration Number / Employee ID"
-                type="text"
-                autoComplete="username"
+                placeholder="Email address"
+                type="email"
+                autoComplete="email"
                 required
                 fullWidth
                 sx={loginStyles.textField}
@@ -618,8 +625,8 @@ export default function Login() {
               </Button>
             </Stack>
 
-            <Box sx={loginStyles.note}>
-              <Box sx={loginStyles.noteIcon}>
+            <Box className="auth-inline-note" sx={loginStyles.note}>
+              <Box className="auth-inline-note-icon" sx={loginStyles.noteIcon}>
                 <VerifiedUserOutlinedIcon />
               </Box>
               <Box>

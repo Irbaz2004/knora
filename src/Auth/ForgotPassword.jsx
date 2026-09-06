@@ -18,8 +18,10 @@ import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
 import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
-import logo from "@/assets/knora-logo-transparent.png";
+import { toast } from "sonner";
+import logo from "../assets/knoralogo.png";
 import authRight from "@/assets/authright.png";
+import AuthThemeToggle from "@/Auth/AuthThemeToggle";
 import { requireFirebaseAuth } from "@/firebase";
 
 const features = [
@@ -197,9 +199,10 @@ const forgotStyles = {
     "& .MuiOutlinedInput-notchedOutline": {
       borderColor: "#d7dfea",
     },
-    "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline, & .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#0572ea",
-    },
+    "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline, & .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+      {
+        borderColor: "#0572ea",
+      },
     "& .MuiInputAdornment-positionStart": {
       mr: "0.8rem",
     },
@@ -434,17 +437,21 @@ export default function ForgotPassword() {
     try {
       await sendPasswordResetEmail(requireFirebaseAuth(), email);
       setStatus("Password reset email sent. Check your inbox.");
+      toast.success("Password reset email sent. Check your inbox.");
     } catch (resetError) {
-      setError(getAuthMessage(resetError));
+      const message = getAuthMessage(resetError);
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Box component="main" sx={forgotStyles.page}>
+    <Box component="main" className="auth-screen" sx={forgotStyles.page}>
       <Box sx={forgotStyles.shell}>
         <Box component="section" sx={forgotStyles.formSide}>
+          <AuthThemeToggle />
           <Box
             component="a"
             href="/"

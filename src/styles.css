@@ -5005,6 +5005,109 @@ html.dark body {
   text-align: right;
 }
 
+html.dark .auth-screen,
+html.dark .auth-screen > .MuiBox-root {
+  background: var(--background) !important;
+  color: var(--foreground) !important;
+}
+
+html.dark .auth-screen section:first-of-type {
+  background:
+    radial-gradient(
+      circle at 8% 94%,
+      color-mix(in oklab, var(--primary) 14%, transparent),
+      transparent 26%
+    ),
+    var(--background) !important;
+}
+
+html.dark .auth-screen footer {
+  border-top-color: var(--border) !important;
+  background: var(--card) !important;
+}
+
+html.dark .auth-screen h1 {
+  color: var(--foreground) !important;
+}
+
+html.dark .auth-screen h1 span,
+html.dark .auth-screen footer strong {
+  color: var(--primary) !important;
+}
+
+html.dark .auth-screen section:first-of-type p,
+html.dark .auth-screen footer p,
+html.dark .auth-screen footer small {
+  color: var(--muted-foreground) !important;
+}
+
+html.dark .auth-screen .MuiOutlinedInput-root {
+  background: var(--card) !important;
+  color: var(--foreground) !important;
+}
+
+html.dark .auth-screen .MuiOutlinedInput-notchedOutline {
+  border-color: var(--border) !important;
+}
+
+html.dark
+  .auth-screen
+  .MuiOutlinedInput-root:hover
+  .MuiOutlinedInput-notchedOutline,
+html.dark
+  .auth-screen
+  .MuiOutlinedInput-root.Mui-focused
+  .MuiOutlinedInput-notchedOutline {
+  border-color: var(--primary) !important;
+}
+
+html.dark .auth-screen .MuiInputBase-input {
+  color: var(--foreground) !important;
+}
+
+html.dark .auth-screen .MuiInputBase-input::placeholder {
+  color: var(--muted-foreground) !important;
+}
+
+html.dark .auth-screen .MuiInputAdornment-root,
+html.dark .auth-screen .MuiIconButton-root {
+  color: var(--muted-foreground) !important;
+}
+
+html.dark .auth-screen .MuiIconButton-root:hover,
+html.dark .auth-screen .MuiButton-text,
+html.dark .auth-screen .MuiButton-root.MuiButton-text {
+  color: var(--primary) !important;
+}
+
+html.dark .auth-screen .MuiDivider-root {
+  color: var(--muted-foreground) !important;
+}
+
+html.dark .auth-screen .MuiDivider-root::before,
+html.dark .auth-screen .MuiDivider-root::after {
+  border-color: var(--border) !important;
+}
+
+html.dark .auth-screen footer span {
+  background: color-mix(in oklab, var(--primary) 16%, var(--card)) !important;
+  color: var(--primary) !important;
+}
+
+html.dark .auth-screen .auth-inline-note {
+  background: color-mix(in oklab, var(--primary) 12%, var(--card)) !important;
+  color: var(--foreground) !important;
+}
+
+html.dark .auth-screen .auth-inline-note-icon {
+  background: color-mix(in oklab, var(--primary) 18%, var(--card)) !important;
+  color: var(--primary) !important;
+}
+
+html.dark .auth-screen .auth-inline-note p {
+  color: var(--muted-foreground) !important;
+}
+
 @media (max-height: 820px) and (min-width: 1025px) {
   .auth-brand {
     height: 4rem;

@@ -110,7 +110,7 @@ export function scatterCloud(count, width, height, depth, seed = 9021) {
   return out;
 }
 
-/** Quiet director-section constellation: soft diagonal threads, no large swirl. */
+/** Director-section formation: CNN pipeline with strong layer silhouettes. */
 export function directorMessageFormation(
   count,
   width,
@@ -121,6 +121,15 @@ export function directorMessageFormation(
 ) {
   const out = new Float32Array(count * 3);
   const rnd = makeRandom(seed);
+  const w = width;
+  const h = height;
+  const unit = Math.min(w, h);
+  const inputX = -w * 0.3;
+  const convX = -w * 0.11;
+  const poolX = w * 0.06;
+  const flattenX = w * 0.18;
+  const denseX = w * 0.27;
+  const outputX = w * 0.36;
 
   const put = (i, x, y, z = 0) => {
     const i3 = i * 3;
@@ -129,55 +138,175 @@ export function directorMessageFormation(
     out[i3 + 2] = center[2] + z;
   };
 
-  for (let i = 0; i < count; i++) {
-    const bucket = i % 12;
+  const putLine = (i, x1, y1, x2, y2, t, jitter = 0.0025) => {
+    put(
+      i,
+      x1 + (x2 - x1) * t + (rnd() - 0.5) * w * jitter,
+      y1 + (y2 - y1) * t + (rnd() - 0.5) * h * jitter,
+      (rnd() - 0.5) * depth * 0.08,
+    );
+  };
 
-    if (bucket < 5) {
-      const lane = bucket - 2;
+  const putRect = (i, cx, cy, rectW, rectH, z = 0, fill = false) => {
+    if (fill && rnd() > 0.44) {
+      put(
+        i,
+        cx + (rnd() - 0.5) * rectW * 0.68,
+        cy + (rnd() - 0.5) * rectH * 0.68,
+        z + (rnd() - 0.5) * depth * 0.025,
+      );
+      return;
+    }
+
+    const side = Math.floor(rnd() * 4);
+    const t = rnd();
+    const left = cx - rectW / 2;
+    const right = cx + rectW / 2;
+    const top = cy + rectH / 2;
+    const bottom = cy - rectH / 2;
+
+    if (side === 0) putLine(i, left, top, right, top, t, 0.002);
+    else if (side === 1) putLine(i, right, top, right, bottom, t, 0.002);
+    else if (side === 2) putLine(i, right, bottom, left, bottom, t, 0.002);
+    else putLine(i, left, bottom, left, top, t, 0.002);
+
+    out[i * 3 + 2] += z;
+  };
+
+  const putGridPoint = (i, cx, cy, grid, size) => {
+    const cell = i % (grid * grid);
+    const col = cell % grid;
+    const row = Math.floor(cell / grid);
+    const step = size / (grid - 1);
+    const snap = rnd() > 0.22;
+    const x =
+      cx - size / 2 + col * step + (snap ? 0 : (rnd() - 0.5) * step * 0.52);
+    const y =
+      cy + size / 2 - row * step + (snap ? 0 : (rnd() - 0.5) * step * 0.52);
+    put(i, x, y, (rnd() - 0.5) * depth * 0.05);
+  };
+
+  const putCircle = (i, cx, cy, radius, z = 0) => {
+    const angle = rnd() * Math.PI * 2;
+    const ringRadius = radius * (0.78 + rnd() * 0.28);
+    put(
+      i,
+      cx + Math.cos(angle) * ringRadius,
+      cy + Math.sin(angle) * ringRadius,
+      z + Math.cos(angle) * depth * 0.025,
+    );
+  };
+
+  const putBezier = (i, x0, y0, x1, y1, x2, y2, t) => {
+    const mt = 1 - t;
+    put(
+      i,
+      mt * mt * x0 + 2 * mt * t * x1 + t * t * x2,
+      mt * mt * y0 + 2 * mt * t * y1 + t * t * y2,
+      (rnd() - 0.5) * depth * 0.1,
+    );
+  };
+
+  for (let i = 0; i < count; i++) {
+    const group = i / count;
+
+    if (group < 0.18) {
+      putGridPoint(i, inputX, 0, 13, unit * 0.46);
+    } else if (group < 0.42) {
+      const local = i - Math.floor(count * 0.18);
+      const map = local % 5;
+      const offsetX = map * w * 0.014;
+      const offsetY = map * h * 0.025;
+      putRect(
+        i,
+        convX + offsetX,
+        h * 0.12 - offsetY,
+        unit * 0.38,
+        unit * 0.28,
+        -map * depth * 0.035,
+        true,
+      );
+    } else if (group < 0.57) {
+      const local = i - Math.floor(count * 0.42);
+      const map = local % 4;
+      const offsetX = map * w * 0.014;
+      const offsetY = map * h * 0.028;
+      putRect(
+        i,
+        poolX + offsetX,
+        -h * 0.02 - offsetY,
+        unit * 0.24,
+        unit * 0.18,
+        -map * depth * 0.04,
+        true,
+      );
+    } else if (group < 0.7) {
+      const band = i % 7;
       const t = rnd();
-      const x = (t - 0.5) * width * 0.92;
-      const diagonal = (t - 0.5) * height * 0.16;
-      const y =
-        height * 0.08 +
-        diagonal +
-        lane * height * 0.026 +
-        Math.sin(t * Math.PI * 2.2 + lane) * height * 0.018;
-      put(i, x, y, (rnd() - 0.5) * depth * 0.34);
-    } else if (bucket < 8) {
-      const cluster = bucket === 5 ? -1 : bucket === 6 ? 0 : 1;
-      const angle = rnd() * Math.PI * 2;
-      const radius = Math.pow(rnd(), 0.52) * Math.min(width, height) * 0.075;
-      const anchorX = width * (0.2 + cluster * 0.12);
-      const anchorY = height * (-0.02 + cluster * 0.035);
+      const pairs = [
+        [inputX + unit * 0.24, 0, convX - unit * 0.2, h * 0.11],
+        [convX + unit * 0.21, h * 0.08, poolX - unit * 0.13, -h * 0.02],
+        [poolX + unit * 0.13, -h * 0.06, flattenX - unit * 0.04, 0],
+      ];
+      const pair = pairs[i % pairs.length];
+      putBezier(
+        i,
+        pair[0],
+        pair[1] + (band - 3) * h * 0.025,
+        (pair[0] + pair[2]) / 2,
+        (pair[1] + pair[3]) / 2 + (band - 3) * h * 0.04,
+        pair[2],
+        pair[3] + (band - 3) * h * 0.018,
+        t,
+      );
+    } else if (group < 0.8) {
+      const lane = i % 20;
+      const y = (0.5 - lane / 19) * h * 0.56;
       put(
         i,
-        anchorX + Math.cos(angle) * radius * 1.2,
-        anchorY + Math.sin(angle) * radius * 0.72,
-        Math.sin(angle) * depth * 0.12,
+        flattenX + (rnd() - 0.5) * w * 0.008,
+        y + (rnd() - 0.5) * h * 0.006,
+        (rnd() - 0.5) * depth * 0.08,
       );
-    } else if (bucket < 10) {
-      const angle = rnd() * Math.PI * 2;
-      const radius = Math.pow(rnd(), 0.5) * Math.min(width, height) * 0.095;
-      const anchorX = -width * 0.27;
-      const anchorY = -height * 0.06;
-      put(
-        i,
-        anchorX + Math.cos(angle) * radius,
-        anchorY + Math.sin(angle) * radius * 0.65,
-        Math.cos(angle) * depth * 0.1,
-      );
+    } else if (group < 0.94) {
+      const local = i - Math.floor(count * 0.8);
+      const layer = local % 3;
+      const nodeCounts = [6, 5, 3];
+      const nodeCount = nodeCounts[layer];
+      const node = Math.floor(rnd() * nodeCount);
+      const x = denseX + layer * w * 0.055;
+      const y = (0.5 - node / (nodeCount - 1)) * h * (0.45 - layer * 0.07);
+
+      if (rnd() > 0.34 || layer === 2) {
+        putCircle(i, x, y, unit * 0.03, layer * depth * 0.015);
+      } else {
+        const nextCount = nodeCounts[Math.min(layer + 1, 2)];
+        const nextNode = Math.floor(rnd() * nextCount);
+        const nextX = denseX + (layer + 1) * w * 0.055;
+        const nextY =
+          (0.5 - nextNode / (nextCount - 1)) * h * (0.45 - (layer + 1) * 0.07);
+        putLine(i, x, y, nextX, nextY, rnd(), 0.003);
+      }
+    } else if (group < 0.995) {
+      const bar = i % 4;
+      const t = rnd();
+      const y = h * (0.18 - bar * 0.1);
+      const barW = unit * (0.1 + bar * 0.035);
+      putLine(i, outputX, y, outputX + barW, y, t, 0.003);
     } else {
-      const side = rnd() > 0.5 ? 1 : -1;
-      const x = side * width * (0.34 + rnd() * 0.2);
-      const y = (rnd() - 0.5) * height * 0.62;
-      put(i, x, y, (rnd() - 0.5) * depth * 0.55);
+      put(
+        i,
+        (rnd() - 0.5) * w * 0.98,
+        (rnd() - 0.5) * h * 0.72,
+        (rnd() - 0.5) * depth * 0.42,
+      );
     }
   }
 
   return out;
 }
 
-const ANN_LAYER_COUNTS = [5, 7, 6, 4, 3];
+const ANN_LAYER_COUNTS = [5, 6, 6, 4];
 
 export function buildAnnLayerEdges() {
   const edges = [];
@@ -201,11 +330,11 @@ export function buildAnnLayerEdges() {
 }
 
 function annLayers(width, height) {
-  const layerGap = 0.84 / Math.max(1, ANN_LAYER_COUNTS.length - 1);
+  const layerGap = 0.78 / Math.max(1, ANN_LAYER_COUNTS.length - 1);
 
   return ANN_LAYER_COUNTS.map((nodeCount, layerIndex) => {
-    const x = (-0.42 + layerIndex * layerGap) * width;
-    const verticalSpan = 0.64;
+    const x = (-0.39 + layerIndex * layerGap) * width;
+    const verticalSpan = 0.68;
 
     return {
       x,
@@ -238,6 +367,9 @@ export function annNetworkFormation(
     })),
   );
   const nodeCount = Math.min(nodes.length, count);
+  const edgeIndices = buildAnnLayerEdges();
+  const edgePairCount = edgeIndices.length / 2;
+  const nodeRingBase = Math.min(width, height) * 0.022;
 
   const put = (i, x, y, z = 0) => {
     const i3 = i * 3;
@@ -252,46 +384,36 @@ export function annNetworkFormation(
   }
 
   for (let i = nodeCount; i < count; i++) {
-    const bucket = i % 18;
+    const local = i - nodeCount;
+    const bucket = local % 12;
 
-    if (bucket < 11) {
-      const fromLayerIndex = bucket % (layers.length - 1);
-      const fromLayer = layers[fromLayerIndex];
-      const toLayer = layers[fromLayerIndex + 1];
-      const fromNode =
-        fromLayer.nodes[Math.floor(rnd() * fromLayer.nodes.length)];
-      const toNode = toLayer.nodes[Math.floor(rnd() * toLayer.nodes.length)];
-      const t = rnd();
-      const ease = t * t * (3 - 2 * t);
-      const bow = Math.sin(t * Math.PI) * (rnd() - 0.5) * height * 0.012;
-      const x =
-        fromLayer.x +
-        (toLayer.x - fromLayer.x) * ease +
-        (rnd() - 0.5) * width * 0.003;
-      const y =
-        fromNode +
-        (toNode - fromNode) * ease +
-        bow +
-        (rnd() - 0.5) * height * 0.004;
-      put(i, x, y, (rnd() - 0.5) * depth * 0.18);
-    } else if (bucket < 17) {
-      const layer = layers[(bucket - 9) % layers.length];
-      const node = layer.nodes[Math.floor(rnd() * layer.nodes.length)];
-      const angle = rnd() * Math.PI * 2;
-      const ring =
-        Math.min(width, height) * (0.034 + Math.pow(rnd(), 0.8) * 0.018);
+    if (bucket < 5 || edgePairCount === 0) {
+      const node = nodes[local % nodeCount];
+      const ring = Math.floor(local / nodeCount) % 4;
+      const angle = GOLDEN * local + ring * 0.42;
+      const radius = nodeRingBase * (1.45 + ring * 0.32 + rnd() * 0.14);
       put(
         i,
-        layer.x + Math.cos(angle) * ring,
-        node + Math.sin(angle) * ring,
-        Math.cos(angle) * depth * 0.06,
+        node.x + Math.cos(angle) * radius,
+        node.y + Math.sin(angle) * radius * 0.92,
+        Math.cos(angle) * depth * 0.045,
       );
     } else {
-      const layer = layers[Math.floor(rnd() * layers.length)];
-      const node = layer.nodes[Math.floor(rnd() * layer.nodes.length)];
-      const x = layer.x + (rnd() - 0.5) * width * 0.075;
-      const y = node + (rnd() - 0.5) * height * 0.075;
-      put(i, x, y, (rnd() - 0.5) * depth * 0.22);
+      const edgePair = Math.floor((local * 1.618) % edgePairCount);
+      const fromNode = nodes[edgeIndices[edgePair * 2]];
+      const toNode = nodes[edgeIndices[edgePair * 2 + 1]];
+      const lane = Math.floor(local / edgePairCount) % 18;
+      const t = (lane + 0.5 + rnd() * 0.12) / 18;
+      const ease = t * t * (3 - 2 * t);
+      const bow =
+        Math.sin(t * Math.PI) * (bucket % 2 === 0 ? 1 : -1) * height * 0.004;
+
+      put(
+        i,
+        fromNode.x + (toNode.x - fromNode.x) * ease,
+        fromNode.y + (toNode.y - fromNode.y) * ease + bow,
+        (rnd() - 0.5) * depth * 0.08,
+      );
     }
   }
 
@@ -378,6 +500,119 @@ export function hybridLearningConsole(
   return out;
 }
 
+/** Courses scene: deep-learning chip with layered neural paths and data arcs. */
+export function deepLearningCourseFormation(
+  count,
+  width,
+  height,
+  depth,
+  center = [0, 0, 0],
+  seed = 4242,
+) {
+  const out = new Float32Array(count * 3);
+  const rnd = makeRandom(seed);
+  const w = width;
+  const h = height;
+  const chipW = Math.min(w * 0.24, 3.25);
+  const chipH = Math.min(h * 0.38, 2.2);
+  const layerCounts = [4, 6, 6, 4];
+  const layerXs = [-0.38, -0.16, 0.16, 0.38].map((x) => x * w);
+  const nodes = layerCounts.flatMap((nodeCount, layerIndex) => {
+    const span = h * (layerIndex === 1 || layerIndex === 2 ? 0.52 : 0.42);
+    return Array.from({ length: nodeCount }, (_, nodeIndex) => {
+      const ratio = nodeCount === 1 ? 0.5 : nodeIndex / (nodeCount - 1);
+      return {
+        x: layerXs[layerIndex],
+        y: (0.5 - ratio) * span,
+        layerIndex,
+      };
+    });
+  });
+
+  const put = (i, x, y, z = 0) => {
+    const i3 = i * 3;
+    out[i3] = center[0] + x;
+    out[i3 + 1] = center[1] + y;
+    out[i3 + 2] = center[2] + z;
+  };
+
+  const pointOnChipEdge = (t) => {
+    const side = Math.floor(t * 4);
+    const local = t * 4 - side;
+    if (side === 0) return [-chipW / 2 + local * chipW, chipH / 2];
+    if (side === 1) return [chipW / 2, chipH / 2 - local * chipH];
+    if (side === 2) return [chipW / 2 - local * chipW, -chipH / 2];
+    return [-chipW / 2, -chipH / 2 + local * chipH];
+  };
+
+  for (let i = 0; i < count; i++) {
+    const bucket = i % 24;
+
+    if (bucket < 5) {
+      const node = nodes[i % nodes.length];
+      const ring = Math.floor(i / nodes.length) % 5;
+      const angle = GOLDEN * i + ring * 0.32;
+      const radius = Math.min(w, h) * (0.018 + ring * 0.006 + rnd() * 0.003);
+      put(
+        i,
+        node.x + Math.cos(angle) * radius,
+        node.y + Math.sin(angle) * radius,
+        Math.cos(angle) * depth * 0.035,
+      );
+    } else if (bucket < 13) {
+      const fromLayer = bucket % 3;
+      const from = nodes.filter((node) => node.layerIndex === fromLayer);
+      const to = nodes.filter((node) => node.layerIndex === fromLayer + 1);
+      const a = from[Math.floor(rnd() * from.length)];
+      const b = to[Math.floor(rnd() * to.length)];
+      const t = rnd();
+      const ease = t * t * (3 - 2 * t);
+      const lift = Math.sin(t * Math.PI) * (rnd() - 0.5) * h * 0.018;
+      put(
+        i,
+        a.x + (b.x - a.x) * ease,
+        a.y + (b.y - a.y) * ease + lift,
+        (rnd() - 0.5) * depth * 0.12,
+      );
+    } else if (bucket < 17) {
+      const [edgeX, edgeY] = pointOnChipEdge(rnd());
+      put(
+        i,
+        edgeX + (rnd() - 0.5) * w * 0.01,
+        edgeY + (rnd() - 0.5) * h * 0.01,
+        (rnd() - 0.5) * depth * 0.08,
+      );
+    } else if (bucket < 20) {
+      const angle = rnd() * Math.PI * 2;
+      const radius = Math.min(chipW, chipH) * (0.18 + rnd() * 0.32);
+      put(
+        i,
+        Math.cos(angle) * radius,
+        Math.sin(angle) * radius,
+        Math.sin(angle) * depth * 0.08,
+      );
+    } else if (bucket < 23) {
+      const lane = bucket - 21;
+      const t = rnd();
+      const x = (t - 0.5) * w * 0.88;
+      const wave =
+        Math.sin(t * Math.PI * 2.2 + lane * 1.3) * h * 0.12 +
+        Math.sin(t * Math.PI * 6.4) * h * 0.022;
+      const y = (lane === -1 ? -1 : 1) * h * 0.31 + wave;
+      put(i, x, y, Math.cos(t * Math.PI * 2) * depth * 0.14);
+    } else {
+      put(
+        i,
+        (rnd() - 0.5) * w * 0.96,
+        (rnd() - 0.5) * h * 0.78,
+        (rnd() - 0.5) * depth * 0.5,
+      );
+    }
+  }
+
+  return out;
+}
+
 /** Launch events object: clean launch burst with orbit arcs and flowing trails. */
 export function eventCalendarFormation(
   count,
@@ -442,6 +677,68 @@ export function eventCalendarFormation(
         Math.cos(angle) * radius * 1.22,
         Math.sin(angle) * radius * 0.52,
         (rnd() - 0.5) * 0.62,
+      );
+    }
+  }
+
+  return out;
+}
+
+/** Full-screen campus splash: airy particle mist with a bright central burst. */
+export function particleSplashFormation(
+  count,
+  width,
+  height,
+  depth,
+  center = [0, 0, 0],
+  seed = 6262,
+) {
+  const out = new Float32Array(count * 3);
+  const rnd = makeRandom(seed);
+  const w = width;
+  const h = height;
+
+  const put = (i, x, y, z = 0) => {
+    const i3 = i * 3;
+    out[i3] = center[0] + x;
+    out[i3 + 1] = center[1] + y;
+    out[i3 + 2] = center[2] + z;
+  };
+
+  for (let i = 0; i < count; i++) {
+    const bucket = i % 16;
+
+    if (bucket < 9) {
+      const x = (rnd() - 0.5) * w;
+      const y = (rnd() - 0.5) * h;
+      put(i, x, y, (rnd() - 0.5) * depth);
+    } else if (bucket < 13) {
+      const ray = bucket - 9;
+      const angle =
+        -Math.PI * 0.86 + (ray / 3) * Math.PI * 1.72 + (rnd() - 0.5) * 0.34;
+      const radius = Math.pow(rnd(), 0.34) * Math.min(w, h) * 0.72;
+      const lift = Math.sin(radius * 1.4 + ray) * h * 0.024;
+      put(
+        i,
+        Math.cos(angle) * radius * 1.85,
+        Math.sin(angle) * radius * 0.8 + lift,
+        Math.sin(angle + radius) * depth * 0.28,
+      );
+    } else if (bucket < 15) {
+      const side = bucket === 13 ? -1 : 1;
+      const t = rnd();
+      const x = side * w * (0.12 + t * 0.44);
+      const y =
+        (rnd() - 0.5) * h * 0.96 + Math.sin(t * Math.PI * 3.2) * h * 0.05;
+      put(i, x, y, (rnd() - 0.5) * depth * 0.62);
+    } else {
+      const angle = rnd() * Math.PI * 2;
+      const radius = Math.pow(rnd(), 0.3) * Math.min(w, h) * 0.34;
+      put(
+        i,
+        Math.cos(angle) * radius * 1.4,
+        Math.sin(angle) * radius,
+        (rnd() - 0.5) * depth * 0.34,
       );
     }
   }

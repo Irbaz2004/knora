@@ -8,12 +8,13 @@ import {
   buildAnnLayerEdges,
   buildNeighborEdges,
   chipConvergence,
+  deepLearningCourseFormation,
   directorMessageFormation,
   eventCalendarFormation,
-  hybridLearningConsole,
   makeRandom,
   morphParticles,
   neuralSphere,
+  particleSplashFormation,
   radialDelays,
 } from "@/lib/particleTargets";
 
@@ -68,6 +69,7 @@ const vertexShader = /* glsl */ `
   attribute float aSeed;
   uniform float uTime;
   uniform float uPixelRatio;
+  uniform float uPointScale;
   varying float vShape;
   varying float vGlow;
   varying float vSeed;
@@ -80,7 +82,7 @@ const vertexShader = /* glsl */ `
     vGlow = 0.55 + 0.45 * aSeed;
     vec4 mv = modelViewMatrix * vec4(position, 1.0);
     float tw = 0.85 + 0.15 * sin(uTime * 1.6 + aSeed * 28.0);
-    gl_PointSize = aSize * uPixelRatio * tw * (22.0 / -mv.z);
+    gl_PointSize = aSize * uPixelRatio * uPointScale * tw * (22.0 / -mv.z);
     gl_Position = projectionMatrix * mv;
   }
 `;
@@ -226,20 +228,21 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
       [0, 0.04, 0],
       3030,
     );
-    const wavePositions = hybridLearningConsole(
+    const wavePositions = deepLearningCourseFormation(
       count,
-      Math.min(vw * 0.92, 12.5),
-      Math.min(vh * 0.72, 6.2),
+      Math.min(vw * 0.98, 13.8),
+      Math.min(vh * 0.72, 6.1),
+      5.4,
       [0, -0.1, 0],
       4242,
     );
     const chipPositions = chipConvergence(count, vw * 0.95, 7777);
-    const campusPositions = annNetworkFormation(
+    const campusPositions = particleSplashFormation(
       count,
-      Math.min(vw * 0.92, 12.2),
-      Math.min(vh * 0.7, 5.8),
-      5.2,
-      [0, -0.04, 0],
+      vw * 1.5,
+      vh * 1.28,
+      7.2,
+      [0, 0, 0],
       6262,
     );
     const eventPositions = eventCalendarFormation(
@@ -336,6 +339,7 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
         uniforms: {
           uTime: { value: 0 },
           uPixelRatio: { value: 1 },
+          uPointScale: { value: 1 },
           uGlobalAlpha: { value: 1 },
         },
         transparent: true,
@@ -404,9 +408,14 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
     const directorQuiet =
       THREE.MathUtils.smoothstep(p, 0.145, 0.18) *
       (1 - THREE.MathUtils.smoothstep(p, 0.3, 0.34));
+    material.uniforms.uPointScale.value = THREE.MathUtils.lerp(
+      1,
+      1.42,
+      directorQuiet,
+    );
     material.uniforms.uGlobalAlpha.value = THREE.MathUtils.lerp(
       1,
-      0.32,
+      0.78,
       directorQuiet,
     );
 
@@ -435,7 +444,7 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
     const chipEnd = 0.64;
     const campusStart = 0.74;
     const campusEnd = 0.8;
-    // Keep campus dedicated to ANN particles; events form on the next scene.
+    // Keep campus dedicated to a full-screen particle splash; events form on the next scene.
     const eventStart = 0.9;
     const eventEnd = 0.96;
     const travelProgress = THREE.MathUtils.clamp(
@@ -646,12 +655,9 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
       p < travelEnd ? THREE.MathUtils.lerp(0.18, 0.045, travelProgress) : 0;
     annLineMaterial.opacity =
       THREE.MathUtils.smoothstep(p, 0.305, 0.34) *
-      (1 - THREE.MathUtils.smoothstep(p, 0.405, 0.47)) *
+      (1 - THREE.MathUtils.smoothstep(p, 0.385, 0.43)) *
       0.2;
-    campusLineMaterial.opacity =
-      THREE.MathUtils.smoothstep(p, 0.765, 0.8) *
-      (1 - THREE.MathUtils.smoothstep(p, 0.885, 0.93)) *
-      0.15;
+    campusLineMaterial.opacity = 0;
   });
 
   return (

@@ -1,13 +1,20 @@
 import { useEffect, useState } from "react";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import {
   ArrowRight,
+  BookOpenCheck,
   ChevronDown,
+  LogIn,
+  LogOut,
   Menu,
   SunMoon,
   UserRound,
   X,
 } from "lucide-react";
+import { toast } from "sonner";
 import logo from "../assets/knoralogo.png";
+import { auth, db } from "@/firebase";
 
 const menu = [
   { label: "Home", href: "/" },
@@ -96,6 +103,12 @@ function DesktopItem({ item, active, onSelect }) {
 export default function Navbar() {
   const [active, setActive] = useState("Home");
   const [open, setOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
+
+  const userName =
+    userProfile?.fullName || userProfile?.displayName || userProfile?.email;
+  const userInitial = (userName || "U").trim().charAt(0).toUpperCase();
 
   const toggleTheme = () => {
     const isDark = document.documentElement.classList.toggle("dark");
@@ -146,6 +159,60 @@ export default function Navbar() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!auth) return undefined;
+
+    let activeSubscription = true;
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        if (activeSubscription) setUserProfile(null);
+        return;
+      }
+
+      const nextProfile = {
+        uid: user.uid,
+        displayName: user.displayName,
+        email: user.email,
+      };
+
+      if (db) {
+        try {
+          const snapshot = await getDoc(doc(db, "users", user.uid));
+          if (snapshot.exists()) {
+            Object.assign(nextProfile, snapshot.data());
+          }
+        } catch (error) {
+          console.warn("Could not load user profile", error);
+        }
+      }
+
+      if (activeSubscription) setUserProfile(nextProfile);
+    });
+
+    return () => {
+      activeSubscription = false;
+      unsubscribe();
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    if (!auth) return;
+
+    try {
+      await signOut(auth);
+      setProfileOpen(false);
+      setOpen(false);
+      toast.success("Logged out successfully.");
+    } catch (error) {
+      toast.error(error?.message || "Could not log out. Please try again.");
+    }
+  };
+
+  const closeMenus = () => {
+    setOpen(false);
+    setProfileOpen(false);
+  };
+
   return (
     <header className="fixed inset-x-0 top-2 z-50 flex justify-center px-3 sm:top-3 sm:px-6">
       <nav className="knora-navbar flex w-full max-w-[1820px] items-center justify-between gap-4 rounded-full px-5 py-3 sm:px-6">
@@ -176,20 +243,69 @@ export default function Navbar() {
           >
             <SunMoon className="size-4.5" />
           </button>
-          <a
-            href="/login"
-            className="hidden items-center gap-1.5 rounded-full border border-border/80 px-4 py-2.5 text-[0.8rem] font-semibold text-foreground hover:border-primary/40 hover:text-primary lg:flex"
-          >
-            <UserRound className="size-4" />
-            Login
-          </a>
-          <a
-            href="/signup"
-            className="lift arrow-shift hidden items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground glow-soft sm:flex"
-          >
-            Sign Up
-            <ArrowRight className="arrow size-4" />
-          </a>
+          <div className="relative hidden lg:block">
+            <button
+              type="button"
+              aria-label="Profile menu"
+              aria-expanded={profileOpen}
+              onClick={() => setProfileOpen((value) => !value)}
+              className="flex size-10 items-center justify-center rounded-full border border-border/80 bg-card text-sm font-semibold text-foreground hover:border-primary/40 hover:text-primary"
+            >
+              {userProfile ? userInitial : <UserRound className="size-4" />}
+            </button>
+
+            {profileOpen && (
+              <div className="nav-dropdown-panel absolute right-0 top-12 z-[70] w-64 rounded-3xl p-2">
+                {userProfile ? (
+                  <>
+                    <div className="px-4 py-3">
+                      <p className="truncate text-sm font-semibold text-foreground">
+                        {userName}
+                      </p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {userProfile.email}
+                      </p>
+                    </div>
+                    <a
+                      href="/my-learning"
+                      onClick={closeMenus}
+                      className="flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                    >
+                      <BookOpenCheck className="size-4" />
+                      My Learning
+                    </a>
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-2 rounded-2xl px-4 py-3 text-left text-sm font-medium text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                    >
+                      <LogOut className="size-4" />
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <a
+                      href="/login"
+                      onClick={closeMenus}
+                      className="flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-foreground hover:bg-primary/10 hover:text-primary"
+                    >
+                      <LogIn className="size-4" />
+                      Login
+                    </a>
+                    <a
+                      href="/signup"
+                      onClick={closeMenus}
+                      className="arrow-shift mt-1 flex items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground"
+                    >
+                      Sign Up
+                      <ArrowRight className="arrow size-4" />
+                    </a>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
           <button
             aria-label="Menu"
             onClick={() => setOpen((v) => !v)}
@@ -238,20 +354,51 @@ export default function Navbar() {
           </div>
 
           <div className="mt-4 grid gap-2 border-t border-border/70 pt-4">
-            <a
-              href="/login"
-              onClick={() => setOpen(false)}
-              className="rounded-2xl border border-border/80 px-4 py-3 text-center text-sm font-semibold text-foreground"
-            >
-              Login
-            </a>
-            <a
-              href="/signup"
-              onClick={() => setOpen(false)}
-              className="rounded-2xl bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground glow-soft"
-            >
-              Sign Up
-            </a>
+            {userProfile ? (
+              <>
+                <div className="rounded-2xl border border-border/80 px-4 py-3">
+                  <p className="truncate text-sm font-semibold text-foreground">
+                    {userName}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {userProfile.email}
+                  </p>
+                </div>
+                <a
+                  href="/my-learning"
+                  onClick={closeMenus}
+                  className="flex items-center justify-center gap-2 rounded-2xl border border-border/80 px-4 py-3 text-center text-sm font-semibold text-foreground"
+                >
+                  <BookOpenCheck className="size-4" />
+                  My Learning
+                </a>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground"
+                >
+                  <LogOut className="size-4" />
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <a
+                  href="/login"
+                  onClick={closeMenus}
+                  className="rounded-2xl border border-border/80 px-4 py-3 text-center text-sm font-semibold text-foreground"
+                >
+                  Login
+                </a>
+                <a
+                  href="/signup"
+                  onClick={closeMenus}
+                  className="rounded-2xl bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground glow-soft"
+                >
+                  Sign Up
+                </a>
+              </>
+            )}
           </div>
         </div>
       )}

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Toaster } from "sonner";
 import AboutUs from "@/pages/AboutUs";
 import AdmissionProcess from "@/pages/AdmissionProcess";
 import ApplyOnline from "@/pages/ApplyOnline";
@@ -13,6 +14,7 @@ import EventsNews from "@/pages/EventsNews";
 import Faculty from "@/pages/Faculty";
 import Gallery from "@/pages/Gallery";
 import Home from "@/pages/Home";
+import MyLearning from "@/pages/MyLearning";
 import Placements from "@/pages/Placements";
 import ForgotPassword from "@/Auth/ForgotPassword";
 import Login from "@/Auth/Login";
@@ -35,6 +37,7 @@ const routes = {
   "/forgot-password": ForgotPassword,
   "/gallery": Gallery,
   "/login": Login,
+  "/my-learning": MyLearning,
   "/placements": Placements,
   "/signup": SignUp,
   "/student-login": StudentLogin,
@@ -56,6 +59,7 @@ const routeLabels = {
   "/forgot-password": "Forgot Password",
   "/gallery": "Gallery",
   "/login": "Login",
+  "/my-learning": "My Learning",
   "/placements": "Placements",
   "/signup": "Sign Up",
   "/student-login": "Student Login",
@@ -212,6 +216,7 @@ export default function App() {
       {!isAuthRoute && <Navbar />}
       <Page />
       {!isAuthRoute && <Footer />}
+      <Toaster richColors position="top-right" />
       <SplashScreen
         transitionKey={transitionKey}
         routeTitle={transitionLabel}
