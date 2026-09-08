@@ -125,18 +125,20 @@ function useVisionMissionGsap(pageRef) {
         "(prefers-reduced-motion: reduce)",
       ).matches;
       const isMobile = window.matchMedia("(max-width: 760px)").matches;
+      ScrollTrigger.config({ ignoreMobileResize: true });
 
-      if (reduceMotion || isMobile) {
-        gsap.set(".vm-slide, .vm-reveal, .vm-track-particle", {
+      if (reduceMotion) {
+        gsap.set(".vm-reveal, .vm-track-particle", {
           autoAlpha: 1,
           clearProps: "transform,filter",
         });
         return;
       }
 
-      ScrollTrigger.config({ ignoreMobileResize: true });
       gsap.set(".vm-slide, .vm-reveal", {
-        willChange: "opacity, transform, filter",
+        willChange: isMobile
+          ? "opacity, transform"
+          : "opacity, transform, filter",
       });
 
       gsap
@@ -150,11 +152,11 @@ function useVisionMissionGsap(pageRef) {
           ".vm-slide",
           {
             autoAlpha: 0,
-            x: (index) => (index % 2 === 0 ? -96 : 96),
+            x: (index) => (isMobile ? 0 : index % 2 === 0 ? -96 : 96),
             y: 12,
-            filter: "blur(8px)",
-            stagger: 0.11,
-            duration: 0.9,
+            filter: isMobile ? "none" : "blur(8px)",
+            stagger: isMobile ? 0.045 : 0.11,
+            duration: isMobile ? 0.42 : 0.9,
           },
           "-=0.22",
         )
@@ -162,11 +164,11 @@ function useVisionMissionGsap(pageRef) {
           ".vm-hero-copy, .vm-hero-action",
           {
             autoAlpha: 0,
-            x: -34,
+            x: isMobile ? 0 : -34,
             y: 10,
-            filter: "blur(6px)",
-            stagger: 0.08,
-            duration: 0.58,
+            filter: isMobile ? "none" : "blur(6px)",
+            stagger: isMobile ? 0.04 : 0.08,
+            duration: isMobile ? 0.32 : 0.58,
           },
           "-=0.5",
         )
@@ -174,10 +176,10 @@ function useVisionMissionGsap(pageRef) {
           ".vm-hero-visual",
           {
             autoAlpha: 0,
-            x: 64,
+            x: isMobile ? 0 : 64,
             y: 18,
-            filter: "blur(8px)",
-            duration: 0.82,
+            filter: isMobile ? "none" : "blur(8px)",
+            duration: isMobile ? 0.36 : 0.82,
           },
           "-=0.5",
         );
@@ -195,8 +197,8 @@ function useVisionMissionGsap(pageRef) {
             scrollTrigger: {
               trigger: section,
               start: "top 84%",
-              end: "bottom 18%",
-              scrub: 0.85,
+              end: isMobile ? "bottom 42%" : "bottom 18%",
+              scrub: isMobile ? 0.18 : 0.85,
               invalidateOnRefresh: true,
             },
           })
@@ -204,46 +206,48 @@ function useVisionMissionGsap(pageRef) {
             items,
             {
               autoAlpha: 0,
-              x: (index) => (index % 2 === 0 ? -92 : 92),
-              y: 18,
-              filter: "blur(8px)",
+              x: (index) => (isMobile ? 0 : index % 2 === 0 ? -92 : 92),
+              y: isMobile ? 24 : 18,
+              filter: isMobile ? "none" : "blur(8px)",
             },
             {
               autoAlpha: 1,
               x: 0,
               y: 0,
-              filter: "blur(0px)",
-              stagger: 0.06,
-              duration: 0.42,
+              filter: isMobile ? "none" : "blur(0px)",
+              stagger: isMobile ? 0.025 : 0.06,
+              duration: isMobile ? 0.24 : 0.42,
             },
           )
           .to(
             items,
             {
               autoAlpha: 0,
-              x: (index) => (index % 2 === 0 ? 82 : -82),
-              y: -12,
-              filter: "blur(6px)",
-              stagger: 0.035,
-              duration: 0.3,
+              x: (index) => (isMobile ? 0 : index % 2 === 0 ? 82 : -82),
+              y: isMobile ? -16 : -12,
+              filter: isMobile ? "none" : "blur(6px)",
+              stagger: isMobile ? 0.015 : 0.035,
+              duration: isMobile ? 0.18 : 0.3,
               ease: "power2.in",
             },
-            0.74,
+            isMobile ? 0.82 : 0.74,
           );
       });
 
-      gsap.utils.toArray(".vm-particle").forEach((particle, index) => {
-        gsap.to(particle, {
-          x: index % 2 === 0 ? 10 : -8,
-          y: index % 3 === 0 ? -18 : 14,
-          scale: index % 4 === 0 ? 1.35 : 0.84,
-          opacity: index % 5 === 0 ? 0.5 : 0.26,
-          duration: 2.8 + (index % 6) * 0.35,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
+      if (!isMobile) {
+        gsap.utils.toArray(".vm-particle").forEach((particle, index) => {
+          gsap.to(particle, {
+            x: index % 2 === 0 ? 10 : -8,
+            y: index % 3 === 0 ? -18 : 14,
+            scale: index % 4 === 0 ? 1.35 : 0.84,
+            opacity: index % 5 === 0 ? 0.5 : 0.26,
+            duration: 2.8 + (index % 6) * 0.35,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+          });
         });
-      });
+      }
 
       gsap.fromTo(
         ".vm-track-particle",
@@ -261,20 +265,22 @@ function useVisionMissionGsap(pageRef) {
           scrollTrigger: {
             trigger: ".vm-rhythm-section",
             start: "top 82%",
-            end: "bottom 18%",
-            scrub: 0.7,
+            end: isMobile ? "bottom 42%" : "bottom 18%",
+            scrub: isMobile ? 0.16 : 0.7,
           },
         },
       );
 
-      gsap.to(".vm-track-particle", {
-        y: (index) => (index % 2 === 0 ? -8 : 8),
-        duration: 1.6,
-        stagger: 0.08,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
+      if (!isMobile) {
+        gsap.to(".vm-track-particle", {
+          y: (index) => (index % 2 === 0 ? -8 : 8),
+          duration: 1.6,
+          stagger: 0.08,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
+      }
 
       ScrollTrigger.refresh();
     }, pageRef);

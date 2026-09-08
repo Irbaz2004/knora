@@ -706,31 +706,16 @@ export default function Home() {
       "(prefers-reduced-motion: reduce)",
     ).matches;
     const isMobile = window.matchMedia("(max-width: 760px)").matches;
+    const useFastScroll = journey.reducedMotion || isMobile;
 
+    gsap.registerPlugin(ScrollTrigger);
+    ScrollTrigger.config({ ignoreMobileResize: true });
     const ctx = gsap.context(() => {
       const proxy = { p: 0 };
-      const sceneSlot = SCENE_SLOT;
+      const sceneSlot = isMobile ? 1.08 : SCENE_SLOT;
       const scenes = sceneRefs.current.slice(0, SCENE_COUNT).filter(Boolean);
       const roadmapTrack = courseRoadmapTrackRef.current;
       const roadmapViewport = courseRoadmapViewportRef.current;
-
-      if (isMobile) {
-        journey.progress = 0;
-        gsap.set(scenes, {
-          autoAlpha: 1,
-          clearProps: "transform,filter,clipPath",
-          pointerEvents: "auto",
-          y: 0,
-          zIndex: "auto",
-        });
-        if (roadmapTrack) {
-          gsap.set(roadmapTrack, { x: 0 });
-        }
-        return;
-      }
-
-      gsap.registerPlugin(ScrollTrigger);
-      ScrollTrigger.config({ ignoreMobileResize: true });
       const getRoadmapDistance = () =>
         Math.max(
           0,
@@ -798,7 +783,7 @@ export default function Home() {
         },
       });
 
-      if (journey.reducedMotion) {
+      if (useFastScroll) {
         scenes.forEach((el, i) => {
           const start = i * sceneSlot;
           tl.to(el, { autoAlpha: 1, y: 0, duration: 0.18 }, start);

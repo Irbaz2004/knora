@@ -5239,54 +5239,7 @@ svg {
 
 @media (max-width: 760px) {
   .home-scroll-wrapper {
-    height: auto;
-  }
-
-  .home-scroll-wrapper > .sticky {
-    position: relative !important;
-    top: auto !important;
-    display: grid;
-    height: auto !important;
-    min-height: 0;
-    gap: 1rem;
-    overflow: visible !important;
-  }
-
-  .home-scroll-wrapper .section-1,
-  .home-scroll-wrapper .section-2,
-  .home-scroll-wrapper .section-3,
-  .home-scroll-wrapper .section-4,
-  .home-scroll-wrapper .section-5,
-  .home-scroll-wrapper .section-6,
-  .home-scroll-wrapper .section-7,
-  .home-scroll-wrapper .section-8,
-  .home-scroll-wrapper .section-9 {
-    position: relative !important;
-    inset: auto !important;
-    min-height: auto !important;
-    opacity: 1 !important;
-    overflow: visible !important;
-    pointer-events: auto !important;
-    transform: none !important;
-    visibility: visible !important;
-  }
-
-  .home-scroll-wrapper .hologram-section {
-    padding: 4.5rem 1rem 2.25rem !important;
-  }
-
-  .home-scroll-wrapper .section-1 {
-    padding-bottom: 2.25rem !important;
-  }
-
-  .course-roadmap-viewport {
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scrollbar-width: thin;
-  }
-
-  .course-roadmap-track {
-    transform: none !important;
+    height: 558vh;
   }
 
   .letter-fade-char,
