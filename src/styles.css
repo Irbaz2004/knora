@@ -5170,6 +5170,259 @@ html.dark .auth-screen .auth-inline-note p {
   color: var(--muted-foreground) !important;
 }
 
+/* Responsive polish shared across pages. */
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+.hero-badge {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.knora-navbar {
+  min-width: 0;
+}
+
+.knora-navbar a,
+.knora-navbar button {
+  white-space: nowrap;
+}
+
+.home-scroll-wrapper {
+  height: var(--home-scroll-height);
+}
+
+.story-copy,
+.courses-hero-copy,
+.course-list-card-copy,
+.course-folder-description,
+.faculty-detail-list strong,
+.faculty-quote-wide p,
+.hybrid-row p,
+.launch-calendar-event strong,
+.launch-calendar-event span,
+.launch-calendar-event small {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1024px) {
+  .hologram-section {
+    min-height: 100svh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .faculty-detail-list > div {
+    grid-template-columns: 2.15rem minmax(0, 0.62fr) minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 760px) {
+  .home-scroll-wrapper {
+    height: 558vh;
+  }
+
+  .letter-fade-char,
+  .fold-reveal,
+  .vm-reveal,
+  .vm-slide,
+  .holo-text,
+  .motion-card {
+    will-change: opacity, transform !important;
+  }
+
+  .course-stack-stage::before,
+  .course-folder-body::before,
+  .course-card-orbit,
+  .bloom {
+    filter: none !important;
+  }
+
+  .faculty-showcase-shell {
+    border-radius: 1.25rem !important;
+  }
+
+  .faculty-showcase-shell::after {
+    inset: 0.6rem;
+    border-radius: 0.95rem;
+  }
+
+  .faculty-hologram-stage {
+    min-height: 24rem !important;
+  }
+
+  .faculty-holo-side {
+    display: none;
+  }
+
+  .faculty-holo-center {
+    width: min(18rem, 90vw);
+    min-height: 21.5rem;
+  }
+
+  .faculty-avatar-ring {
+    width: min(13.75rem, 66vw);
+  }
+
+  .faculty-platform {
+    width: min(18rem, 82vw);
+    height: 5rem;
+  }
+
+  .faculty-name-plate-active {
+    width: min(13rem, 76vw);
+  }
+
+  .faculty-detail-list > div {
+    grid-template-columns: 2rem minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .faculty-detail-list strong {
+    grid-column: 2;
+  }
+
+  .faculty-profile-button.MuiButton-root {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .knora-navbar {
+    gap: 0.65rem !important;
+    border-radius: 1.25rem !important;
+    padding: 0.55rem 0.75rem !important;
+  }
+
+  .knora-navbar img {
+    height: 2.75rem !important;
+    max-width: min(12.5rem, 56vw);
+  }
+
+  .nav-dropdown-panel {
+    border-radius: 1.25rem !important;
+  }
+
+  .hologram-section {
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    padding: 6.1rem 1rem 1.5rem !important;
+  }
+
+  .section-1 {
+    padding-inline: 1rem !important;
+    padding-top: 6.6rem !important;
+  }
+
+  .section-1 h1,
+  .hologram-title.MuiTypography-root,
+  .launch-calendar-heading h2 {
+    font-size: clamp(2rem, 10vw, 2.85rem) !important;
+    line-height: 1.02 !important;
+  }
+
+  .hero-copy-text,
+  .hologram-section p,
+  .courses-hero-copy.MuiTypography-root {
+    font-size: 0.95rem !important;
+    line-height: 1.55 !important;
+  }
+
+  .section-1 .hero-pop.mt-7 {
+    width: 100%;
+  }
+
+  .section-1 .hero-pop.mt-7 a {
+    flex: 1 1 13rem;
+    justify-content: center;
+  }
+
+  .hero-stat {
+    width: 100%;
+  }
+
+  .section-4 .mt-10.grid,
+  .section-8 .mt-10.grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+    margin-top: 1.25rem !important;
+  }
+
+  .section-4 .motion-card,
+  .section-8 .motion-card {
+    border-radius: 0.9rem !important;
+    padding: 1rem !important;
+  }
+
+  .course-roadmap-viewport {
+    padding-inline: 0.75rem;
+  }
+
+  .course-roadmap-card.MuiCard-root {
+    width: min(18.5rem, calc(100vw - 2.5rem));
+  }
+
+  .course-feature-card {
+    grid-template-columns: 3.25rem minmax(0, 1fr) !important;
+  }
+
+  .course-feature-arrow {
+    display: none !important;
+  }
+
+  .course-folder-copy {
+    width: calc(100% - 3rem) !important;
+  }
+
+  .course-folder-icon-ring {
+    display: none !important;
+  }
+
+  .hybrid-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .hybrid-row svg {
+    display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .section-1 h1,
+  .hologram-title.MuiTypography-root,
+  .courses-hero-title.MuiTypography-root,
+  .course-list-title.MuiTypography-root,
+  .launch-calendar-heading h2 {
+    font-size: clamp(1.85rem, 11vw, 2.45rem) !important;
+  }
+
+  .hero-badge {
+    padding-inline: 0.8rem !important;
+    font-size: 0.62rem !important;
+    letter-spacing: 0.12em !important;
+  }
+}
+
 @media (max-height: 820px) and (min-width: 1025px) {
   .auth-brand {
     height: 4rem;

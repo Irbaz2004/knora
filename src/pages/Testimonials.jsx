@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback } from "react";
+import React, { useRef, useEffect, useCallback, useState } from "react";
 import { Box, Typography, Avatar } from "@mui/material";
 import {
   FormatQuote,
@@ -117,7 +117,7 @@ const rand = (min, max) => Math.random() * (max - min) + min;
 /*  card's position.                                                    */
 /* ------------------------------------------------------------------ */
 function getCols(width) {
-  if (width < 500) return 2;
+  if (width < 500) return 1;
   if (width < 800) return 3;
   return 5;
 }
@@ -172,7 +172,7 @@ function Stars({ rating }) {
 /*  Testimonial card (plain absolutely-positioned div — GSAP owns it)  */
 /* ------------------------------------------------------------------ */
 const TestimonialCard = React.forwardRef(function TestimonialCard(
-  { data, index },
+  { data, index, stacked = false },
   ref,
 ) {
   const color = avatarPalette[index % avatarPalette.length];
@@ -181,17 +181,17 @@ const TestimonialCard = React.forwardRef(function TestimonialCard(
     <Box
       ref={ref}
       sx={{
-        position: "absolute",
-        left: "50%",
-        top: "50%",
+        position: stacked ? "relative" : "absolute",
+        left: stacked ? "auto" : "50%",
+        top: stacked ? "auto" : "50%",
         bgcolor: CARD_BG,
         border: `1px solid ${BORDER_SOFT}`,
-        borderRadius: "16px",
-        p: 2.2,
-        width: { xs: 172, sm: 212, md: 250 },
+        borderRadius: "8px",
+        p: { xs: 2, sm: 2.2 },
+        width: stacked ? "100%" : { xs: 172, sm: 212, md: 250 },
         backdropFilter: "blur(6px)",
         userSelect: "none",
-        opacity: 0,
+        opacity: stacked ? 1 : 0,
         transition: "box-shadow 0.25s ease",
         "&:hover": { boxShadow: "0 18px 40px rgba(0,0,0,0.35)" },
       }}
@@ -206,7 +206,7 @@ const TestimonialCard = React.forwardRef(function TestimonialCard(
           color: TEXT_MUTED,
           lineHeight: 1.55,
           mb: 2,
-          minHeight: { xs: 56, md: 74 },
+          minHeight: stacked ? "auto" : { xs: 56, md: 74 },
         }}
       >
         &ldquo;{data.text}&rdquo;
@@ -254,6 +254,7 @@ export default function Testimonial() {
   const cardRefs = useRef([]);
   const draggables = useRef([]);
   const activeTween = useRef(null);
+  const [isCompact, setIsCompact] = useState(() => window.innerWidth <= 640);
 
   const setCardRef = (el, i) => {
     cardRefs.current[i] = el;
@@ -336,7 +337,7 @@ export default function Testimonial() {
   /* Shuffle — already-landed cards fly to a freshly randomized scatter. */
   const shuffleCards = useCallback(() => {
     const cards = cardRefs.current.filter(Boolean);
-    if (!cards.length || !containerRef.current) return;
+    if (isCompact || !cards.length || !containerRef.current) return;
 
     killDraggables();
     activeTween.current?.kill();
@@ -352,9 +353,31 @@ export default function Testimonial() {
       stagger: 0.05,
       onComplete: initDraggables,
     });
-  }, [initDraggables, killDraggables]);
+  }, [initDraggables, isCompact, killDraggables]);
 
   useEffect(() => {
+    const media = window.matchMedia("(max-width: 640px)");
+    const syncCompact = () => setIsCompact(media.matches);
+
+    syncCompact();
+    media.addEventListener("change", syncCompact);
+
+    return () => media.removeEventListener("change", syncCompact);
+  }, []);
+
+  useEffect(() => {
+    const cards = cardRefs.current.filter(Boolean);
+
+    if (isCompact) {
+      activeTween.current?.kill();
+      killDraggables();
+      gsap.set(cards, {
+        clearProps:
+          "transform,opacity,scale,rotation,zIndex,boxShadow,x,y,xPercent,yPercent",
+      });
+      return undefined;
+    }
+
     playDrop();
 
     if (glowRef.current) {
@@ -372,8 +395,7 @@ export default function Testimonial() {
       activeTween.current?.kill();
       killDraggables();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isCompact, killDraggables, playDrop]);
 
   return (
     <>
@@ -492,7 +514,10 @@ export default function Testimonial() {
           ref={containerRef}
           sx={{
             position: "relative",
-            minHeight: { xs: 1150, sm: 900, md: 640 },
+            display: isCompact ? "grid" : "block",
+            gridTemplateColumns: "1fr",
+            gap: 1.5,
+            minHeight: isCompact ? "auto" : { xs: 1150, sm: 900, md: 640 },
             maxWidth: 1200,
             mx: "auto",
           }}
@@ -502,6 +527,7 @@ export default function Testimonial() {
               key={i}
               data={t}
               index={i}
+              stacked={isCompact}
               ref={(el) => setCardRef(el, i)}
             />
           ))}

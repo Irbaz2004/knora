@@ -705,11 +705,14 @@ export default function Home() {
     journey.reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
+    const isMobile = window.matchMedia("(max-width: 760px)").matches;
+    const useFastScroll = journey.reducedMotion || isMobile;
 
     gsap.registerPlugin(ScrollTrigger);
+    ScrollTrigger.config({ ignoreMobileResize: true });
     const ctx = gsap.context(() => {
       const proxy = { p: 0 };
-      const sceneSlot = SCENE_SLOT;
+      const sceneSlot = isMobile ? 1.08 : SCENE_SLOT;
       const scenes = sceneRefs.current.slice(0, SCENE_COUNT).filter(Boolean);
       const roadmapTrack = courseRoadmapTrackRef.current;
       const roadmapViewport = courseRoadmapViewportRef.current;
@@ -740,9 +743,9 @@ export default function Home() {
       gsap.from(".section-1 .letter-fade-char", {
         y: 34,
         autoAlpha: 0,
-        filter: "blur(12px)",
-        duration: 0.72,
-        stagger: { each: 0.018, from: "start" },
+        filter: isMobile ? "none" : "blur(12px)",
+        duration: isMobile ? 0.36 : 0.72,
+        stagger: { each: isMobile ? 0.006 : 0.018, from: "start" },
         ease: "power3.out",
       });
 
@@ -751,9 +754,9 @@ export default function Home() {
           trigger: wrapper.current,
           start: "top top",
           end: "bottom bottom",
-          scrub: journey.reducedMotion ? true : 0.58,
+          scrub: isMobile ? 0.18 : journey.reducedMotion ? true : 0.58,
           invalidateOnRefresh: true,
-          anticipatePin: 0.5,
+          anticipatePin: isMobile ? 0.15 : 0.5,
         },
         defaults: { ease: "none" },
       });
@@ -780,14 +783,26 @@ export default function Home() {
         },
       });
 
-      if (journey.reducedMotion) {
+      if (useFastScroll) {
         scenes.forEach((el, i) => {
           const start = i * sceneSlot;
-          tl.to(el, { autoAlpha: 1, y: 0, duration: 0.3 }, start);
+          tl.to(el, { autoAlpha: 1, y: 0, duration: 0.18 }, start);
           if (i < scenes.length - 1) {
-            tl.to(el, { autoAlpha: 0, duration: 0.3 }, start + 1.16);
+            tl.to(el, { autoAlpha: 0, y: -24, duration: 0.18 }, start + 0.78);
           }
         });
+
+        if (roadmapTrack) {
+          tl.to(
+            roadmapTrack,
+            {
+              x: () => -getRoadmapDistance(),
+              duration: 0.62,
+              ease: "none",
+            },
+            4 * sceneSlot + 0.18,
+          );
+        }
       } else {
         const ease = "power2.inOut";
         const hologramIn = (selector, at) => {
@@ -1375,8 +1390,10 @@ export default function Home() {
 
       <main
         ref={wrapper}
-        className="relative w-full"
-        style={{ height: `${SCENE_COUNT * SCENE_SCROLL_HEIGHT}vh` }}
+        className="home-scroll-wrapper relative w-full"
+        style={{
+          "--home-scroll-height": `${SCENE_COUNT * SCENE_SCROLL_HEIGHT}vh`,
+        }}
       >
         <div className="sticky top-0 h-screen w-full overflow-hidden">
           <section
