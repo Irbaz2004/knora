@@ -467,7 +467,7 @@ function CourseFolderStack({ activeCourse, onSelect, onSendBack, onOpen }) {
     <Box
       className="course-stack-stage"
       sx={{
-        height: { xs: 340, sm: 380, md: "clamp(330px, 31vw, 430px)" },
+        height: { xs: 300, sm: 340, md: "clamp(300px, 28vw, 390px)" },
         position: "relative",
         width: "100%",
       }}
@@ -483,8 +483,8 @@ function CourseFolderStack({ activeCourse, onSelect, onSendBack, onOpen }) {
             ? `translate3d(-50%, ${hoverLift}px, 42px) rotateX(0deg) rotateY(0deg) scale(${
                 isHovered ? 1.012 : 1
               })`
-            : `translate3d(calc(-50% + ${offset * 74}px), ${
-                offset * -36 + hoverLift
+            : `translate3d(calc(-50% + ${offset * 60}px), ${
+                offset * -30 + hoverLift
               }px, ${-offset * 34}px) rotateX(${offset * 1.4}deg) rotateY(${
                 -offset * 5
               }deg) scale(${1 - offset * 0.045 + (isHovered ? 0.008 : 0)})`;
@@ -514,8 +514,8 @@ function CourseFolderStack({ activeCourse, onSelect, onSendBack, onOpen }) {
               left: "50%",
               opacity: offset > 3 ? 0 : 1,
               top: {
-                xs: `${78 - offset * 18}px`,
-                md: `${112 - offset * 12}px`,
+                xs: `${62 - offset * 14}px`,
+                md: `${96 - offset * 10}px`,
               },
               transform: dragTransform,
               zIndex: courses.length - offset,
@@ -805,9 +805,9 @@ export default function Courses() {
             cursor: "pointer",
             filter:
               "drop-shadow(0 30px 28px color-mix(in oklab, var(--primary) 12%, transparent)) drop-shadow(0 18px 38px rgba(0,0,0,0.16))",
-            height: "clamp(230px, 22vw, 318px)",
-            maxWidth: "clamp(410px, 41vw, 590px)",
-            minHeight: "230px",
+            height: "clamp(210px, 20vw, 286px)",
+            maxWidth: "clamp(360px, 36vw, 520px)",
+            minHeight: "210px",
             outline: "none",
             padding: 0,
             position: "absolute",
@@ -817,7 +817,7 @@ export default function Courses() {
               "transform 920ms cubic-bezier(.16,1,.3,1), top 920ms cubic-bezier(.16,1,.3,1), left 920ms cubic-bezier(.16,1,.3,1), opacity 520ms ease",
             userSelect: "none",
             willChange: "transform, top, left, opacity",
-            width: "min(88vw, clamp(410px, 41vw, 590px))",
+            width: "min(84vw, clamp(360px, 36vw, 520px))",
           },
           ".dark .course-folder": {
             filter:
@@ -1796,8 +1796,8 @@ export default function Courses() {
               fontSize: "13px",
             },
             ".course-folder": {
-              height: "330px",
-              minHeight: "330px",
+              height: "300px",
+              minHeight: "300px",
             },
             ".course-folder-icon-ring": {
               opacity: 0.18,

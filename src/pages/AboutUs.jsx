@@ -51,9 +51,8 @@ function useAboutGsap(pageRef) {
       ).matches;
       const isMobile = window.matchMedia("(max-width: 760px)").matches;
       const revealItems = gsap.utils.toArray(".fold-reveal");
-      ScrollTrigger.config({ ignoreMobileResize: true });
 
-      if (reduceMotion) {
+      if (reduceMotion || isMobile) {
         gsap.set(revealItems, {
           autoAlpha: 1,
           clearProps: "transform,filter,clipPath",
@@ -61,12 +60,11 @@ function useAboutGsap(pageRef) {
         return;
       }
 
+      ScrollTrigger.config({ ignoreMobileResize: true });
       gsap.set(revealItems, {
         transformPerspective: 1000,
         transformOrigin: "50% 100%",
-        willChange: isMobile
-          ? "opacity, transform"
-          : "opacity, transform, filter, clip-path",
+        willChange: "opacity, transform, filter, clip-path",
       });
 
       gsap.utils.toArray(".about-scroll-section").forEach((section, index) => {
@@ -82,8 +80,8 @@ function useAboutGsap(pageRef) {
             scrollTrigger: {
               trigger: section,
               start: index === 0 ? "top 98%" : "top 84%",
-              end: isMobile ? "bottom 42%" : "bottom 18%",
-              scrub: isMobile ? 0.18 : 0.8,
+              end: "bottom 18%",
+              scrub: 0.8,
               invalidateOnRefresh: true,
             },
           })
@@ -91,55 +89,49 @@ function useAboutGsap(pageRef) {
             items,
             {
               autoAlpha: 0,
-              y: isMobile ? 28 : 64,
-              rotateX: isMobile ? 0 : -78,
-              scaleY: isMobile ? 1 : 0.9,
-              filter: isMobile ? "none" : "blur(8px)",
-              clipPath: isMobile
-                ? "inset(0% 0% 0% 0%)"
-                : "inset(0% 0% 100% 0%)",
+              y: 64,
+              rotateX: -78,
+              scaleY: 0.9,
+              filter: "blur(8px)",
+              clipPath: "inset(0% 0% 100% 0%)",
             },
             {
               autoAlpha: 1,
               y: 0,
               rotateX: 0,
               scaleY: 1,
-              filter: isMobile ? "none" : "blur(0px)",
+              filter: "blur(0px)",
               clipPath: "inset(0% 0% 0% 0%)",
-              stagger: isMobile ? 0.025 : 0.055,
-              duration: isMobile ? 0.24 : 0.42,
+              stagger: 0.055,
+              duration: 0.42,
             },
           )
           .to(
             items,
             {
               autoAlpha: 0,
-              y: isMobile ? -18 : -38,
-              rotateX: isMobile ? 0 : 46,
-              scaleY: isMobile ? 1 : 0.92,
-              filter: isMobile ? "none" : "blur(6px)",
-              clipPath: isMobile
-                ? "inset(0% 0% 0% 0%)"
-                : "inset(100% 0% 0% 0%)",
-              stagger: isMobile ? 0.015 : 0.035,
-              duration: isMobile ? 0.18 : 0.3,
+              y: -38,
+              rotateX: 46,
+              scaleY: 0.92,
+              filter: "blur(6px)",
+              clipPath: "inset(100% 0% 0% 0%)",
+              stagger: 0.035,
+              duration: 0.3,
               ease: "power2.in",
             },
-            isMobile ? 0.82 : 0.74,
+            0.74,
           );
       });
 
       ScrollTrigger.refresh();
 
-      if (!isMobile) {
-        gsap.to(".wave-lines", {
-          xPercent: -8,
-          duration: 8,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-        });
-      }
+      gsap.to(".wave-lines", {
+        xPercent: -8,
+        duration: 8,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
     }, pageRef);
 
     return () => ctx.revert();
