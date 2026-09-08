@@ -297,7 +297,6 @@ export default function CourseDetails() {
 
   const { course, lesson } = detail;
   const Icon = lesson.icon;
-  const CourseIcon = course.icon;
   const learnItems = [
     ...course.highlights,
     "Build portfolio-ready project work",
@@ -333,17 +332,16 @@ export default function CourseDetails() {
           },
           ".course-detail-icon": {
             alignItems: "center",
-            background:
-              "linear-gradient(145deg, var(--primary), color-mix(in oklab, var(--primary) 64%, var(--foreground)))",
+            background: "var(--primary)",
             borderRadius: "8px",
             color: "var(--primary-foreground)",
             display: "flex",
-            height: "4rem",
+            height: "3.25rem",
             justifyContent: "center",
-            width: "4rem",
+            width: "3.25rem",
           },
           ".course-detail-icon svg": {
-            fontSize: "2.3rem",
+            fontSize: "1.8rem",
           },
           ".course-detail-image": {
             aspectRatio: "16 / 10",
@@ -368,7 +366,7 @@ export default function CourseDetails() {
         }}
       />
       <CursorEffect />
-      <main className="course-detail-page min-h-screen px-4 py-32 text-foreground sm:px-8 lg:px-16">
+      <main className="course-detail-page min-h-screen px-4 py-28 text-foreground sm:px-8 lg:px-16">
         <Container maxWidth={false} sx={{ maxWidth: 1280 }}>
           <Button
             href={`/course/${slugify(course.name)}`}
@@ -390,12 +388,12 @@ export default function CourseDetails() {
               gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1fr) 360px" },
             }}
           >
-            <Stack spacing={3}>
-              <Box className="course-detail-card" sx={{ p: { xs: 3, md: 5 } }}>
+            <Stack spacing={2.5}>
+              <Box className="course-detail-card" sx={{ p: { xs: 3, md: 4 } }}>
                 <Stack
                   direction="row"
                   spacing={2}
-                  sx={{ alignItems: "center", mb: 3 }}
+                  sx={{ alignItems: "center", mb: 2.5 }}
                 >
                   <Box className="course-detail-icon">
                     <Icon />
@@ -415,10 +413,10 @@ export default function CourseDetails() {
                       component="h1"
                       sx={{
                         fontFamily: "var(--font-display)",
-                        fontSize: { xs: 38, md: 58 },
-                        fontWeight: 700,
+                        fontSize: { xs: 30, md: 42 },
+                        fontWeight: 800,
                         letterSpacing: 0,
-                        lineHeight: 0.98,
+                        lineHeight: 1.02,
                       }}
                     >
                       {lesson.title}
@@ -428,10 +426,10 @@ export default function CourseDetails() {
                 <Typography
                   sx={{
                     color: "var(--muted-foreground)",
-                    fontSize: { xs: 16, md: 19 },
+                    fontSize: { xs: 14, md: 16 },
                     fontWeight: 400,
-                    lineHeight: 1.7,
-                    maxWidth: 840,
+                    lineHeight: 1.65,
+                    maxWidth: 780,
                   }}
                 >
                   {lesson.copy} This course details page gives you a clear path
@@ -517,28 +515,14 @@ export default function CourseDetails() {
                     src={courseImage}
                     alt={course.fullName}
                   />
-                  <Box
-                    className="course-detail-icon"
-                    sx={{
-                      bottom: 14,
-                      height: "3.25rem",
-                      position: "absolute",
-                      right: 14,
-                      width: "3.25rem",
-                      zIndex: 2,
-                      "& svg": { fontSize: "1.9rem" },
-                    }}
-                  >
-                    <CourseIcon />
-                  </Box>
                 </Box>
                 <Typography
                   sx={{
                     fontFamily: "var(--font-display)",
-                    fontSize: 28,
-                    fontWeight: 700,
+                    fontSize: 23,
+                    fontWeight: 800,
                     letterSpacing: 0,
-                    lineHeight: 1.05,
+                    lineHeight: 1.12,
                   }}
                 >
                   {course.fullName}

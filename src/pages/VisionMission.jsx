@@ -1,1074 +1,1157 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
+import { Box, Button, Typography } from "@mui/material";
 import {
-  Box,
-  Button,
-  Chip,
-  Container,
-  GlobalStyles,
-  Stack,
-  Typography,
-} from "@mui/material";
-import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
-import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
-import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
-import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
-import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
-import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
-import TrackChangesRoundedIcon from "@mui/icons-material/TrackChangesRounded";
+  ArrowForward,
+  AutoGraphOutlined,
+  BarChartOutlined,
+  CodeOutlined,
+  EmojiObjectsOutlined,
+  GpsFixedOutlined,
+  GroupsOutlined,
+  MenuBookOutlined,
+  NorthEastOutlined,
+  RocketLaunchOutlined,
+  SchoolOutlined,
+} from "@mui/icons-material";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import CursorEffect from "@/components/CursorEffect";
+import courseImage from "@/assets/courseimg.webp";
+import facultyAisha from "@/assets/faculty-aisha.avif";
+import facultyRahul from "@/assets/faculty-rahul.jpg";
 
-// ---------------------------------------------------------------------------
-// Typography
-// ---------------------------------------------------------------------------
-const FONT_DISPLAY = "'Archivo', 'Helvetica Neue', sans-serif";
-const FONT_BODY = "'Inter', 'Helvetica Neue', sans-serif";
+gsap.registerPlugin(ScrollTrigger);
 
-// ---------------------------------------------------------------------------
-// Scroll-reveal hook — flips true once, the moment an element enters the
-// viewport, so sections animate in as the user scrolls instead of on mount.
-// ---------------------------------------------------------------------------
-function useInView(options) {
-  const ref = useRef(null);
-  const [inView, setInView] = useState(false);
+const visionMetrics = [
+  ["800+", "Active learners"],
+  ["12", "Learning tracks"],
+  ["260+", "Guided projects"],
+];
 
-  useEffect(() => {
-    const node = ref.current;
-    if (!node || typeof IntersectionObserver === "undefined") {
-      setInView(true);
-      return undefined;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setInView(true);
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.18, rootMargin: "0px 0px -8% 0px", ...options },
-    );
-
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [options]);
-
-  return [ref, inView];
-}
-
-function hexToRgb(hex) {
-  const clean = hex.replace("#", "");
-  const value = parseInt(
-    clean.length === 3
-      ? clean
-          .split("")
-          .map((char) => char + char)
-          .join("")
-      : clean,
-    16,
-  );
-
-  return [
-    ((value >> 16) & 255) / 255,
-    ((value >> 8) & 255) / 255,
-    (value & 255) / 255,
-  ];
-}
-
-const vertexShader = `
-  attribute vec2 a_position;
-  varying vec2 v_uv;
-
-  void main() {
-    v_uv = a_position * 0.5 + 0.5;
-    gl_Position = vec4(a_position, 0.0, 1.0);
-  }
-`;
-
-const fragmentShader = `
-  precision highp float;
-
-  varying vec2 v_uv;
-  uniform vec2 u_resolution;
-  uniform vec2 u_mouse;
-  uniform float u_time;
-  uniform vec3 u_color1;
-  uniform vec3 u_color2;
-  uniform vec3 u_color3;
-  uniform float u_scale;
-  uniform float u_detail;
-  uniform float u_glow;
-  uniform float u_coreSize;
-  uniform float u_swirl;
-  uniform float u_fold;
-  uniform float u_blackPoint;
-  uniform float u_brightness;
-  uniform float u_grain;
-  uniform float u_grainIntensity;
-  uniform float u_mouseStrength;
-  uniform float u_opacity;
-
-  mat2 rotate2d(float angle) {
-    float s = sin(angle);
-    float c = cos(angle);
-    return mat2(c, -s, s, c);
-  }
-
-  float hash(vec2 p) {
-    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
-  }
-
-  float noise(vec2 p) {
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-    vec2 u = f * f * (3.0 - 2.0 * f);
-    return mix(
-      mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x),
-      mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x),
-      u.y
-    );
-  }
-
-  float fbm(vec2 p) {
-    float value = 0.0;
-    float amplitude = 0.52;
-    for (int i = 0; i < 6; i++) {
-      value += amplitude * noise(p);
-      p = rotate2d(0.62 + u_fold) * p * (1.8 + u_detail * 0.08);
-      amplitude *= 0.52;
-    }
-    return value;
-  }
-
-  void main() {
-    vec2 uv = v_uv;
-    vec2 aspect = vec2(u_resolution.x / u_resolution.y, 1.0);
-    vec2 p = (uv - 0.5) * aspect;
-    vec2 mouse = (u_mouse - 0.5) * aspect;
-    float distToMouse = length(p - mouse);
-    float mousePull = exp(-distToMouse * 4.0) * u_mouseStrength;
-
-    float angle = atan(p.y, p.x);
-    float radius = length(p);
-    p += vec2(cos(angle * 2.0 + u_time), sin(angle * 2.0 - u_time)) * radius * 0.16 * u_swirl;
-    p += normalize(mouse - p + 0.0001) * mousePull * 0.16;
-
-    float flowA = fbm(p * u_scale + vec2(u_time * 0.28, -u_time * 0.18));
-    float flowB = fbm((p + flowA) * (u_scale * 0.66) - vec2(u_time * 0.16, u_time * 0.24));
-    float molten = smoothstep(u_blackPoint, 1.0, flowA * 0.56 + flowB * 0.7);
-    float core = smoothstep(u_coreSize, 0.88, molten);
-    float shine = pow(max(0.0, molten), 2.4) * u_glow;
-
-    vec3 color = mix(u_color1, u_color2, smoothstep(0.15, 0.9, molten));
-    color = mix(color, u_color3, smoothstep(0.7, 1.0, core) * 0.55);
-    color += shine * u_color2 * 0.3;
-    color *= u_brightness;
-
-    if (u_grain > 0.5) {
-      color += (hash(uv * u_resolution + u_time) - 0.5) * u_grainIntensity;
-    }
-
-    float vignette = smoothstep(0.95, 0.2, radius);
-    gl_FragColor = vec4(color * vignette, u_opacity);
-  }
-`;
-
-function createShader(gl, type, source) {
-  const shader = gl.createShader(type);
-  gl.shaderSource(shader, source);
-  gl.compileShader(shader);
-
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    gl.deleteShader(shader);
-    return null;
-  }
-
-  return shader;
-}
-
-function MoltenMetal({
-  color1 = "#2f80ed",
-  color2 = "#8fc7ff",
-  color3 = "#FFFFFF",
-  speed = 0.35,
-  scale = 4,
-  detail = 3,
-  glow = 1.6,
-  coreSize = 0.1,
-  swirl = 1,
-  fold = -0.2,
-  blackPoint = 0.05,
-  brightness = 1.3,
-  colorMode = "molten",
-  grain = false,
-  grainIntensity = 0.05,
-  mouseInteraction = false,
-  mouseStrength = 0.3,
-  opacity = 1,
-}) {
-  const canvasRef = useRef(null);
-  const mouseRef = useRef({ x: 0.5, y: 0.5 });
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const gl = canvas?.getContext("webgl", { alpha: true });
-    if (!gl) return undefined;
-
-    const vertex = createShader(gl, gl.VERTEX_SHADER, vertexShader);
-    const fragment = createShader(gl, gl.FRAGMENT_SHADER, fragmentShader);
-    if (!vertex || !fragment) return undefined;
-
-    const program = gl.createProgram();
-    gl.attachShader(program, vertex);
-    gl.attachShader(program, fragment);
-    gl.linkProgram(program);
-
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      gl.deleteProgram(program);
-      return undefined;
-    }
-
-    const buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]),
-      gl.STATIC_DRAW,
-    );
-
-    const position = gl.getAttribLocation(program, "a_position");
-    const uniforms = {
-      resolution: gl.getUniformLocation(program, "u_resolution"),
-      mouse: gl.getUniformLocation(program, "u_mouse"),
-      time: gl.getUniformLocation(program, "u_time"),
-      color1: gl.getUniformLocation(program, "u_color1"),
-      color2: gl.getUniformLocation(program, "u_color2"),
-      color3: gl.getUniformLocation(program, "u_color3"),
-      scale: gl.getUniformLocation(program, "u_scale"),
-      detail: gl.getUniformLocation(program, "u_detail"),
-      glow: gl.getUniformLocation(program, "u_glow"),
-      coreSize: gl.getUniformLocation(program, "u_coreSize"),
-      swirl: gl.getUniformLocation(program, "u_swirl"),
-      fold: gl.getUniformLocation(program, "u_fold"),
-      blackPoint: gl.getUniformLocation(program, "u_blackPoint"),
-      brightness: gl.getUniformLocation(program, "u_brightness"),
-      grain: gl.getUniformLocation(program, "u_grain"),
-      grainIntensity: gl.getUniformLocation(program, "u_grainIntensity"),
-      mouseStrength: gl.getUniformLocation(program, "u_mouseStrength"),
-      opacity: gl.getUniformLocation(program, "u_opacity"),
-    };
-    const rgb1 = hexToRgb(color1);
-    const rgb2 = hexToRgb(color2);
-    const rgb3 = hexToRgb(color3);
-    let frameId = 0;
-
-    const resize = () => {
-      const { width, height } = canvas.getBoundingClientRect();
-      const ratio = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.max(1, Math.floor(width * ratio));
-      canvas.height = Math.max(1, Math.floor(height * ratio));
-      gl.viewport(0, 0, canvas.width, canvas.height);
-    };
-
-    const render = (time) => {
-      resize();
-      gl.useProgram(program);
-      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-      gl.enableVertexAttribArray(position);
-      gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
-      gl.uniform2f(uniforms.resolution, canvas.width, canvas.height);
-      gl.uniform2f(uniforms.mouse, mouseRef.current.x, mouseRef.current.y);
-      gl.uniform1f(uniforms.time, time * 0.001 * speed);
-      gl.uniform3fv(uniforms.color1, colorMode === "molten" ? rgb1 : rgb2);
-      gl.uniform3fv(uniforms.color2, rgb2);
-      gl.uniform3fv(uniforms.color3, rgb3);
-      gl.uniform1f(uniforms.scale, scale);
-      gl.uniform1f(uniforms.detail, detail);
-      gl.uniform1f(uniforms.glow, glow);
-      gl.uniform1f(uniforms.coreSize, coreSize);
-      gl.uniform1f(uniforms.swirl, swirl);
-      gl.uniform1f(uniforms.fold, fold);
-      gl.uniform1f(uniforms.blackPoint, blackPoint);
-      gl.uniform1f(uniforms.brightness, brightness);
-      gl.uniform1f(uniforms.grain, grain ? 1 : 0);
-      gl.uniform1f(uniforms.grainIntensity, grainIntensity);
-      gl.uniform1f(
-        uniforms.mouseStrength,
-        mouseInteraction ? mouseStrength : 0,
-      );
-      gl.uniform1f(uniforms.opacity, opacity);
-      gl.drawArrays(gl.TRIANGLES, 0, 6);
-      frameId = window.requestAnimationFrame(render);
-    };
-
-    resize();
-    frameId = window.requestAnimationFrame(render);
-    window.addEventListener("resize", resize);
-
-    return () => {
-      window.cancelAnimationFrame(frameId);
-      window.removeEventListener("resize", resize);
-      gl.deleteBuffer(buffer);
-      gl.deleteProgram(program);
-      gl.deleteShader(vertex);
-      gl.deleteShader(fragment);
-    };
-  }, [
-    blackPoint,
-    brightness,
-    color1,
-    color2,
-    color3,
-    colorMode,
-    coreSize,
-    detail,
-    fold,
-    glow,
-    grain,
-    grainIntensity,
-    mouseInteraction,
-    mouseStrength,
-    opacity,
-    scale,
-    speed,
-    swirl,
-  ]);
-
-  const handlePointerMove = (event) => {
-    if (!mouseInteraction || !canvasRef.current) return;
-
-    const rect = canvasRef.current.getBoundingClientRect();
-    mouseRef.current = {
-      x: (event.clientX - rect.left) / rect.width,
-      y: 1 - (event.clientY - rect.top) / rect.height,
-    };
-  };
-
-  return (
-    <canvas
-      ref={canvasRef}
-      aria-hidden="true"
-      onPointerMove={handlePointerMove}
-      style={{
-        background:
-          "radial-gradient(circle at 50% 50%, rgba(143,199,255,0.34), rgba(47,128,237,0.22) 42%, transparent 76%)",
-        display: "block",
-        height: "100%",
-        inset: 0,
-        position: "absolute",
-        width: "100%",
-      }}
-    />
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Content — glass tints are translucent so the frosted cards genuinely blur
-// whatever sits behind them (the hero, the ambient orbs, the previous card
-// in the stack) rather than sitting on top as flat color.
-// ---------------------------------------------------------------------------
-const stackCards = [
+const journeySteps = [
   {
-    eyebrow: "Vision",
-    title: "Future Ready Learning",
-    tint: "linear-gradient(135deg, color-mix(in oklab, var(--primary) 58%, transparent), color-mix(in oklab, var(--electric) 46%, transparent))",
-    shadow: "color-mix(in oklab, var(--electric) 42%, transparent)",
-    icon: AutoAwesomeRoundedIcon,
-    visual: "lines",
-    copy: "To make advanced AI and technology education accessible, practical, and confidence-building for every learner.",
-    points: [
-      "Accessible AI education for beginners",
-      "Project-first learning with real outcomes",
-      "Skills that stay useful beyond trends",
-    ],
+    icon: MenuBookOutlined,
+    title: "Learn",
+    copy: "Clear concepts and structured sessions for practical understanding.",
   },
   {
-    eyebrow: "Mission",
-    title: "Build Real Capability",
-    tint: "linear-gradient(135deg, color-mix(in oklab, var(--electric) 60%, transparent), color-mix(in oklab, var(--navy) 40%, var(--primary) 40%))",
-    shadow: "color-mix(in oklab, var(--primary) 46%, transparent)",
-    icon: TrackChangesRoundedIcon,
-    visual: "play",
-    copy: "Our mission is to guide students from curiosity to career-ready practice through mentorship, labs, and portfolio projects.",
-    points: [
-      "Live mentor-led classes",
-      "Hands-on assignments after every module",
-      "Personal feedback and doubt clearing",
-    ],
+    icon: CodeOutlined,
+    title: "Practice",
+    copy: "Hands-on labs, assignments, and mentor-led project reviews.",
   },
   {
-    eyebrow: "Learning",
-    title: "Practice Over Theory",
-    tint: "linear-gradient(135deg, color-mix(in oklab, var(--glow) 52%, transparent), color-mix(in oklab, var(--primary) 58%, var(--navy) 20%))",
-    shadow: "color-mix(in oklab, var(--glow) 36%, transparent)",
-    icon: MenuBookRoundedIcon,
-    visual: "book",
-    copy: "Each topic moves from concept to guided demo to independent build, so students learn by doing instead of memorizing.",
-    points: [
-      "Short explanations with strong examples",
-      "Code labs, notebooks, and mini builds",
-      "Revision-friendly resources and recordings",
-    ],
+    icon: RocketLaunchOutlined,
+    title: "Build",
+    copy: "Portfolio-ready work that proves confidence and capability.",
   },
   {
-    eyebrow: "Community",
-    title: "Grow With Mentors",
-    tint: "linear-gradient(135deg, color-mix(in oklab, var(--electric) 50%, transparent), color-mix(in oklab, var(--navy) 50%, var(--electric) 20%))",
-    shadow: "color-mix(in oklab, var(--electric) 34%, transparent)",
-    icon: GroupsRoundedIcon,
-    visual: "people",
-    copy: "We want students to feel supported, visible, and ready to ask better questions as they move through the program.",
-    points: [
-      "Small batches for better attention",
-      "Peer learning and weekly checkpoints",
-      "Career guidance with portfolio reviews",
-    ],
+    icon: AutoGraphOutlined,
+    title: "Grow",
+    copy: "Career guidance, communication practice, and interview readiness.",
   },
 ];
 
 const principles = [
   {
-    icon: SchoolRoundedIcon,
-    title: "Clarity First",
-    copy: "Complex ideas are taught with simple language, visual examples, and repeated practice.",
+    icon: GpsFixedOutlined,
+    title: "Purpose First",
+    copy: "Every course path is built around outcomes students can actually use.",
   },
   {
-    icon: TrackChangesRoundedIcon,
-    title: "Outcome Focused",
-    copy: "Every course points toward a visible student outcome: a skill, project, demo, or portfolio piece.",
+    icon: GroupsOutlined,
+    title: "Mentor Close",
+    copy: "Learners get guidance, feedback, and support instead of passive content.",
   },
   {
-    icon: GroupsRoundedIcon,
-    title: "Mentor Supported",
-    copy: "Learners get structure, feedback, and encouragement while they build technical confidence.",
+    icon: BarChartOutlined,
+    title: "Progress Visible",
+    copy: "Milestones, projects, and reviews make growth easy to track.",
+  },
+  {
+    icon: SchoolOutlined,
+    title: "Future Ready",
+    copy: "The focus stays on skills that remain relevant in a changing tech world.",
   },
 ];
 
-function CardVisual({ type }) {
-  if (type === "play") {
-    return (
-      <Box className="vm-card-visual">
-        <PlayArrowRoundedIcon sx={{ color: "#fff", fontSize: 112 }} />
-      </Box>
-    );
-  }
+const particles = [
+  [8, 12, 4, 0.28],
+  [16, 46, 7, 0.18],
+  [24, 78, 3, 0.32],
+  [31, 22, 5, 0.2],
+  [39, 61, 4, 0.28],
+  [47, 34, 8, 0.16],
+  [55, 86, 5, 0.22],
+  [63, 16, 3, 0.34],
+  [72, 48, 6, 0.19],
+  [84, 28, 4, 0.3],
+  [92, 72, 7, 0.17],
+  [11, 88, 5, 0.2],
+  [19, 24, 3, 0.36],
+  [28, 55, 6, 0.18],
+  [36, 91, 4, 0.27],
+  [44, 10, 5, 0.2],
+  [52, 69, 3, 0.34],
+  [60, 42, 7, 0.17],
+  [68, 96, 4, 0.26],
+  [77, 8, 5, 0.22],
+  [86, 58, 3, 0.34],
+  [95, 39, 6, 0.18],
+  [5, 67, 3, 0.3],
+  [33, 43, 4, 0.24],
+  [58, 5, 3, 0.28],
+  [81, 83, 5, 0.2],
+];
 
-  if (type === "people") {
-    return (
-      <Box className="vm-card-visual">
-        <GroupsRoundedIcon sx={{ color: "#fff", fontSize: 104 }} />
-      </Box>
-    );
-  }
+const trackParticles = [
+  [0, 4, 0.4],
+  [12, 7, 0.72],
+  [24, 3, 0.52],
+  [36, 6, 0.64],
+  [48, 4, 0.46],
+  [60, 8, 0.78],
+  [72, 3, 0.5],
+  [84, 5, 0.66],
+  [96, 4, 0.42],
+  [108, 7, 0.74],
+  [120, 3, 0.48],
+  [132, 5, 0.62],
+];
 
-  if (type === "book") {
-    return (
-      <Box className="vm-card-visual">
-        <MenuBookRoundedIcon sx={{ color: "#fff", fontSize: 104 }} />
-      </Box>
-    );
-  }
+function useVisionMissionGsap(pageRef) {
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      const reduceMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
 
+      if (reduceMotion) {
+        gsap.set(".vm-reveal, .vm-track-particle", {
+          autoAlpha: 1,
+          clearProps: "transform,filter",
+        });
+        return;
+      }
+
+      gsap.set(".vm-slide, .vm-reveal", {
+        willChange: "opacity, transform, filter",
+      });
+
+      gsap
+        .timeline({ defaults: { ease: "power3.out" } })
+        .from(".vm-badge", {
+          autoAlpha: 0,
+          y: 16,
+          duration: 0.5,
+        })
+        .from(
+          ".vm-slide",
+          {
+            autoAlpha: 0,
+            x: (index) => (index % 2 === 0 ? -96 : 96),
+            y: 12,
+            filter: "blur(8px)",
+            stagger: 0.11,
+            duration: 0.9,
+          },
+          "-=0.22",
+        )
+        .from(
+          ".vm-hero-copy, .vm-hero-action",
+          {
+            autoAlpha: 0,
+            x: -34,
+            y: 10,
+            filter: "blur(6px)",
+            stagger: 0.08,
+            duration: 0.58,
+          },
+          "-=0.5",
+        )
+        .from(
+          ".vm-hero-visual",
+          {
+            autoAlpha: 0,
+            x: 64,
+            y: 18,
+            filter: "blur(8px)",
+            duration: 0.82,
+          },
+          "-=0.5",
+        );
+
+      gsap.utils.toArray(".vm-section").forEach((section) => {
+        const items = section.querySelectorAll(".vm-reveal");
+
+        if (!items.length) {
+          return;
+        }
+
+        gsap
+          .timeline({
+            defaults: { ease: "power3.out" },
+            scrollTrigger: {
+              trigger: section,
+              start: "top 84%",
+              end: "bottom 18%",
+              scrub: 0.85,
+              invalidateOnRefresh: true,
+            },
+          })
+          .fromTo(
+            items,
+            {
+              autoAlpha: 0,
+              x: (index) => (index % 2 === 0 ? -92 : 92),
+              y: 18,
+              filter: "blur(8px)",
+            },
+            {
+              autoAlpha: 1,
+              x: 0,
+              y: 0,
+              filter: "blur(0px)",
+              stagger: 0.06,
+              duration: 0.42,
+            },
+          )
+          .to(
+            items,
+            {
+              autoAlpha: 0,
+              x: (index) => (index % 2 === 0 ? 82 : -82),
+              y: -12,
+              filter: "blur(6px)",
+              stagger: 0.035,
+              duration: 0.3,
+              ease: "power2.in",
+            },
+            0.74,
+          );
+      });
+
+      gsap.utils.toArray(".vm-particle").forEach((particle, index) => {
+        gsap.to(particle, {
+          x: index % 2 === 0 ? 10 : -8,
+          y: index % 3 === 0 ? -18 : 14,
+          scale: index % 4 === 0 ? 1.35 : 0.84,
+          opacity: index % 5 === 0 ? 0.5 : 0.26,
+          duration: 2.8 + (index % 6) * 0.35,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
+      });
+
+      gsap.fromTo(
+        ".vm-track-particle",
+        {
+          x: 0,
+          autoAlpha: 0,
+          scale: 0.55,
+        },
+        {
+          x: "108vw",
+          autoAlpha: 1,
+          scale: 1.15,
+          stagger: 0.08,
+          ease: "none",
+          scrollTrigger: {
+            trigger: ".vm-rhythm-section",
+            start: "top 82%",
+            end: "bottom 18%",
+            scrub: 0.7,
+          },
+        },
+      );
+
+      gsap.to(".vm-track-particle", {
+        y: (index) => (index % 2 === 0 ? -8 : 8),
+        duration: 1.6,
+        stagger: 0.08,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
+
+      ScrollTrigger.refresh();
+    }, pageRef);
+
+    return () => ctx.revert();
+  }, [pageRef]);
+}
+
+function Eyebrow({ children }) {
   return (
-    <Box className="vm-card-visual">
-      <Box className="vm-line vm-line-short" />
-      <Box className="vm-line vm-line-mid" />
-      <Box className="vm-line vm-line-long" />
+    <Typography
+      className="vm-badge"
+      sx={{
+        color: "var(--primary)",
+        fontSize: "0.72rem",
+        fontWeight: 800,
+        letterSpacing: "0.18em",
+        textTransform: "uppercase",
+      }}
+    >
+      {children}
+    </Typography>
+  );
+}
+
+function ParticleField() {
+  return (
+    <Box
+      aria-hidden="true"
+      sx={{
+        pointerEvents: "none",
+        position: "absolute",
+        inset: 0,
+        zIndex: 0,
+        overflow: "hidden",
+        background:
+          "radial-gradient(circle at 18% 18%, color-mix(in oklab, var(--primary) 10%, transparent), transparent 26%), radial-gradient(circle at 82% 42%, color-mix(in oklab, var(--primary) 8%, transparent), transparent 30%), radial-gradient(circle at 44% 88%, color-mix(in oklab, var(--foreground) 5%, transparent), transparent 34%)",
+      }}
+    >
+      {particles.map(([left, top, size, opacity], index) => (
+        <Box
+          key={`${left}-${top}-${index}`}
+          className="vm-particle"
+          sx={{
+            position: "absolute",
+            left: `${left}%`,
+            top: `${top}%`,
+            width: size,
+            height: size,
+            borderRadius: "999px",
+            bgcolor: "var(--primary)",
+            opacity,
+            boxShadow:
+              "0 0 18px color-mix(in oklab, var(--primary) 58%, transparent)",
+          }}
+        />
+      ))}
+      <Box
+        sx={{
+          position: "absolute",
+          left: "14%",
+          top: "38%",
+          width: { xs: 170, md: 260 },
+          height: { xs: 170, md: 260 },
+          borderRadius: "999px",
+          background:
+            "radial-gradient(circle, color-mix(in oklab, var(--primary) 12%, transparent), transparent 68%)",
+          filter: "blur(4px)",
+        }}
+      />
+      <Box
+        sx={{
+          position: "absolute",
+          right: "8%",
+          bottom: "16%",
+          width: { xs: 190, md: 320 },
+          height: { xs: 190, md: 320 },
+          borderRadius: "999px",
+          background:
+            "radial-gradient(circle, color-mix(in oklab, var(--primary) 10%, transparent), transparent 70%)",
+          filter: "blur(5px)",
+        }}
+      />
     </Box>
   );
 }
 
-// A single frosted "widget" tile used for the principles row — reveals on
-// scroll rather than on mount.
-function PrincipleTile({ item, delay }) {
-  const [ref, inView] = useInView();
-  const Icon = item.icon;
-
+function MetricStrip() {
   return (
-    <Stack
-      ref={ref}
-      spacing={2}
-      className="vm-glass vm-tile"
+    <Box
       sx={{
-        color: "var(--foreground)",
-        opacity: inView ? 1 : 0,
-        p: 3,
-        transform: inView ? "translateY(0) scale(1)" : "translateY(28px) scale(0.97)",
-        transitionDelay: `${delay}ms`,
+        display: "grid",
+        gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+        borderTop: "1px solid var(--border)",
+        borderLeft: "1px solid var(--border)",
+      }}
+    >
+      {visionMetrics.map(([value, label]) => (
+        <Box
+          key={label}
+          sx={{
+            minHeight: 96,
+            borderRight: "1px solid var(--border)",
+            borderBottom: "1px solid var(--border)",
+            bgcolor: "color-mix(in oklab, var(--card) 72%, transparent)",
+            p: { xs: 1.6, md: 2 },
+          }}
+        >
+          <Typography
+            className="font-display"
+            sx={{
+              color: "var(--foreground)",
+              fontFamily: "var(--font-display)",
+              fontSize: { xs: "1.9rem", md: "2.35rem" },
+              fontWeight: 800,
+              lineHeight: 0.92,
+            }}
+          >
+            {value}
+          </Typography>
+          <Typography
+            sx={{
+              mt: 1,
+              color: "var(--muted-foreground)",
+              fontSize: "0.72rem",
+              fontWeight: 700,
+              textTransform: "uppercase",
+            }}
+          >
+            {label}
+          </Typography>
+        </Box>
+      ))}
+    </Box>
+  );
+}
+
+function HeroVisual() {
+  return (
+    <Box
+      className="vm-hero-visual"
+      sx={{
+        position: "relative",
+        minHeight: { xs: 420, md: 560 },
+        borderRadius: "8px",
+        overflow: "hidden",
+        border:
+          "1px solid color-mix(in oklab, var(--primary) 18%, var(--border))",
+        bgcolor: "var(--card)",
       }}
     >
       <Box
-        className="vm-tile-icon"
+        component="img"
+        src={courseImage}
+        alt="Knora practical learning session"
         sx={{
-          alignItems: "center",
-          borderRadius: "16px",
-          display: "flex",
-          height: 52,
-          justifyContent: "center",
-          width: 52,
+          width: "100%",
+          height: "100%",
+          minHeight: "inherit",
+          display: "block",
+          objectFit: "cover",
+          filter: "grayscale(1) contrast(1.08)",
+          opacity: 0.9,
+        }}
+      />
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "linear-gradient(180deg, transparent 20%, color-mix(in oklab, var(--background) 92%, transparent)), linear-gradient(90deg, color-mix(in oklab, var(--primary) 20%, transparent), transparent 52%)",
+        }}
+      />
+      <Box
+        sx={{
+          position: "absolute",
+          left: { xs: 18, md: 24 },
+          right: { xs: 18, md: 24 },
+          bottom: { xs: 18, md: 24 },
+          display: "grid",
+          gap: 1.4,
         }}
       >
-        <Icon sx={{ color: "var(--primary)", fontSize: 26 }} />
+        <Box
+          sx={{
+            display: "inline-flex",
+            width: "fit-content",
+            alignItems: "center",
+            gap: 1,
+            border:
+              "1px solid color-mix(in oklab, var(--primary) 30%, var(--border))",
+            borderRadius: "8px",
+            bgcolor: "color-mix(in oklab, var(--card) 84%, transparent)",
+            px: 1.3,
+            py: 0.85,
+            backdropFilter: "blur(18px)",
+          }}
+        >
+          <EmojiObjectsOutlined
+            sx={{ color: "var(--primary)", fontSize: 18 }}
+          />
+          <Typography
+            sx={{
+              color: "var(--foreground)",
+              fontSize: "0.76rem",
+              fontWeight: 800,
+              textTransform: "uppercase",
+            }}
+          >
+            Practical knowledge. Real outcomes.
+          </Typography>
+        </Box>
+        <MetricStrip />
       </Box>
+    </Box>
+  );
+}
+
+function PurposeBlock({ number, label, title, copy, image, reverse = false }) {
+  return (
+    <Box
+      className="vm-section"
+      component="section"
+      sx={{
+        display: "grid",
+        gridTemplateColumns: { xs: "1fr", lg: "repeat(12, 1fr)" },
+        gap: { xs: 3, lg: 4 },
+        alignItems: "stretch",
+        px: { xs: 2, sm: 4, lg: 7 },
+        py: { xs: 5, md: 7 },
+      }}
+    >
+      <Box
+        className="vm-reveal"
+        sx={{
+          gridColumn: { lg: reverse ? "8 / span 5" : "1 / span 5" },
+          gridRow: { lg: 1 },
+          display: "flex",
+          minHeight: { xs: 320, md: 440 },
+          flexDirection: "column",
+          justifyContent: "space-between",
+          border: "1px solid var(--border)",
+          borderRadius: "8px",
+          bgcolor: "color-mix(in oklab, var(--card) 78%, transparent)",
+          p: { xs: 2.4, md: 3.6 },
+        }}
+      >
+        <Box>
+          <Typography
+            className="font-display"
+            sx={{
+              color: "var(--primary)",
+              fontFamily: "var(--font-display)",
+              fontSize: "0.86rem",
+              fontWeight: 800,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+            }}
+          >
+            {number} / {label}
+          </Typography>
+          <Typography
+            className="font-display"
+            sx={{
+              mt: 4,
+              color: "var(--foreground)",
+              fontFamily: "var(--font-display)",
+              fontSize: { xs: "2.25rem", md: "3.45rem" },
+              fontWeight: 800,
+              lineHeight: 0.95,
+              textTransform: "uppercase",
+            }}
+          >
+            {title}
+          </Typography>
+        </Box>
+        <Typography
+          sx={{
+            mt: 4,
+            maxWidth: 460,
+            color: "var(--muted-foreground)",
+            fontSize: { xs: "0.95rem", md: "1rem" },
+            lineHeight: 1.7,
+          }}
+        >
+          {copy}
+        </Typography>
+      </Box>
+
+      <Box
+        className="vm-reveal"
+        sx={{
+          gridColumn: { lg: reverse ? "1 / span 7" : "6 / span 7" },
+          gridRow: { lg: 1 },
+          position: "relative",
+          minHeight: { xs: 320, md: 440 },
+          overflow: "hidden",
+          borderRadius: "8px",
+          border: "1px solid var(--border)",
+          bgcolor: "var(--card)",
+        }}
+      >
+        <Box
+          component="img"
+          src={image}
+          alt=""
+          sx={{
+            width: "100%",
+            height: "100%",
+            display: "block",
+            objectFit: "cover",
+            filter: "grayscale(1) contrast(1.08)",
+          }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(180deg, transparent, color-mix(in oklab, var(--background) 78%, transparent)), radial-gradient(circle at 22% 24%, color-mix(in oklab, var(--primary) 16%, transparent), transparent 34%), radial-gradient(circle at 82% 76%, color-mix(in oklab, var(--primary) 12%, transparent), transparent 38%)",
+            opacity: 0.72,
+          }}
+        />
+      </Box>
+    </Box>
+  );
+}
+
+function setNeonPosition(event) {
+  const bounds = event.currentTarget.getBoundingClientRect();
+  event.currentTarget.style.setProperty(
+    "--vm-neon-x",
+    `${event.clientX - bounds.left}px`,
+  );
+  event.currentTarget.style.setProperty(
+    "--vm-neon-y",
+    `${event.clientY - bounds.top}px`,
+  );
+}
+
+function JourneyCard({ step, index }) {
+  const Icon = step.icon;
+
+  return (
+    <Box
+      className="vm-reveal vm-neon-card"
+      onMouseMove={setNeonPosition}
+      sx={{
+        position: "relative",
+        isolation: "isolate",
+        overflow: "hidden",
+        minHeight: 260,
+        border:
+          "1px solid color-mix(in oklab, var(--primary) 16%, var(--border))",
+        borderRadius: "8px",
+        bgcolor: "color-mix(in oklab, var(--card) 76%, transparent)",
+        p: { xs: 2.3, md: 2.7 },
+        transform: "translateZ(0)",
+        transition:
+          "transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.28s ease, background 0.28s ease",
+        "&::before": {
+          content: '""',
+          pointerEvents: "none",
+          position: "absolute",
+          inset: 0,
+          zIndex: 0,
+          background:
+            "radial-gradient(220px circle at var(--vm-neon-x, 50%) var(--vm-neon-y, 50%), color-mix(in oklab, var(--primary) 28%, transparent), transparent 62%)",
+          opacity: 0,
+          transition: "opacity 0.24s ease",
+        },
+        "&::after": {
+          content: '""',
+          pointerEvents: "none",
+          position: "absolute",
+          inset: 0,
+          zIndex: 0,
+          borderRadius: "inherit",
+          background:
+            "linear-gradient(135deg, color-mix(in oklab, var(--primary) 18%, transparent), transparent 42%, color-mix(in oklab, var(--primary) 12%, transparent))",
+          opacity: 0,
+          transition: "opacity 0.28s ease",
+        },
+        "& > *": {
+          position: "relative",
+          zIndex: 1,
+        },
+        "&:hover": {
+          transform: "translateY(-6px) scale(1.025)",
+          borderColor: "color-mix(in oklab, var(--primary) 62%, var(--border))",
+          bgcolor: "color-mix(in oklab, var(--card) 88%, transparent)",
+        },
+        "&:hover::before, &:hover::after": {
+          opacity: 1,
+        },
+        "&:hover .vm-card-icon": {
+          transform: "scale(1.12)",
+          bgcolor: "color-mix(in oklab, var(--primary) 22%, var(--card))",
+        },
+      }}
+    >
       <Typography
         sx={{
-          fontFamily: FONT_DISPLAY,
-          fontSize: 22,
-          fontWeight: 700,
-          letterSpacing: 0,
+          position: "absolute",
+          top: 16,
+          right: 18,
+          color: "color-mix(in oklab, var(--foreground) 28%, transparent)",
+          fontSize: "0.78rem",
+          fontWeight: 800,
+        }}
+      >
+        0{index + 1}
+      </Typography>
+      <Box
+        className="vm-card-icon"
+        sx={{
+          display: "grid",
+          width: 48,
+          height: 48,
+          placeItems: "center",
+          borderRadius: "8px",
+          bgcolor: "color-mix(in oklab, var(--primary) 13%, var(--card))",
+          color: "var(--primary)",
+          transition:
+            "transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), background 0.28s ease",
+        }}
+      >
+        <Icon sx={{ fontSize: 22 }} />
+      </Box>
+      <Typography
+        className="font-display"
+        sx={{
+          mt: 5,
+          color: "var(--foreground)",
+          fontFamily: "var(--font-display)",
+          fontSize: "1.55rem",
+          fontWeight: 800,
+        }}
+      >
+        {step.title}
+      </Typography>
+      <Typography
+        sx={{
+          mt: 1,
+          color: "var(--muted-foreground)",
+          fontSize: "0.92rem",
+          lineHeight: 1.6,
+        }}
+      >
+        {step.copy}
+      </Typography>
+    </Box>
+  );
+}
+
+function PrincipleRow({ item }) {
+  const Icon = item.icon;
+
+  return (
+    <Box
+      className="vm-reveal vm-neon-row"
+      onMouseMove={setNeonPosition}
+      sx={{
+        position: "relative",
+        isolation: "isolate",
+        overflow: "hidden",
+        display: "grid",
+        gridTemplateColumns: { xs: "3rem 1fr", md: "4rem 0.7fr 1fr" },
+        alignItems: "center",
+        gap: { xs: 1.6, md: 3 },
+        borderTop: "1px solid var(--border)",
+        borderRadius: "8px",
+        mx: { xs: -1, md: -1.6 },
+        px: { xs: 1, md: 1.6 },
+        py: { xs: 2.3, md: 2.7 },
+        transform: "translateZ(0)",
+        transition:
+          "transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.28s ease, background 0.28s ease",
+        "&::before": {
+          content: '""',
+          pointerEvents: "none",
+          position: "absolute",
+          inset: 0,
+          zIndex: 0,
+          background:
+            "radial-gradient(260px circle at var(--vm-neon-x, 50%) var(--vm-neon-y, 50%), color-mix(in oklab, var(--primary) 26%, transparent), transparent 64%)",
+          opacity: 0,
+          transition: "opacity 0.22s ease",
+        },
+        "&::after": {
+          content: '""',
+          pointerEvents: "none",
+          position: "absolute",
+          inset: 0,
+          zIndex: 0,
+          borderRadius: "inherit",
+          background:
+            "linear-gradient(90deg, color-mix(in oklab, var(--primary) 10%, transparent), transparent 54%)",
+          opacity: 0,
+          transition: "opacity 0.28s ease",
+        },
+        "& > *": {
+          position: "relative",
+          zIndex: 1,
+        },
+        "&:hover": {
+          transform: "scale(1.018)",
+          borderTopColor:
+            "color-mix(in oklab, var(--primary) 58%, var(--border))",
+          bgcolor: "color-mix(in oklab, var(--card) 54%, transparent)",
+        },
+        "&:hover::before, &:hover::after": {
+          opacity: 1,
+        },
+        "&:hover .vm-row-icon": {
+          transform: "scale(1.12)",
+          bgcolor: "color-mix(in oklab, var(--primary) 22%, var(--card))",
+        },
+      }}
+    >
+      <Box
+        className="vm-row-icon"
+        sx={{
+          display: "grid",
+          width: 44,
+          height: 44,
+          placeItems: "center",
+          borderRadius: "8px",
+          bgcolor: "color-mix(in oklab, var(--primary) 12%, var(--card))",
+          color: "var(--primary)",
+          transition:
+            "transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), background 0.28s ease",
+        }}
+      >
+        <Icon sx={{ fontSize: 21 }} />
+      </Box>
+      <Typography
+        className="font-display"
+        sx={{
+          color: "var(--foreground)",
+          fontFamily: "var(--font-display)",
+          fontSize: { xs: "1.18rem", md: "1.55rem" },
+          fontWeight: 800,
         }}
       >
         {item.title}
       </Typography>
       <Typography
         sx={{
+          gridColumn: { xs: "2", md: "auto" },
           color: "var(--muted-foreground)",
-          fontFamily: FONT_BODY,
-          fontSize: 16,
+          fontSize: "0.92rem",
           lineHeight: 1.6,
         }}
       >
         {item.copy}
       </Typography>
-    </Stack>
+    </Box>
   );
 }
 
-export default function VisionMission() {
-  const [ctaRef, ctaInView] = useInView();
+export default function VissionMission() {
+  const pageRef = useRef(null);
+  useVisionMissionGsap(pageRef);
 
   return (
     <>
-      <GlobalStyles
-        styles={{
-          "@import":
-            "url('https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap')",
-          "@keyframes vmFadeUp": {
-            "0%": {
-              opacity: 0,
-              transform: "translateY(28px)",
-            },
-            "100%": {
-              opacity: 1,
-              transform: "translateY(0)",
-            },
-          },
-          "@keyframes vmDrift": {
-            "0%, 100%": { transform: "translate3d(0, 0, 0) scale(1)" },
-            "50%": { transform: "translate3d(3%, -4%, 0) scale(1.06)" },
-          },
-          ".vm-page": {
-            background:
-              "radial-gradient(circle at 50% 10%, color-mix(in oklab, var(--electric) 12%, transparent), transparent 30%), linear-gradient(180deg, #ffffff 0%, var(--background) 48%, color-mix(in oklab, var(--primary) 5%, var(--background)) 100%)",
-            fontFamily: FONT_BODY,
-          },
-          ".dark .vm-page": {
-            background:
-              "radial-gradient(circle at 50% 10%, color-mix(in oklab, var(--electric) 14%, transparent), transparent 30%), var(--background)",
-          },
-          ".vm-hero-copy": {
-            animation: "vmFadeUp 700ms ease both",
-          },
-          /* Ambient blurred orbs — the color source the glass panels blur */
-          ".vm-orb": {
-            animation: "vmDrift 16s ease-in-out infinite",
-            borderRadius: "50%",
-            filter: "blur(70px)",
-            position: "fixed",
-            willChange: "transform",
-            zIndex: 0,
-          },
-          /* Core iOS-style frosted glass surface */
-          ".vm-glass": {
-            backdropFilter: "blur(28px) saturate(180%)",
-            WebkitBackdropFilter: "blur(28px) saturate(180%)",
-            background: "rgba(255,255,255,0.14)",
-            border: "1px solid rgba(255,255,255,0.4)",
-            borderRadius: "26px",
-            boxShadow:
-              "0 20px 50px rgba(15,30,60,0.14), inset 0 1px 0 rgba(255,255,255,0.55)",
-            transition: "transform 420ms cubic-bezier(.2,.8,.2,1), opacity 420ms ease, box-shadow 300ms ease",
-          },
-          ".dark .vm-glass": {
-            background: "rgba(20,24,34,0.38)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            boxShadow:
-              "0 20px 50px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)",
-          },
-          ".vm-tile": {
-            cursor: "default",
-          },
-          ".vm-tile:hover": {
-            boxShadow:
-              "0 26px 60px rgba(15,30,60,0.2), inset 0 1px 0 rgba(255,255,255,0.6)",
-            transform: "translateY(-6px)",
-          },
-          ".vm-tile-icon": {
-            background: "rgba(255,255,255,0.5)",
-            border: "1px solid rgba(255,255,255,0.5)",
-          },
-          ".dark .vm-tile-icon": {
-            background: "rgba(255,255,255,0.08)",
-            border: "1px solid rgba(255,255,255,0.14)",
-          },
-          /* Stacked vision/mission cards — tinted frosted glass */
-          ".vm-card": {
-            backdropFilter: "blur(30px) saturate(190%)",
-            WebkitBackdropFilter: "blur(30px) saturate(190%)",
-            border: "1px solid rgba(255,255,255,0.4)",
-            boxShadow:
-              "inset 0 1px 0 rgba(255,255,255,0.5), inset 0 0 60px rgba(255,255,255,0.06)",
-          },
-          ".vm-card-visual": {
-            alignItems: "center",
-            background: "rgba(255,255,255,0.14)",
-            backdropFilter: "blur(10px)",
-            border: "1px solid rgba(255,255,255,0.4)",
-            borderRadius: "22px",
-            display: "flex",
-            height: "clamp(140px, 18vw, 240px)",
-            justifyContent: "center",
-            overflow: "hidden",
-            position: "relative",
-            width: "min(42vw, 430px)",
-          },
-          ".vm-line": {
-            background: "rgba(255,255,255,0.9)",
-            borderRadius: "999px",
-            height: "10px",
-            left: "50%",
-            position: "absolute",
-            transform: "translateX(-50%)",
-          },
-          ".vm-line-short": {
-            top: "35%",
-            width: "26%",
-          },
-          ".vm-line-mid": {
-            top: "50%",
-            width: "34%",
-          },
-          ".vm-line-long": {
-            top: "65%",
-            width: "44%",
-          },
-          ".vm-cta": {
-            opacity: 0,
-            transform: "translateY(24px)",
-            transition: "opacity 650ms ease, transform 650ms cubic-bezier(.2,.8,.2,1)",
-          },
-          ".vm-cta.vm-in": {
-            opacity: 1,
-            transform: "translateY(0)",
-          },
-          ".vm-glass-btn": {
-            backdropFilter: "blur(20px) saturate(180%)",
-            WebkitBackdropFilter: "blur(20px) saturate(180%)",
-            background: "color-mix(in oklab, var(--primary) 70%, transparent)",
-            border: "1px solid rgba(255,255,255,0.4)",
-            boxShadow: "0 14px 30px color-mix(in oklab, var(--primary) 30%, transparent)",
-            transition: "transform 260ms ease, box-shadow 260ms ease",
-          },
-          ".vm-glass-btn:hover": {
-            boxShadow: "0 18px 40px color-mix(in oklab, var(--primary) 40%, transparent)",
-            transform: "translateY(-2px)",
-          },
-          "@media (max-width: 899px)": {
-            ".vm-card-visual": {
-              borderWidth: "6px",
-              width: "100%",
-            },
-          },
-          "@media (prefers-reduced-motion: reduce)": {
-            ".vm-orb": { animation: "none" },
-            ".vm-glass, .vm-cta, .vm-tile": { transition: "none" },
-          },
-        }}
-      />
       <CursorEffect />
-
       <Box
+        ref={pageRef}
         component="main"
-        className="vm-page"
         sx={{
-          color: "var(--foreground)",
-          minHeight: "100vh",
-          overflow: "clip",
           position: "relative",
+          overflow: "hidden",
+          bgcolor: "var(--background)",
+          color: "var(--foreground)",
+          fontFamily: "var(--font-sans)",
+          pt: { xs: 10, md: 12 },
         }}
       >
-        {/* Ambient color orbs the glass surfaces blur through */}
-        <Box
-          className="vm-orb"
-          sx={{
-            background: "var(--electric)",
-            height: 480,
-            left: "-8%",
-            opacity: 0.35,
-            top: "6%",
-            width: 480,
-          }}
-        />
-        <Box
-          className="vm-orb"
-          sx={{
-            animationDelay: "-6s",
-            background: "var(--glow)",
-            height: 420,
-            opacity: 0.28,
-            right: "-6%",
-            top: "38%",
-            width: 420,
-          }}
-        />
-        <Box
-          className="vm-orb"
-          sx={{
-            animationDelay: "-11s",
-            background: "var(--primary)",
-            bottom: "4%",
-            height: 520,
-            left: "18%",
-            opacity: 0.22,
-            width: 520,
-          }}
-        />
+        <ParticleField />
 
         <Box
+          component="section"
           sx={{
-            background:
-              "radial-gradient(circle, color-mix(in oklab, var(--primary) 10%, transparent) 1px, transparent 1px)",
-            backgroundSize: "40px 40px",
-            inset: 0,
-            maskImage:
-              "radial-gradient(circle at 50% 18%, black, transparent 68%)",
-            opacity: 0.22,
-            pointerEvents: "none",
-            position: "fixed",
-          }}
-        />
-
-        <Container
-          maxWidth={false}
-          sx={{
-            maxWidth: "none",
-            pb: { xs: 10, md: 14 },
-            px: { xs: 2, sm: 4, lg: 8 },
             position: "relative",
-            pt: 0,
-            width: "100%",
             zIndex: 1,
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", lg: "1fr minmax(25rem, 0.72fr)" },
+            gap: { xs: 4, lg: 6 },
+            alignItems: "end",
+            minHeight: { md: "calc(100vh - 6rem)" },
+            px: { xs: 2, sm: 4, lg: 7 },
+            pb: { xs: 5, md: 7 },
           }}
         >
-          <Stack
-            className="vm-hero-copy"
-            spacing={3}
-            sx={{
-              alignItems: "center",
-              height: "50vh",
-              justifyContent: "center",
-              mb: { xs: 7, md: 10 },
-              minHeight: { xs: 470, md: 540 },
-              ml: "calc(50% - 50vw)",
-              mr: "calc(50% - 50vw)",
-              overflow: "hidden",
-              position: "relative",
-              pt: { xs: 10, md: 12 },
-              textAlign: "center",
-              width: "100vw",
-            }}
-          >
-            <MoltenMetal
-              color1="#2f80ed"
-              color2="#8fc7ff"
-              color3="#FFFFFF"
-              speed={0.35}
-              scale={4}
-              detail={3}
-              glow={1.6}
-              coreSize={0.1}
-              swirl={1}
-              fold={-0.2}
-              blackPoint={0.05}
-              brightness={1.3}
-              colorMode="molten"
-              grain
-              grainIntensity={0.05}
-              mouseInteraction
-              mouseStrength={0.3}
-              opacity={1}
-            />
-            <Box
+          <Box sx={{ maxWidth: 920 }}>
+            <Eyebrow>Our Purpose</Eyebrow>
+            <Typography
+              className="font-display vm-slide"
               sx={{
-                background:
-                  "radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--background) 72%, transparent), color-mix(in oklab, var(--background) 36%, transparent) 66%, color-mix(in oklab, var(--background) 62%, transparent))",
-                inset: 0,
-                pointerEvents: "none",
-                position: "absolute",
-                zIndex: 1,
-              }}
-            />
-            <Stack
-              spacing={3}
-              sx={{
-                alignItems: "center",
-                px: 2,
-                position: "relative",
-                zIndex: 2,
+                mt: 2.2,
+                color: "var(--foreground)",
+                fontFamily: "var(--font-display)",
+                fontSize: {
+                  xs: "4.25rem",
+                  sm: "7.4rem",
+                  lg: "clamp(8rem, 12vw, 15rem)",
+                },
+                fontWeight: 800,
+                letterSpacing: 0,
+                lineHeight: 0.77,
+                textTransform: "uppercase",
               }}
             >
-              <Chip
-                label="Vision & Mission"
-                className="vm-glass"
-                sx={{
-                  color: "var(--primary)",
-                  fontFamily: FONT_BODY,
-                  fontWeight: 700,
-                  letterSpacing: 0,
-                  px: 0.5,
-                }}
-              />
-              <Typography
-                component="h1"
-                sx={{
-                  color: "var(--foreground)",
-                  fontFamily: FONT_DISPLAY,
-                  fontSize: { xs: 52, sm: 76, md: 96 },
-                  fontWeight: 800,
-                  letterSpacing: 0,
-                  lineHeight: 0.96,
-                  maxWidth: 980,
-                  textShadow:
-                    "0 18px 56px color-mix(in oklab, var(--primary) 12%, transparent)",
-                }}
-              >
-                Stack Completed!
-              </Typography>
-              <Typography
-                sx={{
-                  color: "var(--muted-foreground)",
-                  fontFamily: FONT_BODY,
-                  fontSize: { xs: 18, md: 24 },
-                  lineHeight: 1.55,
-                  maxWidth: 780,
-                  textShadow: "none",
-                }}
-              >
-                Scroll down to reveal how Knora Academy turns vision into daily
-                learning, guided practice, and student growth.
-              </Typography>
-            </Stack>
-          </Stack>
+              Vision
+            </Typography>
+            <Typography
+              className="font-display vm-slide"
+              sx={{
+                color: "var(--primary)",
+                fontFamily: "var(--font-display)",
+                fontSize: {
+                  xs: "4.25rem",
+                  sm: "7.4rem",
+                  lg: "clamp(8rem, 12vw, 15rem)",
+                },
+                fontWeight: 800,
+                letterSpacing: 0,
+                lineHeight: 0.77,
+                textTransform: "uppercase",
+              }}
+            >
+              Mission
+            </Typography>
+            <Typography
+              className="vm-hero-copy"
+              sx={{
+                mt: { xs: 2.5, md: 3 },
+                maxWidth: 620,
+                color: "var(--muted-foreground)",
+                fontSize: { xs: "1rem", md: "1.12rem" },
+                lineHeight: 1.75,
+              }}
+            >
+              We empower learners with practical AI and technology skills,
+              mentor-led practice, and project-first learning so every student
+              can move from curiosity to career-ready confidence.
+            </Typography>
 
+            <Box
+              className="vm-hero-action"
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 1.2,
+                mt: 3.2,
+              }}
+            >
+              <Button
+                href="/courses"
+                endIcon={<ArrowForward />}
+                sx={{
+                  minHeight: 46,
+                  borderRadius: "8px",
+                  bgcolor: "var(--primary)",
+                  color: "var(--primary-foreground)",
+                  px: 2.5,
+                  fontWeight: 800,
+                  textTransform: "none",
+                  "&:hover": {
+                    bgcolor: "color-mix(in oklab, var(--primary) 86%, black)",
+                  },
+                }}
+              >
+                Explore Courses
+              </Button>
+              <Button
+                href="/about-us"
+                endIcon={<NorthEastOutlined />}
+                sx={{
+                  minHeight: 46,
+                  borderRadius: "8px",
+                  border: "1px solid var(--border)",
+                  color: "var(--foreground)",
+                  px: 2.5,
+                  fontWeight: 800,
+                  textTransform: "none",
+                  "&:hover": {
+                    borderColor: "var(--primary)",
+                    color: "var(--primary)",
+                    bgcolor:
+                      "color-mix(in oklab, var(--primary) 8%, transparent)",
+                  },
+                }}
+              >
+                About Knora
+              </Button>
+            </Box>
+          </Box>
+
+          <HeroVisual />
+        </Box>
+
+        <PurposeBlock
+          number="01"
+          label="Our Vision"
+          title="Learning that shapes what comes next."
+          copy="Our vision is to become a trusted learning academy where students build strong technical foundations, practical portfolios, and the confidence to adapt as technology evolves."
+          image={facultyAisha}
+        />
+
+        <PurposeBlock
+          reverse
+          number="02"
+          label="Our Mission"
+          title="Skills that turn effort into opportunity."
+          copy="Our mission is to deliver clear teaching, guided practice, and real project experience so learners can develop in-demand skills and step into the future with clarity."
+          image={facultyRahul}
+        />
+
+        <Box
+          className="vm-section vm-rhythm-section"
+          component="section"
+          sx={{
+            position: "relative",
+            zIndex: 1,
+            px: { xs: 2, sm: 4, lg: 7 },
+            py: { xs: 5, md: 8 },
+          }}
+        >
           <Box
+            className="vm-track-line"
             sx={{
-              minHeight: {
-                xs: `${stackCards.length * 92}vh`,
-                md: `${stackCards.length * 96}vh`,
-              },
-              position: "relative",
+              position: "absolute",
+              left: 0,
+              right: 0,
+              top: { xs: 138, md: 176 },
+              display: { xs: "none", md: "block" },
+              height: 88,
+              overflow: "hidden",
+              opacity: 0.82,
             }}
           >
-            {stackCards.map((card, index) => {
-              const Icon = card.icon;
-
-              return (
-                <Box
-                  key={card.title}
-                  className="vm-card vm-hero-copy"
-                  sx={{
-                    background: card.tint,
-                    borderRadius: { xs: "28px", md: "40px" },
-                    boxShadow: `0 40px 90px ${card.shadow}`,
-                    color: "#fff",
-                    display: "grid",
-                    gap: { xs: 4, md: 6 },
-                    gridTemplateColumns: { xs: "1fr", md: "1.1fr 0.9fr" },
-                    minHeight: { xs: 520, md: 430 },
-                    overflow: "hidden",
-                    p: { xs: 3, sm: 5, md: 6 },
-                    position: "sticky",
-                    top: { xs: 104 + index * 12, md: 112 + index * 18 },
-                    transform: {
-                      xs: `scale(${1 - index * 0.012})`,
-                      md: `scale(${1 - index * 0.018})`,
-                    },
-                    transformOrigin: "top center",
-                    zIndex: 20 + index,
-                  }}
-                >
-                  <Stack spacing={3} sx={{ justifyContent: "space-between" }}>
-                    <Box>
-                      <Stack
-                        direction="row"
-                        spacing={1.5}
-                        sx={{ alignItems: "center", mb: 3 }}
-                      >
-                        <Box
-                          sx={{
-                            alignItems: "center",
-                            bgcolor: "rgba(255,255,255,0.18)",
-                            border: "1px solid rgba(255,255,255,0.3)",
-                            borderRadius: "18px",
-                            display: "flex",
-                            height: 48,
-                            justifyContent: "center",
-                            width: 48,
-                          }}
-                        >
-                          <Icon sx={{ color: "#fff" }} />
-                        </Box>
-                        <Typography
-                          sx={{
-                            color: "rgba(255,255,255,0.82)",
-                            fontFamily: FONT_BODY,
-                            fontSize: 13,
-                            fontWeight: 700,
-                            letterSpacing: "0.02em",
-                          }}
-                        >
-                          {card.eyebrow}
-                        </Typography>
-                      </Stack>
-
-                      <Typography
-                        component="h2"
-                        sx={{
-                          fontFamily: FONT_DISPLAY,
-                          fontSize: { xs: 40, sm: 52, md: 62 },
-                          fontWeight: 800,
-                          letterSpacing: 0,
-                          lineHeight: 1,
-                          maxWidth: 620,
-                        }}
-                      >
-                        {card.title}
-                      </Typography>
-                      <Typography
-                        sx={{
-                          color: "rgba(255,255,255,0.82)",
-                          fontFamily: FONT_BODY,
-                          fontSize: { xs: 17, md: 21 },
-                          lineHeight: 1.55,
-                          maxWidth: 650,
-                          mt: 3,
-                        }}
-                      >
-                        {card.copy}
-                      </Typography>
-                    </Box>
-
-                    <Stack spacing={1.4}>
-                      {card.points.map((point) => (
-                        <Box
-                          key={point}
-                          sx={{
-                            alignItems: "center",
-                            backdropFilter: "blur(6px)",
-                            bgcolor: "rgba(255,255,255,0.14)",
-                            border: "1px solid rgba(255,255,255,0.22)",
-                            borderRadius: "16px",
-                            display: "flex",
-                            fontFamily: FONT_BODY,
-                            fontSize: { xs: 14, md: 16 },
-                            fontWeight: 600,
-                            gap: 1.5,
-                            p: 1.6,
-                          }}
-                        >
-                          <AutoAwesomeRoundedIcon sx={{ fontSize: 18 }} />
-                          {point}
-                        </Box>
-                      ))}
-                    </Stack>
-                  </Stack>
-
-                  <Box
-                    sx={{
-                      alignItems: "center",
-                      display: "flex",
-                      justifyContent: "center",
-                      minHeight: { xs: 170, md: "100%" },
-                    }}
-                  >
-                    <CardVisual type={card.visual} />
-                  </Box>
-                </Box>
-              );
-            })}
+            {trackParticles.map(([delay, size, opacity], index) => (
+              <Box
+                key={`${delay}-${index}`}
+                className="vm-track-particle"
+                sx={{
+                  position: "absolute",
+                  left: `-${delay}px`,
+                  top: `${16 + (index % 5) * 12}px`,
+                  width: size,
+                  height: size,
+                  borderRadius: "999px",
+                  bgcolor: "var(--primary)",
+                  opacity,
+                  boxShadow:
+                    "0 0 18px color-mix(in oklab, var(--primary) 70%, transparent)",
+                }}
+              />
+            ))}
+          </Box>
+          <Box
+            className="vm-reveal"
+            sx={{
+              display: "flex",
+              alignItems: "end",
+              justifyContent: "space-between",
+              gap: 3,
+              mb: { xs: 3, md: 5 },
+            }}
+          >
+            <Box>
+              <Typography
+                sx={{
+                  color: "var(--primary)",
+                  fontSize: "0.72rem",
+                  fontWeight: 800,
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Learning Rhythm
+              </Typography>
+              <Typography
+                className="font-display"
+                sx={{
+                  mt: 1.5,
+                  color: "var(--foreground)",
+                  fontFamily: "var(--font-display)",
+                  fontSize: { xs: "2.25rem", md: "4.5rem" },
+                  fontWeight: 800,
+                  lineHeight: 0.92,
+                  textTransform: "uppercase",
+                }}
+              >
+                How Growth Happens
+              </Typography>
+            </Box>
+            <Typography
+              sx={{
+                display: { xs: "none", md: "block" },
+                maxWidth: 380,
+                color: "var(--muted-foreground)",
+                fontSize: "0.96rem",
+                lineHeight: 1.65,
+              }}
+            >
+              A focused path that turns class time into practical progress and
+              real portfolio outcomes.
+            </Typography>
           </Box>
 
           <Box
             sx={{
               display: "grid",
-              gap: 2,
-              gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
-              mt: { xs: 10, md: 14 },
-              position: "relative",
-              zIndex: 1,
+              gridTemplateColumns: {
+                xs: "1fr",
+                sm: "repeat(2, minmax(0, 1fr))",
+                lg: "repeat(4, minmax(0, 1fr))",
+              },
+              gap: { xs: 1.4, md: 1.8 },
             }}
           >
-            {principles.map((item, index) => (
-              <PrincipleTile key={item.title} item={item} delay={index * 110} />
+            {journeySteps.map((step, index) => (
+              <JourneyCard key={step.title} step={step} index={index} />
             ))}
           </Box>
+        </Box>
 
-          <Stack
-            ref={ctaRef}
-            className={`vm-cta${ctaInView ? " vm-in" : ""}`}
-            spacing={3}
-            sx={{
-              alignItems: "center",
-              mt: { xs: 10, md: 14 },
-              position: "relative",
-              textAlign: "center",
-              zIndex: 1,
-            }}
-          >
+        <Box
+          className="vm-section"
+          component="section"
+          sx={{
+            position: "relative",
+            zIndex: 1,
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", lg: "0.8fr 1fr" },
+            gap: { xs: 3, lg: 6 },
+            px: { xs: 2, sm: 4, lg: 7 },
+            pt: { xs: 5, md: 7 },
+            pb: { xs: 7, md: 10 },
+          }}
+        >
+          <Box className="vm-reveal">
             <Typography
-              component="h2"
               sx={{
-                fontFamily: FONT_DISPLAY,
-                fontSize: { xs: 36, md: 56 },
+                color: "var(--primary)",
+                fontSize: "0.72rem",
                 fontWeight: 800,
-                letterSpacing: 0,
-                lineHeight: 1,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
               }}
             >
-              Learn. Build. Grow.
+              Core Principles
             </Typography>
             <Typography
+              className="font-display"
               sx={{
-                color: "var(--muted-foreground)",
-                fontFamily: FONT_BODY,
-                fontSize: { xs: 17, md: 20 },
-                lineHeight: 1.55,
-                maxWidth: 720,
+                mt: 1.5,
+                color: "var(--foreground)",
+                fontFamily: "var(--font-display)",
+                fontSize: { xs: "2.4rem", md: "5.4rem" },
+                fontWeight: 800,
+                lineHeight: 0.88,
+                textTransform: "uppercase",
               }}
             >
-              Our vision and mission work together: give students practical
-              technology skills, then help them turn those skills into visible
-              confidence.
+              What We Believe
             </Typography>
-            <Button
-              href="/courses"
-              endIcon={<ArrowForwardRoundedIcon />}
-              className="vm-glass-btn"
-              sx={{
-                borderRadius: "999px",
-                color: "#fff",
-                fontFamily: FONT_BODY,
-                fontWeight: 700,
-                px: 4,
-                py: 1.5,
-                textTransform: "none",
-              }}
-            >
-              Explore Courses
-            </Button>
-          </Stack>
-        </Container>
+          </Box>
+
+          <Box>
+            {principles.map((item) => (
+              <PrincipleRow key={item.title} item={item} />
+            ))}
+          </Box>
+        </Box>
       </Box>
     </>
   );

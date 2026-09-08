@@ -5,8 +5,8 @@ import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
-import logo from "@/assets/knora-logo-transparent.png";
 import authRight from "@/assets/authright.png";
+import useThemeLogo from "@/lib/useThemeLogo";
 
 const features = [
   {
@@ -175,6 +175,8 @@ export const authStyles = {
 };
 
 export default function AuthLayout({ children }) {
+  const logo = useThemeLogo();
+
   return (
     <Box
       component="main"

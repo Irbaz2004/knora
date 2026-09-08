@@ -110,17 +110,15 @@ export function scatterCloud(count, width, height, depth, seed = 9021) {
   return out;
 }
 
-/** Director-section formation: CNN pipeline with strong layer silhouettes. */
+/** Director-section formation: CNN pipeline with locked, clean particle paths. */
 export function directorMessageFormation(
   count,
   width,
   height,
   depth,
   center = [0, 0, 0],
-  seed = 3030,
 ) {
   const out = new Float32Array(count * 3);
-  const rnd = makeRandom(seed);
   const w = width;
   const h = height;
   const unit = Math.min(w, h);
@@ -138,63 +136,8 @@ export function directorMessageFormation(
     out[i3 + 2] = center[2] + z;
   };
 
-  const putLine = (i, x1, y1, x2, y2, t, jitter = 0.0025) => {
-    put(
-      i,
-      x1 + (x2 - x1) * t + (rnd() - 0.5) * w * jitter,
-      y1 + (y2 - y1) * t + (rnd() - 0.5) * h * jitter,
-      (rnd() - 0.5) * depth * 0.08,
-    );
-  };
-
-  const putRect = (i, cx, cy, rectW, rectH, z = 0, fill = false) => {
-    if (fill && rnd() > 0.44) {
-      put(
-        i,
-        cx + (rnd() - 0.5) * rectW * 0.68,
-        cy + (rnd() - 0.5) * rectH * 0.68,
-        z + (rnd() - 0.5) * depth * 0.025,
-      );
-      return;
-    }
-
-    const side = Math.floor(rnd() * 4);
-    const t = rnd();
-    const left = cx - rectW / 2;
-    const right = cx + rectW / 2;
-    const top = cy + rectH / 2;
-    const bottom = cy - rectH / 2;
-
-    if (side === 0) putLine(i, left, top, right, top, t, 0.002);
-    else if (side === 1) putLine(i, right, top, right, bottom, t, 0.002);
-    else if (side === 2) putLine(i, right, bottom, left, bottom, t, 0.002);
-    else putLine(i, left, bottom, left, top, t, 0.002);
-
-    out[i * 3 + 2] += z;
-  };
-
-  const putGridPoint = (i, cx, cy, grid, size) => {
-    const cell = i % (grid * grid);
-    const col = cell % grid;
-    const row = Math.floor(cell / grid);
-    const step = size / (grid - 1);
-    const snap = rnd() > 0.22;
-    const x =
-      cx - size / 2 + col * step + (snap ? 0 : (rnd() - 0.5) * step * 0.52);
-    const y =
-      cy + size / 2 - row * step + (snap ? 0 : (rnd() - 0.5) * step * 0.52);
-    put(i, x, y, (rnd() - 0.5) * depth * 0.05);
-  };
-
-  const putCircle = (i, cx, cy, radius, z = 0) => {
-    const angle = rnd() * Math.PI * 2;
-    const ringRadius = radius * (0.78 + rnd() * 0.28);
-    put(
-      i,
-      cx + Math.cos(angle) * ringRadius,
-      cy + Math.sin(angle) * ringRadius,
-      z + Math.cos(angle) * depth * 0.025,
-    );
+  const putLine = (i, x1, y1, x2, y2, t, z = 0) => {
+    put(i, x1 + (x2 - x1) * t, y1 + (y2 - y1) * t, z);
   };
 
   const putBezier = (i, x0, y0, x1, y1, x2, y2, t) => {
@@ -203,103 +146,142 @@ export function directorMessageFormation(
       i,
       mt * mt * x0 + 2 * mt * t * x1 + t * t * x2,
       mt * mt * y0 + 2 * mt * t * y1 + t * t * y2,
-      (rnd() - 0.5) * depth * 0.1,
     );
+  };
+
+  const putInputGrid = (i) => {
+    const grid = 15;
+    const size = unit * 0.46;
+    const cell = i % (grid * grid);
+    const col = cell % grid;
+    const row = Math.floor(cell / grid);
+    const step = size / (grid - 1);
+    put(i, inputX - size / 2 + col * step, size / 2 - row * step);
+  };
+
+  const putRectOutline = (i, local, cx, cy, rectW, rectH, z = 0) => {
+    const side = local % 4;
+    const t = ((Math.floor(local / 4) % 54) + 0.5) / 54;
+    const left = cx - rectW / 2;
+    const right = cx + rectW / 2;
+    const top = cy + rectH / 2;
+    const bottom = cy - rectH / 2;
+
+    if (side === 0) putLine(i, left, top, right, top, t, z);
+    else if (side === 1) putLine(i, right, top, right, bottom, t, z);
+    else if (side === 2) putLine(i, right, bottom, left, bottom, t, z);
+    else putLine(i, left, bottom, left, top, t, z);
+  };
+
+  const putRectGrid = (i, local, cx, cy, rectW, rectH, z = 0) => {
+    const cols = 15;
+    const rows = 11;
+    const cell = local % (cols * rows);
+    const col = cell % cols;
+    const row = Math.floor(cell / cols);
+    put(
+      i,
+      cx - rectW * 0.38 + (col / (cols - 1)) * rectW * 0.76,
+      cy + rectH * 0.34 - (row / (rows - 1)) * rectH * 0.68,
+      z,
+    );
+  };
+
+  const putMap = (i, local, cx, cy, rectW, rectH, z = 0) => {
+    if (Math.floor(local / 4) % 3 === 0) {
+      putRectOutline(i, local, cx, cy, rectW, rectH, z);
+    } else {
+      putRectGrid(i, local, cx, cy, rectW, rectH, z);
+    }
+  };
+
+  const putCircle = (i, local, cx, cy, radius, z = 0) => {
+    const angle = ((local % 72) / 72) * Math.PI * 2;
+    put(i, cx + Math.cos(angle) * radius, cy + Math.sin(angle) * radius, z);
   };
 
   for (let i = 0; i < count; i++) {
     const group = i / count;
 
     if (group < 0.18) {
-      putGridPoint(i, inputX, 0, 13, unit * 0.46);
+      putInputGrid(i);
     } else if (group < 0.42) {
       const local = i - Math.floor(count * 0.18);
       const map = local % 5;
-      const offsetX = map * w * 0.014;
-      const offsetY = map * h * 0.025;
-      putRect(
+      putMap(
         i,
-        convX + offsetX,
-        h * 0.12 - offsetY,
+        Math.floor(local / 5),
+        convX + map * w * 0.014,
+        h * 0.12 - map * h * 0.025,
         unit * 0.38,
         unit * 0.28,
         -map * depth * 0.035,
-        true,
       );
     } else if (group < 0.57) {
       const local = i - Math.floor(count * 0.42);
       const map = local % 4;
-      const offsetX = map * w * 0.014;
-      const offsetY = map * h * 0.028;
-      putRect(
+      putMap(
         i,
-        poolX + offsetX,
-        -h * 0.02 - offsetY,
+        Math.floor(local / 4),
+        poolX + map * w * 0.014,
+        -h * 0.02 - map * h * 0.028,
         unit * 0.24,
         unit * 0.18,
         -map * depth * 0.04,
-        true,
       );
     } else if (group < 0.7) {
-      const band = i % 7;
-      const t = rnd();
-      const pairs = [
+      const local = i - Math.floor(count * 0.57);
+      const band = local % 8;
+      const t = ((Math.floor(local / 8) % 84) + 0.5) / 84;
+      const paths = [
         [inputX + unit * 0.24, 0, convX - unit * 0.2, h * 0.11],
         [convX + unit * 0.21, h * 0.08, poolX - unit * 0.13, -h * 0.02],
         [poolX + unit * 0.13, -h * 0.06, flattenX - unit * 0.04, 0],
       ];
-      const pair = pairs[i % pairs.length];
+      const path = paths[Math.floor(local / 672) % paths.length];
       putBezier(
         i,
-        pair[0],
-        pair[1] + (band - 3) * h * 0.025,
-        (pair[0] + pair[2]) / 2,
-        (pair[1] + pair[3]) / 2 + (band - 3) * h * 0.04,
-        pair[2],
-        pair[3] + (band - 3) * h * 0.018,
+        path[0],
+        path[1] + (band - 3.5) * h * 0.018,
+        (path[0] + path[2]) / 2,
+        (path[1] + path[3]) / 2 + (band - 3.5) * h * 0.026,
+        path[2],
+        path[3] + (band - 3.5) * h * 0.014,
         t,
       );
     } else if (group < 0.8) {
-      const lane = i % 20;
-      const y = (0.5 - lane / 19) * h * 0.56;
-      put(
-        i,
-        flattenX + (rnd() - 0.5) * w * 0.008,
-        y + (rnd() - 0.5) * h * 0.006,
-        (rnd() - 0.5) * depth * 0.08,
-      );
+      const local = i - Math.floor(count * 0.7);
+      const lane = local % 22;
+      const repeat = Math.floor(local / 22) % 12;
+      const y = (0.5 - lane / 21) * h * 0.56;
+      put(i, flattenX + (repeat - 5.5) * w * 0.0012, y);
     } else if (group < 0.94) {
       const local = i - Math.floor(count * 0.8);
       const layer = local % 3;
       const nodeCounts = [6, 5, 3];
       const nodeCount = nodeCounts[layer];
-      const node = Math.floor(rnd() * nodeCount);
+      const node = Math.floor(local / 3) % nodeCount;
       const x = denseX + layer * w * 0.055;
       const y = (0.5 - node / (nodeCount - 1)) * h * (0.45 - layer * 0.07);
+      const localGroup = Math.floor(local / (3 * nodeCount));
 
-      if (rnd() > 0.34 || layer === 2) {
-        putCircle(i, x, y, unit * 0.03, layer * depth * 0.015);
-      } else {
-        const nextCount = nodeCounts[Math.min(layer + 1, 2)];
-        const nextNode = Math.floor(rnd() * nextCount);
+      if (localGroup % 4 === 0 && layer < 2) {
+        const nextCount = nodeCounts[layer + 1];
+        const nextNode = Math.floor(localGroup / 4) % nextCount;
         const nextX = denseX + (layer + 1) * w * 0.055;
         const nextY =
           (0.5 - nextNode / (nextCount - 1)) * h * (0.45 - (layer + 1) * 0.07);
-        putLine(i, x, y, nextX, nextY, rnd(), 0.003);
+        putLine(i, x, y, nextX, nextY, ((localGroup % 40) + 0.5) / 40);
+      } else {
+        putCircle(i, localGroup, x, y, unit * 0.03, layer * depth * 0.015);
       }
-    } else if (group < 0.995) {
-      const bar = i % 4;
-      const t = rnd();
+    } else {
+      const local = i - Math.floor(count * 0.94);
+      const bar = local % 4;
+      const t = ((Math.floor(local / 4) % 88) + 0.5) / 88;
       const y = h * (0.18 - bar * 0.1);
       const barW = unit * (0.1 + bar * 0.035);
-      putLine(i, outputX, y, outputX + barW, y, t, 0.003);
-    } else {
-      put(
-        i,
-        (rnd() - 0.5) * w * 0.98,
-        (rnd() - 0.5) * h * 0.72,
-        (rnd() - 0.5) * depth * 0.42,
-      );
+      putLine(i, outputX, y, outputX + barW, y, t);
     }
   }
 

@@ -18,6 +18,7 @@ import DataObjectRoundedIcon from "@mui/icons-material/DataObjectRounded";
 import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
 import FolderRoundedIcon from "@mui/icons-material/FolderRounded";
 import FolderOpenRoundedIcon from "@mui/icons-material/FolderOpenRounded";
+import LockRoundedIcon from "@mui/icons-material/LockRounded";
 import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import PsychologyRoundedIcon from "@mui/icons-material/PsychologyRounded";
 import RocketLaunchRoundedIcon from "@mui/icons-material/RocketLaunchRounded";
@@ -242,6 +243,49 @@ const courses = [
       },
     ],
   },
+  {
+    name: "AI Agents",
+    category: "Automation",
+    fullName: "AI Agents & Workflow Automation",
+    tag: "Coming soon",
+    icon: RocketLaunchRoundedIcon,
+    image: courseGenAiImage,
+    duration: "Coming Soon",
+    mode: "Live Online",
+    level: "Advanced",
+    comingSoon: true,
+    color:
+      "linear-gradient(135deg, color-mix(in oklab, var(--navy) 52%, var(--primary)), color-mix(in oklab, var(--primary) 70%, white))",
+    copy: "Tool-using agents, workflow design, automation patterns, and production-minded AI systems.",
+    highlights: ["Agent design", "Tool calling", "Workflow automation"],
+    files: [
+      {
+        title: "Agent Basics",
+        copy: "Understand planning, tools, memory, and safe execution patterns.",
+        icon: SmartToyRoundedIcon,
+      },
+      {
+        title: "Tool Workflows",
+        copy: "Connect APIs, data, and assistant actions into guided flows.",
+        icon: DataObjectRoundedIcon,
+      },
+      {
+        title: "Automation Lab",
+        copy: "Build repeatable automations for real classroom and business tasks.",
+        icon: RocketLaunchRoundedIcon,
+      },
+      {
+        title: "Evaluation",
+        copy: "Check reliability, failures, and output quality before release.",
+        icon: AssignmentTurnedInRoundedIcon,
+      },
+      {
+        title: "Deployment Prep",
+        copy: "Package an agent workflow with clear controls and documentation.",
+        icon: FolderOpenRoundedIcon,
+      },
+    ],
+  },
 ];
 
 const courseThumbnailImages = [courseImage];
@@ -349,7 +393,18 @@ function getCourseLessons(course) {
       image: courseThumbnailImages[3],
       lessons: "8 lessons",
     },
-  ].slice(0, 8);
+  ]
+    .slice(0, 6)
+    .map((lesson, index) => {
+      if (index < 4) return lesson;
+
+      return {
+        ...lesson,
+        badge: "Coming soon",
+        duration: "Coming soon",
+        locked: true,
+      };
+    });
 }
 
 function CourseFolderStack({ activeCourse, onSelect, onSendBack, onOpen }) {
@@ -454,6 +509,7 @@ function CourseFolderStack({ activeCourse, onSelect, onSendBack, onOpen }) {
             onPointerLeave={() => setHoveredCourse(null)}
             className={`course-folder ${isActive ? "course-folder-active" : ""}`}
             sx={{
+              "--folder-delay": `${index * 0.48}s`,
               "--folder-gradient": course.color,
               left: "50%",
               opacity: offset > 3 ? 0 : 1,
@@ -465,62 +521,78 @@ function CourseFolderStack({ activeCourse, onSelect, onSendBack, onOpen }) {
               zIndex: courses.length - offset,
             }}
           >
-            <Box className="course-folder-tab">
-              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                <Icon sx={{ fontSize: 18 }} />
-                <span>{course.category}</span>
-              </Stack>
-            </Box>
-            <Box className="course-folder-body">
-              <Box className="course-card-orbit" />
-              {!isActive && (
-                <Box className="course-folder-side-tab">
-                  <ArrowForwardRoundedIcon />
-                </Box>
-              )}
-              <Box className="course-folder-icon-ring">
-                <Icon className="course-folder-main-icon" />
+            <Box className="course-folder-float">
+              <Box className="course-folder-tab">
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={{ alignItems: "center" }}
+                >
+                  <Icon sx={{ fontSize: 18 }} />
+                  <span>{course.category}</span>
+                </Stack>
               </Box>
-              <Stack className="course-folder-copy" spacing={1.4}>
-                <Typography
-                  sx={{
-                    color: "var(--foreground)",
-                    fontFamily: "var(--font-display)",
-                    fontSize: {
-                      xs: "clamp(34px, 12vw, 48px)",
-                      md: "clamp(42px, 4.4vw, 56px)",
-                    },
-                    fontWeight: 800,
-                    letterSpacing: 0,
-                    lineHeight: 1,
-                  }}
-                >
-                  {String(index + 1).padStart(2, "0")}
-                </Typography>
-                <Typography className="course-folder-name">
-                  {course.fullName}
-                </Typography>
-                <Box className="course-folder-rule" />
-                <Typography
-                  sx={{
-                    color: "var(--primary)",
-                    fontSize: {
-                      xs: "clamp(11px, 3.4vw, 13px)",
-                      md: "clamp(12px, 1vw, 14px)",
-                    },
-                    fontWeight: 900,
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {course.tag}
-                </Typography>
-                <Typography className="course-folder-description">
-                  {course.copy}
-                </Typography>
-              </Stack>
-              <Box className="course-folder-open-icon">
-                <ArrowForwardRoundedIcon />
+              <Box className="course-folder-body">
+                <Box className="course-card-orbit" />
+                {!isActive && (
+                  <Box className="course-folder-side-tab">
+                    <ArrowForwardRoundedIcon />
+                  </Box>
+                )}
+                <Box className="course-folder-icon-ring">
+                  <Icon className="course-folder-main-icon" />
+                </Box>
+                <Stack className="course-folder-copy" spacing={1.4}>
+                  <Typography
+                    sx={{
+                      color: "var(--foreground)",
+                      fontFamily: "var(--font-display)",
+                      fontSize: {
+                        xs: "clamp(34px, 12vw, 48px)",
+                        md: "clamp(42px, 4.4vw, 56px)",
+                      },
+                      fontWeight: 800,
+                      letterSpacing: 0,
+                      lineHeight: 1,
+                    }}
+                  >
+                    {String(index + 1).padStart(2, "0")}
+                  </Typography>
+                  <Typography className="course-folder-name">
+                    {course.fullName}
+                  </Typography>
+                  <Box className="course-folder-rule" />
+                  <Typography
+                    sx={{
+                      color: "var(--primary)",
+                      fontSize: {
+                        xs: "clamp(11px, 3.4vw, 13px)",
+                        md: "clamp(12px, 1vw, 14px)",
+                      },
+                      fontWeight: 900,
+                      letterSpacing: "0.12em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {course.tag}
+                  </Typography>
+                  <Typography className="course-folder-description">
+                    {course.copy}
+                  </Typography>
+                </Stack>
+                <Box className="course-folder-open-icon">
+                  {course.comingSoon ? (
+                    <LockRoundedIcon />
+                  ) : (
+                    <ArrowForwardRoundedIcon />
+                  )}
+                </Box>
+                {course.comingSoon && (
+                  <Box className="course-folder-lock-badge">
+                    <LockRoundedIcon />
+                    <span>Coming soon</span>
+                  </Box>
+                )}
               </Box>
             </Box>
           </Box>
@@ -572,18 +644,27 @@ function CourseLessonList({ course }) {
 
       <Box className="course-list-grid">
         {lessons.map((lesson, index) => {
-          const Icon = lesson.icon;
+          const isLocked = lesson.locked;
 
           return (
             <Box
               key={`${course.name}-${lesson.title}`}
-              href={getCourseLessonPath(course, lesson)}
-              component="a"
-              className="course-list-card"
+              href={isLocked ? undefined : getCourseLessonPath(course, lesson)}
+              component={isLocked ? "div" : "a"}
+              aria-disabled={isLocked ? "true" : undefined}
+              className={`course-list-card ${
+                isLocked ? "course-list-card-locked" : ""
+              }`}
               onPointerMove={moveCardGlow}
               sx={{ "--card-index": String(index + 1).padStart(2, "0") }}
             >
               <Box className="course-list-card-top">
+                {isLocked && (
+                  <span className="course-list-lock">
+                    <LockRoundedIcon />
+                    Coming soon
+                  </span>
+                )}
                 <Stack className="course-list-number" spacing={0.4}>
                   <span>{String(index + 1).padStart(2, "0")}</span>
                   <b>{lesson.badge}</b>
@@ -614,7 +695,6 @@ function CourseLessonList({ course }) {
 
               <Box className="course-list-thumb">
                 <Box component="img" src={lesson.image} alt="" />
-                <Icon className="course-list-thumb-icon" />
               </Box>
             </Box>
           );
@@ -643,6 +723,17 @@ export default function Courses() {
           "@keyframes courseGlow": {
             "0%, 100%": { opacity: 0.42, transform: "scale(1)" },
             "50%": { opacity: 0.82, transform: "scale(1.06)" },
+          },
+          "@keyframes courseFolderJump": {
+            "0%, 100%": {
+              transform: "translateY(0)",
+            },
+            "18%": {
+              transform: "translateY(-18px)",
+            },
+            "36%": {
+              transform: "translateY(0)",
+            },
           },
           ".courses-page": {
             background:
@@ -746,6 +837,14 @@ export default function Courses() {
             transform: "rotateX(72deg)",
             transformOrigin: "top",
             zIndex: -1,
+          },
+          ".course-folder-float": {
+            animation:
+              "courseFolderJump 5.8s cubic-bezier(.2,.78,.18,1) infinite",
+            animationDelay: "var(--folder-delay)",
+            height: "100%",
+            transform: "translateY(0)",
+            willChange: "transform",
           },
           ".course-folder:focus-visible .course-folder-body": {
             outline:
@@ -939,6 +1038,32 @@ export default function Courses() {
           },
           ".course-folder-open-icon svg": {
             fontSize: "24px",
+          },
+          ".course-folder-lock-badge": {
+            alignItems: "center",
+            background: "color-mix(in oklab, var(--primary) 12%, var(--card))",
+            border:
+              "1px solid color-mix(in oklab, var(--primary) 18%, transparent)",
+            borderRadius: "999px",
+            color: "var(--primary)",
+            display: "inline-flex",
+            fontSize: "11px",
+            fontWeight: 900,
+            gap: "6px",
+            left: "26px",
+            letterSpacing: "0.06em",
+            padding: "7px 10px",
+            position: "absolute",
+            textTransform: "uppercase",
+            top: "26px",
+            zIndex: 4,
+          },
+          ".course-folder-lock-badge svg": {
+            fontSize: "14px",
+          },
+          ".dark .course-folder-lock-badge": {
+            background: "rgba(255,255,255,0.08)",
+            borderColor: "rgba(255,255,255,0.14)",
           },
           ".course-folder-side-tab": {
             alignItems: "center",
@@ -1377,7 +1502,7 @@ export default function Courses() {
           ".course-list-number": {
             alignItems: "flex-end",
             color: "color-mix(in oklab, var(--foreground) 38%, transparent)",
-            fontSize: "10px",
+            fontSize: "11px",
             fontWeight: 900,
             lineHeight: 1,
             textTransform: "uppercase",
@@ -1392,7 +1517,7 @@ export default function Courses() {
             borderRadius: "999px",
             color: "var(--primary)",
             display: "block",
-            fontSize: "8px",
+            fontSize: "9px",
             lineHeight: 1,
             padding: "3px 6px",
           },
@@ -1404,7 +1529,7 @@ export default function Courses() {
           ".course-list-card-title.MuiTypography-root": {
             color: "var(--foreground)",
             fontFamily: "var(--font-display)",
-            fontSize: "16px",
+            fontSize: "19px",
             fontWeight: 900,
             letterSpacing: 0,
             lineHeight: 1.12,
@@ -1418,7 +1543,7 @@ export default function Courses() {
           },
           ".course-list-card-copy.MuiTypography-root": {
             color: "color-mix(in oklab, var(--foreground) 62%, transparent)",
-            fontSize: "12px",
+            fontSize: "14px",
             fontWeight: 750,
             lineHeight: 1.5,
             marginTop: "8px",
@@ -1433,7 +1558,7 @@ export default function Courses() {
             alignItems: "center",
             color: "color-mix(in oklab, var(--foreground) 50%, transparent)",
             flexWrap: "wrap",
-            fontSize: "9px",
+            fontSize: "10.5px",
             fontWeight: 800,
             marginTop: "16px",
             minHeight: "30px",
@@ -1519,6 +1644,48 @@ export default function Courses() {
             filter:
               "drop-shadow(0 0 22px color-mix(in oklab, var(--primary) 18%, transparent))",
             transform: "translateY(-3px)",
+          },
+          ".course-list-card-locked": {
+            cursor: "default",
+            filter: "saturate(0.72)",
+          },
+          ".course-list-card-locked:hover": {
+            borderColor: "color-mix(in oklab, var(--primary) 18%, transparent)",
+            filter: "saturate(0.72)",
+            transform: "none",
+          },
+          ".course-list-card-locked::after": {
+            content: "none",
+          },
+          ".course-list-lock": {
+            alignItems: "center",
+            background: "color-mix(in oklab, var(--primary) 10%, transparent)",
+            border:
+              "1px solid color-mix(in oklab, var(--primary) 16%, transparent)",
+            borderRadius: "999px",
+            color: "var(--primary)",
+            display: "inline-flex",
+            fontSize: "10px",
+            fontWeight: 900,
+            gap: "4px",
+            letterSpacing: "0.08em",
+            lineHeight: 1,
+            padding: "6px 8px",
+            textTransform: "uppercase",
+          },
+          ".course-list-lock svg": {
+            fontSize: "12px",
+          },
+          ".course-list-card-locked .course-list-thumb img": {
+            opacity: 0.34,
+          },
+          ".course-list-card-locked .course-list-thumb-icon": {
+            color: "color-mix(in oklab, var(--primary) 46%, transparent)",
+          },
+          ".dark .course-list-lock": {
+            background: "rgba(255,255,255,0.1)",
+            borderColor: "rgba(255,255,255,0.16)",
+            color: "#f5f5f5",
           },
           "@media (max-width: 1180px)": {
             ".course-list-grid": {
@@ -1640,6 +1807,11 @@ export default function Courses() {
               height: "44px",
               right: "22px",
               width: "44px",
+            },
+          },
+          "@media (prefers-reduced-motion: reduce)": {
+            ".course-folder-float": {
+              animation: "none",
             },
           },
         }}
@@ -1785,7 +1957,10 @@ export default function Courses() {
                   activeCourse={activeCourse}
                   onSelect={setActiveCourse}
                   onSendBack={sendFrontFolderBack}
-                  onOpen={(index) => navigateToCourse(courses[index])}
+                  onOpen={(index) => {
+                    if (!courses[index].comingSoon)
+                      navigateToCourse(courses[index]);
+                  }}
                 />
               </Stack>
 

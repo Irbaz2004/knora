@@ -23,10 +23,10 @@ import VerifiedUserOutlinedIcon from "@mui/icons-material/VerifiedUserOutlined";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { toast } from "sonner";
-import logo from "../assets/knoralogo.png";
 import authRight from "@/assets/authright.png";
 import AuthThemeToggle from "@/Auth/AuthThemeToggle";
 import { requireFirebaseAuth, saveUserProfile } from "@/firebase";
+import useThemeLogo from "@/lib/useThemeLogo";
 
 const features = [
   {
@@ -470,6 +470,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
+  const logo = useThemeLogo();
 
   const updateField = (event) => {
     setForm((current) => ({

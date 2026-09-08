@@ -19,10 +19,10 @@ import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
 import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import { toast } from "sonner";
-import logo from "../assets/knoralogo.png";
 import authRight from "@/assets/authright.png";
 import AuthThemeToggle from "@/Auth/AuthThemeToggle";
 import { requireFirebaseAuth } from "@/firebase";
+import useThemeLogo from "@/lib/useThemeLogo";
 
 const features = [
   {
@@ -427,6 +427,7 @@ export default function ForgotPassword() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
+  const logo = useThemeLogo();
 
   const handleReset = async (event) => {
     event.preventDefault();

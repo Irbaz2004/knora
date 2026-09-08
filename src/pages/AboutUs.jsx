@@ -1,486 +1,735 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  Box,
-  Button,
-  Chip,
-  Container,
-  GlobalStyles,
-  Stack,
-  Typography,
-} from "@mui/material";
-import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
-import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
-import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
-import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
-import VerifiedRoundedIcon from "@mui/icons-material/VerifiedRounded";
+import React, { useEffect, useRef } from "react";
+import { Box, Typography } from "@mui/material";
+import { ArrowForward } from "@mui/icons-material";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import CursorEffect from "@/components/CursorEffect";
+import courseImage from "@/assets/courseimg.webp";
+import facultyAisha from "@/assets/faculty-aisha.avif";
+import facultyRahul from "@/assets/faculty-rahul.jpg";
 
-const wavePositions = {
-  top: 26,
-  middle: 50,
-  bottom: 74,
-};
+gsap.registerPlugin(ScrollTrigger);
 
-function valueForWave(value, index) {
-  return Array.isArray(value) ? (value[index] ?? value[0]) : value;
+const stats = [
+  { number: "01", label: "Years Experience", value: "07" },
+  { number: "02", label: "Active Learners", value: "800+" },
+  { number: "03", label: "Learning Tracks", value: "12" },
+  { number: "04", label: "Guided Projects", value: "260+" },
+];
+
+const partners = [
+  "Python",
+  "TensorFlow",
+  "OpenAI",
+  "React",
+  "Firebase",
+  "Google Meet",
+  "Zoom",
+  "Power BI",
+  "Pandas",
+  "NumPy",
+  "Scikit-learn",
+  "Figma",
+  "Tableau",
+  "VS Code",
+  "Canva",
+];
+
+const awards = [
+  ["98", "Student-first learning experience"],
+  ["78", "Project-based curriculum design"],
+  ["37", "Mentor-led technical workshops"],
+  ["29", "AI and data portfolio reviews"],
+  ["18", "Career readiness learning sessions"],
+];
+
+function useAboutGsap(pageRef) {
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      const reduceMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      const revealItems = gsap.utils.toArray(".fold-reveal");
+
+      if (reduceMotion) {
+        gsap.set(revealItems, {
+          autoAlpha: 1,
+          clearProps: "transform,filter,clipPath",
+        });
+        return;
+      }
+
+      gsap.set(revealItems, {
+        transformPerspective: 1000,
+        transformOrigin: "50% 100%",
+        willChange: "opacity, transform, filter, clip-path",
+      });
+
+      gsap.utils.toArray(".about-scroll-section").forEach((section, index) => {
+        const items = section.querySelectorAll(".fold-reveal");
+
+        if (!items.length) {
+          return;
+        }
+
+        gsap
+          .timeline({
+            defaults: { ease: "power3.out" },
+            scrollTrigger: {
+              trigger: section,
+              start: index === 0 ? "top 98%" : "top 84%",
+              end: "bottom 18%",
+              scrub: 0.8,
+              invalidateOnRefresh: true,
+            },
+          })
+          .fromTo(
+            items,
+            {
+              autoAlpha: 0,
+              y: 64,
+              rotateX: -78,
+              scaleY: 0.9,
+              filter: "blur(8px)",
+              clipPath: "inset(0% 0% 100% 0%)",
+            },
+            {
+              autoAlpha: 1,
+              y: 0,
+              rotateX: 0,
+              scaleY: 1,
+              filter: "blur(0px)",
+              clipPath: "inset(0% 0% 0% 0%)",
+              stagger: 0.055,
+              duration: 0.42,
+            },
+          )
+          .to(
+            items,
+            {
+              autoAlpha: 0,
+              y: -38,
+              rotateX: 46,
+              scaleY: 0.92,
+              filter: "blur(6px)",
+              clipPath: "inset(100% 0% 0% 0%)",
+              stagger: 0.035,
+              duration: 0.3,
+              ease: "power2.in",
+            },
+            0.74,
+          );
+      });
+
+      ScrollTrigger.refresh();
+
+      gsap.to(".wave-lines", {
+        xPercent: -8,
+        duration: 8,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
+    }, pageRef);
+
+    return () => ctx.revert();
+  }, [pageRef]);
 }
 
-function buildPath(
-  baseY,
-  lineIndex,
-  count,
-  distance,
-  bendRadius,
-  bendStrength,
-  mouse,
-) {
-  const centered = lineIndex - (count - 1) / 2;
-  const y = baseY + centered * distance;
-  const influence = Math.max(0, 1 - Math.abs(mouse.y - y) / (bendRadius * 9));
-  const bend = bendStrength * influence * 10;
-  const mouseX = Math.min(86, Math.max(14, mouse.x));
-  const leftControl = Math.max(8, mouseX - 18);
-  const rightControl = Math.min(92, mouseX + 18);
-
-  return [
-    `M -6 ${y}`,
-    `C ${leftControl} ${y + bend} ${leftControl} ${y - bend} ${mouseX} ${
-      y + bend
-    }`,
-    `S ${rightControl} ${y - bend} 106 ${y}`,
-  ].join(" ");
-}
-
-function FloatingLines({
-  enabledWaves = ["top", "middle", "bottom"],
-  lineCount = 8,
-  lineDistance = 8,
-  bendRadius = 8,
-  bendStrength = -2,
-  interactive = false,
-  parallax = true,
-  animationSpeed = 1,
-  gradientStart = "#2f80ed",
-  gradientMid = "#8fc7ff",
-  gradientEnd = "#f8fbff",
-}) {
-  const [mouse, setMouse] = useState({ x: 50, y: 50 });
-
-  const waves = useMemo(
-    () => enabledWaves.filter((wave) => wavePositions[wave] != null),
-    [enabledWaves],
-  );
-
-  const handlePointerMove = (event) => {
-    if (!interactive) return;
-
-    const rect = event.currentTarget.getBoundingClientRect();
-    setMouse({
-      x: ((event.clientX - rect.left) / rect.width) * 100,
-      y: ((event.clientY - rect.top) / rect.height) * 100,
-    });
-  };
-
+function StoryImage({ src, alt }) {
   return (
-    <div
-      onPointerMove={handlePointerMove}
-      style={{
-        background:
-          "radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--electric) 14%, transparent), transparent 58%)",
-        height: "100%",
-        inset: 0,
+    <Box
+      className="story-image fold-reveal"
+      sx={{
+        minHeight: { xs: 140, md: 150 },
         overflow: "hidden",
-        position: "absolute",
-        width: "100%",
+        borderRadius: "8px",
+        border: "1px solid var(--border)",
+        background: "var(--card)",
       }}
     >
-      <style>
-        {`
-          @keyframes floating-lines-drift {
-            from { stroke-dashoffset: 0; }
-            to { stroke-dashoffset: -180; }
-          }
-
-          @keyframes floating-lines-glow {
-            0%, 100% { opacity: 0.34; }
-            50% { opacity: 0.78; }
-          }
-        `}
-      </style>
-      <svg
-        aria-hidden="true"
-        preserveAspectRatio="none"
-        viewBox="0 0 100 100"
-        style={{
-          height: "100%",
-          transform: parallax
-            ? `translate3d(${(mouse.x - 50) * -0.08}px, ${
-                (mouse.y - 50) * -0.08
-              }px, 0)`
-            : "none",
-          transition: "transform 220ms ease-out",
+      <Box
+        component="img"
+        src={src}
+        alt={alt}
+        sx={{
+          display: "block",
           width: "100%",
-        }}
-      >
-        <defs>
-          <linearGradient
-            id="floating-lines-gradient"
-            x1="0"
-            y1="0"
-            x2="1"
-            y2="0"
-          >
-            <stop offset="0%" stopColor={gradientStart} />
-            <stop offset="52%" stopColor={gradientMid} />
-            <stop offset="100%" stopColor={gradientEnd} />
-          </linearGradient>
-          <filter id="floating-lines-blur">
-            <feGaussianBlur stdDeviation="0.24" />
-          </filter>
-        </defs>
-
-        {waves.map((wave, waveIndex) => {
-          const count = valueForWave(lineCount, waveIndex);
-          const distance = valueForWave(lineDistance, waveIndex);
-          const baseY = wavePositions[wave];
-
-          return Array.from({ length: count }).map((_, lineIndex) => {
-            const path = buildPath(
-              baseY,
-              lineIndex,
-              count,
-              distance,
-              bendRadius,
-              bendStrength,
-              mouse,
-            );
-            const opacity = 0.18 + lineIndex * (0.5 / Math.max(1, count));
-
-            return (
-              <path
-                key={`${wave}-${lineIndex}`}
-                d={path}
-                fill="none"
-                filter={
-                  lineIndex % 3 === 0 ? "url(#floating-lines-blur)" : "none"
-                }
-                pathLength="180"
-                stroke="url(#floating-lines-gradient)"
-                strokeDasharray="36 144"
-                strokeLinecap="round"
-                strokeWidth={lineIndex % 2 === 0 ? 0.42 : 0.26}
-                style={{
-                  animation: `floating-lines-drift ${
-                    9 / animationSpeed
-                  }s linear infinite, floating-lines-glow ${
-                    4.8 + lineIndex * 0.18
-                  }s ease-in-out infinite`,
-                  animationDelay: `${waveIndex * -0.8 + lineIndex * -0.12}s`,
-                  opacity,
-                }}
-              />
-            );
-          });
-        })}
-      </svg>
-    </div>
-  );
-}
-
-function hexToRgb(hex) {
-  const clean = hex.replace("#", "");
-  const value = parseInt(
-    clean.length === 3
-      ? clean
-          .split("")
-          .map((char) => char + char)
-          .join("")
-      : clean,
-    16,
-  );
-
-  return {
-    r: (value >> 16) & 255,
-    g: (value >> 8) & 255,
-    b: value & 255,
-  };
-}
-
-function rgba(hex, alpha) {
-  const { r, g, b } = hexToRgb(hex);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-
-const detailMap = {
-  low: 4,
-  medium: 6,
-  high: 9,
-};
-
-function GradientWaves({
-  horizonColor = "#2f80ed",
-  waveColor = "#8fc7ff",
-  crestColor = "#FFFFFF",
-  speed = 0.4,
-  amplitude = 2.5,
-  waveScale = 0.6,
-  waveRatio = 0.9,
-  swell = 35,
-  turbulence = 20,
-  tilt = 1.11,
-  zoom = 1,
-  height = 5.5,
-  fogDepth = 15,
-  detail = "medium",
-  brightness = 1,
-  opacity = 1,
-  mouseInteraction = false,
-  parallaxStrength = 0.5,
-  grain = false,
-  grainIntensity = 0.05,
-}) {
-  const canvasRef = useRef(null);
-  const mouseRef = useRef({ x: 0.5, y: 0.5 });
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (!ctx) return undefined;
-
-    let frameId = 0;
-    const bandCount = detailMap[detail] ?? detailMap.medium;
-
-    const resize = () => {
-      const rect = canvas.getBoundingClientRect();
-      const ratio = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.max(1, Math.floor(rect.width * ratio));
-      canvas.height = Math.max(1, Math.floor(rect.height * ratio));
-      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-    };
-
-    const drawGrain = (width, canvasHeight) => {
-      if (!grain) return;
-
-      const spacing = 3;
-      const alpha = Math.min(0.18, grainIntensity * 1.8);
-      ctx.save();
-      ctx.globalCompositeOperation = "screen";
-
-      for (let y = 0; y < canvasHeight; y += spacing) {
-        for (let x = 0; x < width; x += spacing) {
-          const value = Math.floor(Math.random() * 255);
-          ctx.fillStyle = `rgba(${value}, ${value}, ${value}, ${alpha})`;
-          ctx.fillRect(x, y, 1, 1);
-        }
-      }
-
-      ctx.restore();
-    };
-
-    const render = (time) => {
-      const rect = canvas.getBoundingClientRect();
-      const width = rect.width;
-      const viewHeight = rect.height;
-      const t = time * 0.001 * speed;
-      const mouseX = (mouseRef.current.x - 0.5) * parallaxStrength;
-      const mouseY = (mouseRef.current.y - 0.5) * parallaxStrength;
-
-      ctx.clearRect(0, 0, width, viewHeight);
-      ctx.globalAlpha = opacity;
-
-      const sky = ctx.createLinearGradient(0, 0, 0, viewHeight);
-      sky.addColorStop(0, "rgba(15, 11, 22, 0.98)");
-      sky.addColorStop(0.34, rgba(horizonColor, 0.34 * brightness));
-      sky.addColorStop(1, "rgba(12, 8, 20, 0.98)");
-      ctx.fillStyle = sky;
-      ctx.fillRect(0, 0, width, viewHeight);
-
-      const horizon = viewHeight * (0.43 + height * 0.006 + mouseY * 0.035);
-      const glow = ctx.createRadialGradient(
-        width * (0.5 + mouseX * 0.08),
-        horizon + viewHeight * 0.08,
-        0,
-        width * 0.5,
-        horizon + viewHeight * 0.08,
-        width * 0.84,
-      );
-      glow.addColorStop(0, rgba(crestColor, 0.38 * brightness));
-      glow.addColorStop(0.28, rgba(waveColor, 0.58 * brightness));
-      glow.addColorStop(0.7, rgba(horizonColor, 0.46 * brightness));
-      glow.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = glow;
-      ctx.fillRect(0, 0, width, viewHeight);
-
-      for (let i = 0; i < bandCount; i += 1) {
-        const depth = i / Math.max(1, bandCount - 1);
-        const y = horizon - viewHeight * 0.12 + depth * viewHeight * 0.3;
-        const perspective = Math.pow(depth + 0.04, tilt);
-        const waveHeight =
-          (amplitude * 16 + swell * (1 - depth) * 0.52) * waveScale * zoom;
-        const frequency = (0.9 + depth * 1.6) * waveRatio;
-        const phase = t * (0.55 + depth * 0.75) + i * 0.7;
-        const alpha = Math.max(0.34, 1 - depth * (fogDepth / 42));
-
-        ctx.beginPath();
-        ctx.moveTo(-20, y);
-
-        for (let x = -20; x <= width + 20; x += 12) {
-          const normalizedX = x / width;
-          const turbulenceWave =
-            Math.sin(normalizedX * turbulence * 0.28 + phase * 0.7) * 0.3;
-          const wave =
-            Math.sin(normalizedX * Math.PI * frequency + phase) +
-            Math.sin(normalizedX * Math.PI * frequency * 2.2 - phase * 0.55) *
-              0.22 +
-            turbulenceWave;
-          const lift = wave * waveHeight;
-          ctx.lineTo(x, y + lift);
-        }
-
-        ctx.lineTo(width + 20, viewHeight + 20);
-        ctx.lineTo(-20, viewHeight + 20);
-        ctx.closePath();
-
-        const gradient = ctx.createLinearGradient(0, y - 90, width, viewHeight);
-        gradient.addColorStop(0, rgba(horizonColor, alpha * 0.82));
-        gradient.addColorStop(0.46, rgba(waveColor, alpha));
-        gradient.addColorStop(1, rgba(crestColor, alpha * 0.28));
-
-        ctx.fillStyle = gradient;
-        ctx.shadowBlur = 36 * (1 - depth * 0.34);
-        ctx.shadowColor = rgba(waveColor, 0.32);
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.moveTo(-20, y);
-        for (let x = -20; x <= width + 20; x += 18) {
-          const normalizedX = x / width;
-          const crestWave =
-            Math.sin(normalizedX * Math.PI * frequency + phase) +
-            Math.sin(normalizedX * Math.PI * frequency * 2.2 - phase * 0.55) *
-              0.22;
-          ctx.lineTo(x, y + crestWave * waveHeight);
-        }
-        ctx.strokeStyle = rgba(crestColor, alpha * 0.18);
-        ctx.lineWidth = 1.2 + perspective * 1.4;
-        ctx.stroke();
-      }
-
-      const fog = ctx.createLinearGradient(0, 0, 0, viewHeight);
-      fog.addColorStop(0, "rgba(13,10,18,0.22)");
-      fog.addColorStop(0.48, "rgba(13,10,18,0.02)");
-      fog.addColorStop(1, "rgba(10,7,15,0.36)");
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = fog;
-      ctx.fillRect(0, 0, width, viewHeight);
-
-      drawGrain(Math.floor(width), Math.floor(viewHeight));
-      frameId = window.requestAnimationFrame(render);
-    };
-
-    resize();
-    frameId = window.requestAnimationFrame(render);
-    window.addEventListener("resize", resize);
-
-    return () => {
-      window.cancelAnimationFrame(frameId);
-      window.removeEventListener("resize", resize);
-    };
-  }, [
-    amplitude,
-    brightness,
-    crestColor,
-    detail,
-    fogDepth,
-    grain,
-    grainIntensity,
-    height,
-    horizonColor,
-    opacity,
-    parallaxStrength,
-    speed,
-    swell,
-    tilt,
-    turbulence,
-    waveColor,
-    waveRatio,
-    waveScale,
-    zoom,
-  ]);
-
-  const handlePointerMove = (event) => {
-    if (!mouseInteraction) return;
-
-    const rect = event.currentTarget.getBoundingClientRect();
-    mouseRef.current = {
-      x: (event.clientX - rect.left) / rect.width,
-      y: (event.clientY - rect.top) / rect.height,
-    };
-  };
-
-  return (
-    <canvas
-      ref={canvasRef}
-      aria-hidden="true"
-      onPointerMove={handlePointerMove}
-      style={{
-        display: "block",
-        height: "100%",
-        inset: 0,
-        position: "absolute",
-        width: "100%",
-      }}
-    />
-  );
-}
-
-const aboutStats = [
-  { value: "Hybrid", label: "Online and campus learning" },
-  { value: "AI First", label: "Modern practical curriculum" },
-  { value: "Mentors", label: "Guided project support" },
-];
-
-const aboutCards = [
-  {
-    icon: SchoolRoundedIcon,
-    title: "Practical Learning",
-    copy: "Students learn concepts through guided labs, projects, and mentor-led review sessions.",
-  },
-  {
-    icon: GroupsRoundedIcon,
-    title: "Small Batches",
-    copy: "Focused batches help every learner ask questions, get feedback, and stay visible.",
-  },
-  {
-    icon: VerifiedRoundedIcon,
-    title: "Career Confidence",
-    copy: "The academy emphasizes portfolio work, presentation skills, and clear technical foundations.",
-  },
-];
-
-export default function AboutUs() {
-  return (
-    <>
-      <GlobalStyles
-        styles={{
-          "@keyframes aboutFadeUp": {
-            "0%": { opacity: 0, transform: "translateY(24px)" },
-            "100%": { opacity: 1, transform: "translateY(0)" },
-          },
-          ".about-page": {
-            background:
-              "linear-gradient(180deg, #ffffff 0%, color-mix(in oklab, var(--primary) 8%, var(--background)) 58%, var(--background) 100%)",
-          },
-          ".dark .about-page": {
-            background:
-              "linear-gradient(180deg, var(--background) 0%, color-mix(in oklab, var(--primary) 10%, var(--background)) 54%, var(--background) 100%)",
-          },
-          ".about-hero-content": {
-            animation: "aboutFadeUp 720ms ease both",
-          },
+          height: "100%",
+          objectFit: "cover",
+          filter: "grayscale(1) contrast(1.08)",
+          opacity: 0.9,
         }}
       />
+    </Box>
+  );
+}
+
+function StatCard({ stat, featured = false, sx }) {
+  return (
+    <Box
+      className="stat-card fold-reveal"
+      sx={{
+        position: "relative",
+        display: "flex",
+        minHeight: { xs: 160, md: "100%" },
+        flexDirection: "column",
+        justifyContent: "flex-end",
+        border: "1px solid var(--border)",
+        borderRadius: "8px",
+        background: featured
+          ? "color-mix(in oklab, var(--primary) 12%, var(--card))"
+          : "color-mix(in oklab, var(--card) 64%, transparent)",
+        p: { xs: 2.2, md: 2.6 },
+        ...sx,
+      }}
+    >
+      <Typography
+        sx={{
+          position: "absolute",
+          top: 12,
+          right: 14,
+          color: "color-mix(in oklab, var(--foreground) 36%, transparent)",
+          fontSize: "0.72rem",
+          fontWeight: 600,
+        }}
+      >
+        {stat.number}
+      </Typography>
+      <Typography
+        sx={{
+          color: "var(--muted-foreground)",
+          fontSize: "0.72rem",
+          lineHeight: 1,
+        }}
+      >
+        {stat.label}
+      </Typography>
+      <Typography
+        className="font-display"
+        sx={{
+          mt: 0.7,
+          color: featured ? "var(--primary)" : "var(--foreground)",
+          fontFamily: "var(--font-display)",
+          fontSize: { xs: "3.5rem", md: "4.45rem" },
+          fontWeight: 800,
+          letterSpacing: 0,
+          lineHeight: 0.82,
+        }}
+      >
+        {stat.value}
+      </Typography>
+    </Box>
+  );
+}
+
+function StatementCard({ sx }) {
+  return (
+    <Box
+      className="statement-card fold-reveal"
+      sx={{
+        position: "relative",
+        display: "flex",
+        minHeight: { xs: 220, md: "100%" },
+        alignItems: "center",
+        justifyContent: "center",
+        overflow: "hidden",
+        border: "1px solid var(--border)",
+        borderRadius: "8px",
+        background: "color-mix(in oklab, var(--card) 62%, transparent)",
+        p: { xs: 2.4, md: 4 },
+        ...sx,
+      }}
+    >
+      <Box
+        className="wave-lines"
+        sx={{
+          pointerEvents: "none",
+          position: "absolute",
+          right: "-8%",
+          bottom: "-22%",
+          width: "72%",
+          height: "70%",
+          opacity: 0.26,
+          background:
+            "repeating-radial-gradient(ellipse at 50% 50%, color-mix(in oklab, var(--primary) 48%, transparent) 0 1px, transparent 1px 10px)",
+          maskImage:
+            "radial-gradient(ellipse at 50% 50%, black, transparent 66%)",
+        }}
+      />
+      <Typography
+        className="font-display"
+        sx={{
+          position: "relative",
+          zIndex: 1,
+          maxWidth: 740,
+          color: "var(--foreground)",
+          fontFamily: "var(--font-display)",
+          fontSize: { xs: "1.9rem", md: "3rem" },
+          fontWeight: 700,
+          lineHeight: 1.05,
+          textAlign: "center",
+        }}
+      >
+        We bring together deep technical{" "}
+        <Box component="span" sx={{ color: "var(--primary)" }}>
+          expertise
+        </Box>
+        , clear{" "}
+        <Box component="span" sx={{ color: "var(--primary)" }}>
+          learning design
+        </Box>{" "}
+        and optimised{" "}
+        <Box component="span" sx={{ color: "var(--primary)" }}>
+          mentorship
+        </Box>
+        .
+      </Typography>
+    </Box>
+  );
+}
+
+function BrandGrid() {
+  return (
+    <Box
+      className="brand-section about-scroll-section"
+      component="section"
+      sx={{
+        px: { xs: 2, sm: 4, lg: 7 },
+        py: { xs: 5, md: 7 },
+      }}
+    >
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "repeat(2, 1fr)",
+            sm: "repeat(3, 1fr)",
+            lg: "repeat(6, 1fr)",
+          },
+          borderTop: "1px solid var(--border)",
+          borderLeft: "1px solid var(--border)",
+        }}
+      >
+        {partners.map((partner, index) => {
+          const isFeature = index === 7;
+          return (
+            <Box
+              key={partner}
+              className="brand-cell fold-reveal"
+              sx={{
+                minHeight: {
+                  xs: isFeature ? 118 : 82,
+                  md: isFeature ? 136 : 96,
+                },
+                display: "grid",
+                placeItems: "center",
+                gridColumn: {
+                  xs: isFeature ? "span 2" : "auto",
+                  lg: isFeature ? "span 2" : "auto",
+                },
+                borderRight: "1px solid var(--border)",
+                borderBottom: "1px solid var(--border)",
+                background: isFeature
+                  ? "color-mix(in oklab, var(--primary) 12%, var(--card))"
+                  : "color-mix(in oklab, var(--card) 56%, transparent)",
+                color: isFeature
+                  ? "var(--primary)"
+                  : "color-mix(in oklab, var(--foreground) 78%, transparent)",
+                px: 1.5,
+                textAlign: "center",
+              }}
+            >
+              {isFeature ? (
+                <Typography
+                  className="font-display"
+                  sx={{
+                    maxWidth: 360,
+                    color: "var(--foreground)",
+                    fontFamily: "var(--font-display)",
+                    fontSize: { xs: "1.55rem", md: "2rem" },
+                    fontWeight: 800,
+                    lineHeight: 0.96,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  We&apos;ve worked with{" "}
+                  <Box component="span" sx={{ color: "var(--primary)" }}>
+                    amazing tools
+                  </Box>
+                </Typography>
+              ) : (
+                <Typography
+                  sx={{
+                    fontSize: { xs: "0.74rem", md: "0.82rem" },
+                    fontWeight: 700,
+                    letterSpacing: "0.02em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {partner}
+                </Typography>
+              )}
+            </Box>
+          );
+        })}
+      </Box>
+    </Box>
+  );
+}
+
+function AwardsSection() {
+  return (
+    <Box
+      component="section"
+      className="awards-section about-scroll-section"
+      sx={{
+        display: "grid",
+        gridTemplateColumns: { xs: "1fr", md: "0.9fr 1fr" },
+        alignItems: "end",
+        gap: { xs: 2, md: 5 },
+        px: { xs: 2, sm: 4, lg: 7 },
+        pt: { xs: 5, md: 7 },
+        pb: { xs: 6, md: 8 },
+      }}
+    >
+      <Typography
+        className="font-display fold-reveal"
+        sx={{
+          color: "var(--primary)",
+          fontFamily: "var(--font-display)",
+          fontSize: { xs: "7.8rem", sm: "12rem", lg: "18rem" },
+          fontWeight: 800,
+          letterSpacing: 0,
+          lineHeight: 0.72,
+        }}
+      >
+        260+
+      </Typography>
+
+      <Box sx={{ pb: { md: 1.5 } }}>
+        <Typography
+          className="font-display fold-reveal"
+          sx={{
+            color: "var(--foreground)",
+            fontFamily: "var(--font-display)",
+            fontSize: { xs: "2.15rem", md: "4rem" },
+            fontWeight: 800,
+            lineHeight: 0.95,
+            textTransform: "uppercase",
+          }}
+        >
+          Outcomes for
+          <br />
+          digital learning
+        </Typography>
+
+        <Box sx={{ display: "grid", gap: 0.9, mt: 3 }}>
+          {awards.map(([score, label]) => (
+            <Box
+              key={label}
+              className="fold-reveal"
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "3.8rem 1fr",
+                gap: 1.4,
+                color: "var(--muted-foreground)",
+              }}
+            >
+              <Typography
+                component="span"
+                sx={{
+                  color: "var(--foreground)",
+                  fontSize: "0.92rem",
+                  fontWeight: 700,
+                }}
+              >
+                {score}
+              </Typography>
+              <Typography component="span" sx={{ fontSize: "0.92rem" }}>
+                {label}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
+export default function About() {
+  const pageRef = useRef(null);
+  useAboutGsap(pageRef);
+
+  return (
+    <>
       <CursorEffect />
+      <Box
+        ref={pageRef}
+        component="main"
+        sx={{
+          position: "relative",
+          minHeight: "100vh",
+          overflow: "hidden",
+          background:
+            "radial-gradient(circle at 8% 20%, color-mix(in oklab, var(--primary) 14%, transparent), transparent 30%), radial-gradient(circle at 96% 78%, color-mix(in oklab, var(--primary) 10%, transparent), transparent 28%), var(--background)",
+          color: "var(--foreground)",
+          fontFamily: "var(--font-sans)",
+          pt: { xs: 10, md: 12 },
+        }}
+      >
+        <Box
+          sx={{
+            pointerEvents: "none",
+            position: "absolute",
+            inset: 0,
+            backgroundImage:
+              "linear-gradient(color-mix(in oklab, var(--primary) 8%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in oklab, var(--primary) 8%, transparent) 1px, transparent 1px)",
+            backgroundSize: "72px 72px",
+            opacity: 0.45,
+          }}
+        />
+
+        <Box
+          component="img"
+          src={facultyRahul}
+          alt=""
+          aria-hidden="true"
+          sx={{
+            pointerEvents: "none",
+            position: "absolute",
+            left: { xs: "-32%", md: "-3%" },
+            top: { xs: 250, md: 230 },
+            width: { xs: 310, md: 520 },
+            height: { xs: 520, md: 820 },
+            objectFit: "cover",
+            borderRadius: "8px",
+            filter: "grayscale(1) contrast(1.08)",
+            opacity: 0.13,
+            zIndex: 0,
+          }}
+        />
+
+        <Box
+          component="section"
+          className="about-scroll-section"
+          sx={{
+            position: "relative",
+            zIndex: 1,
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              lg: "minmax(0, 1.42fr) minmax(22rem, 0.58fr)",
+            },
+            gap: { xs: 3, lg: 5 },
+            minHeight: { xs: "auto", lg: 570 },
+            px: { xs: 2, sm: 4, lg: 7 },
+            pb: { xs: 5, lg: 4 },
+            alignItems: "start",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "flex-start",
+              mt: 5,
+              minWidth: 0,
+              overflow: "visible",
+              textTransform: "uppercase",
+              whiteSpace: { xs: "normal", sm: "nowrap" },
+            }}
+          >
+            <Typography
+              className="font-display fold-text fold-reveal"
+              sx={{
+                color: "var(--foreground)",
+                fontFamily: "var(--font-display)",
+                fontSize: {
+                  xs: "5.4rem",
+                  sm: "9.4rem",
+                  lg: "clamp(10rem, 14.6vw, 18rem)",
+                },
+                fontWeight: 800,
+                letterSpacing: 0,
+                lineHeight: 0.74,
+              }}
+            >
+              About
+            </Typography>
+            <Box
+              sx={{
+                display: "grid",
+                ml: { xs: 0.6, md: 1.4 },
+              }}
+            >
+              <Typography
+                className="font-display fold-text fold-reveal"
+                sx={{
+                  color: "var(--primary)",
+                  fontFamily: "var(--font-display)",
+                  fontSize: {
+                    xs: "5.4rem",
+                    sm: "9.4rem",
+                    lg: "clamp(10rem, 14.6vw, 18rem)",
+                  },
+                  fontWeight: 800,
+                  letterSpacing: 0,
+                  lineHeight: 0.74,
+                }}
+              >
+                US
+              </Typography>
+            </Box>
+          </Box>
+
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "1fr 0.82fr" },
+              gap: 1.5,
+              alignItems: "start",
+              pt: { lg: 1.2 },
+              mt: { xs: 0.5, lg: 25 },
+            }}
+          >
+            <Box
+              sx={{ display: "grid", gap: 1.15, minWidth: 40, ml: -40, mt: 10 }}
+            >
+              <Typography
+                className="story-copy fold-reveal"
+                sx={{
+                  color: "var(--muted-foreground)",
+                  fontSize: { xs: "0.9rem", lg: "0.96rem" },
+                  lineHeight: 1.58,
+                }}
+              >
+                Knora Edu Academy is built for practical AI and technology
+                learning. We combine clear teaching, guided practice, and
+                project-first mentoring so students can build confidence from
+                day one.
+              </Typography>
+              <Typography
+                className="story-copy fold-reveal"
+                sx={{
+                  color: "var(--muted-foreground)",
+                  fontSize: { xs: "0.9rem", lg: "0.96rem" },
+                  lineHeight: 1.58,
+                }}
+              >
+                Our focus is simple: useful skills, personal support, and
+                learning paths that connect classroom effort with real outcomes.
+              </Typography>
+              <Box
+                className="read-link fold-reveal"
+                component="a"
+                href="/courses"
+                sx={{
+                  display: "inline-flex",
+                  minHeight: 42,
+                  width: "min(100%, 13rem)",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 0.8,
+                  borderRadius: "8px",
+                  border: "1px solid var(--border)",
+                  color: "var(--foreground)",
+                  fontSize: "0.78rem",
+                  fontWeight: 700,
+                  textDecoration: "none",
+                  textTransform: "uppercase",
+                  transition: "border-color 0.24s ease, color 0.24s ease",
+                  "&:hover": {
+                    borderColor: "var(--primary)",
+                    color: "var(--primary)",
+                  },
+                }}
+              >
+                Read More <ArrowForward sx={{ fontSize: 15 }} />
+              </Box>
+            </Box>
+
+            <Box sx={{ display: "grid", gap: 1.5 }}>
+              <StoryImage src={facultyAisha} alt="Knora mentor session" />
+              <StoryImage src={courseImage} alt="Knora learning campus" />
+            </Box>
+          </Box>
+        </Box>
+
+        <Box
+          component="section"
+          className="stats-section about-scroll-section"
+          sx={{
+            position: "relative",
+            zIndex: 1,
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "repeat(12, 1fr)" },
+            gridAutoRows: { md: "118px" },
+            gap: { xs: 1.3, md: 0 },
+            px: { xs: 2, sm: 4, lg: 7 },
+            py: { xs: 4, md: 7 },
+            minHeight: { md: 700 },
+          }}
+        >
+          <StatCard
+            stat={stats[0]}
+            sx={{
+              gridColumn: { md: "1 / span 3" },
+              gridRow: { md: "1 / span 2" },
+            }}
+          />
+          <StatementCard
+            sx={{
+              gridColumn: { md: "4 / span 8" },
+              gridRow: { md: "1 / span 2" },
+            }}
+          />
+          <StatCard
+            stat={stats[1]}
+            featured
+            sx={{
+              gridColumn: { md: "2 / span 3" },
+              gridRow: { md: "3 / span 2" },
+            }}
+          />
+          <StatCard
+            stat={stats[2]}
+            sx={{
+              gridColumn: { md: "5 / span 6" },
+              gridRow: { md: "3 / span 2" },
+            }}
+          />
+          <StatCard
+            stat={stats[3]}
+            sx={{
+              gridColumn: { md: "8 / span 3" },
+              gridRow: { md: "5 / span 2" },
+            }}
+          />
+        </Box>
+
+        <BrandGrid />
+        <AwardsSection />
+
+        <Box
+          component="img"
+          src={facultyAisha}
+          alt=""
+          aria-hidden="true"
+          sx={{
+            pointerEvents: "none",
+            position: "absolute",
+            right: { xs: "-34%", md: "-5%" },
+            bottom: { xs: 260, md: 120 },
+            width: { xs: 280, md: 420 },
+            height: { xs: 420, md: 640 },
+            objectFit: "cover",
+            borderRadius: "8px",
+            filter: "grayscale(1) contrast(1.04)",
+            opacity: 0.12,
+            zIndex: 0,
+          }}
+        />
+      </Box>
     </>
   );
 }

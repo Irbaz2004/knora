@@ -13,8 +13,8 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
-import logo from "../assets/knoralogo.png";
 import { auth, db } from "@/firebase";
+import useThemeLogo from "@/lib/useThemeLogo";
 
 const menu = [
   { label: "Home", href: "/" },
@@ -27,13 +27,6 @@ const menu = [
     ],
   },
   { label: "Courses", href: "/courses" },
-  {
-    label: "Admission",
-    items: [
-      { label: "Admission Process", href: "/admission-process" },
-      { label: "Apply Online", href: "/apply-online" },
-    ],
-  },
   { label: "Placements", href: "/placements" },
   {
     label: "Media",
@@ -105,6 +98,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
+  const logo = useThemeLogo();
 
   const userName =
     userProfile?.fullName || userProfile?.displayName || userProfile?.email;
@@ -123,8 +117,6 @@ export default function Navbar() {
       "/faculty": "About",
       "/courses": "Courses",
       "/course": "Courses",
-      "/admission-process": "Admission",
-      "/apply-online": "Admission",
       "/placements": "Placements",
       "/events-news": "Media",
       "/gallery": "Media",

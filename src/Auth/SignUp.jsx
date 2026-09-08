@@ -32,7 +32,6 @@ import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { toast } from "sonner";
-import logo from "../assets/knoralogo.png";
 import authRight from "@/assets/authright.png";
 import AuthThemeToggle from "@/Auth/AuthThemeToggle";
 import {
@@ -42,6 +41,7 @@ import {
   requireFirebaseAuth,
   saveUserProfile,
 } from "@/firebase";
+import useThemeLogo from "@/lib/useThemeLogo";
 
 const socialProviders = [
   {
@@ -534,6 +534,7 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
+  const logo = useThemeLogo();
 
   const updateField = (event) => {
     setForm((current) => ({
