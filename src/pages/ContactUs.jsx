@@ -20,9 +20,7 @@ const contactInfo = {
   phone: "+91 98765 43210",
   location: "Chennai, Tamil Nadu",
   mapUrl: "https://maps.app.goo.gl/5468fWa9LqNDsWPP7?g_st=iw",
-  // Approx coordinates used to place the marker on the particle globe
-  lat: 13.0827,
-  lon: 80.2707,
+  mapQuery: "Knora Edu Academy Chennai Tamil Nadu",
 };
 
 const contactCards = [
@@ -47,8 +45,8 @@ const contactCards = [
     label: "Location",
     value: contactInfo.location,
     helper: "Campus details available during counselling",
-    href: "#globe",
-    action: "View Location",
+    href: "#map",
+    action: "View Map",
   },
 ];
 
@@ -79,11 +77,9 @@ function ContactCard({ item }) {
       component="a"
       href={item.href}
       sx={{
-        position: "relative",
         display: "grid",
         minHeight: 230,
         alignContent: "space-between",
-        overflow: "hidden",
         borderRadius: "8px",
         border:
           "1px solid color-mix(in oklab, var(--primary) 14%, var(--border))",
@@ -93,43 +89,16 @@ function ContactCard({ item }) {
         textDecoration: "none",
         backdropFilter: "blur(20px)",
         transition:
-          "border-color 0.28s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), background 0.28s ease, box-shadow 0.28s ease",
+          "border-color 0.28s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), background 0.28s ease",
         "&:hover": {
           borderColor: "color-mix(in oklab, var(--primary) 58%, var(--border))",
           bgcolor: "color-mix(in oklab, var(--card) 94%, transparent)",
-          transform: "translateY(-6px)",
-          boxShadow:
-            "0 22px 44px -22px color-mix(in oklab, var(--primary) 45%, transparent)",
-        },
-        "&:hover .contact-card-icon": {
-          transform: "scale(1.08) rotate(-4deg)",
-          bgcolor: "color-mix(in oklab, var(--primary) 22%, transparent)",
-        },
-        "&:hover .contact-card-glow": {
-          opacity: 1,
+          transform: "translateY(-4px)",
         },
       }}
     >
-      <Box
-        className="contact-card-glow"
-        sx={{
-          pointerEvents: "none",
-          position: "absolute",
-          top: -60,
-          right: -60,
-          width: 160,
-          height: 160,
-          borderRadius: "50%",
-          background:
-            "radial-gradient(circle, color-mix(in oklab, var(--primary) 22%, transparent), transparent 70%)",
-          opacity: 0,
-          transition: "opacity 0.32s ease",
-        }}
-      />
-
-      <Box sx={{ position: "relative" }}>
+      <Box>
         <Box
-          className="contact-card-icon"
           sx={{
             display: "grid",
             width: 50,
@@ -138,7 +107,6 @@ function ContactCard({ item }) {
             borderRadius: "8px",
             bgcolor: "color-mix(in oklab, var(--primary) 13%, transparent)",
             color: "var(--primary)",
-            transition: "transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), background 0.32s ease",
           }}
         >
           <Icon size={21} />
@@ -182,7 +150,6 @@ function ContactCard({ item }) {
       <Typography
         component="span"
         sx={{
-          position: "relative",
           display: "inline-flex",
           width: "fit-content",
           alignItems: "center",
@@ -200,157 +167,11 @@ function ContactCard({ item }) {
   );
 }
 
-// A rotating "globe" built entirely from particles, drawn on canvas,
-// with a glowing marker pinned at Knora Edu Academy's location.
-function ParticleGlobe({ lat, lon }) {
-  const canvasRef = useRef(null);
-  const containerRef = useRef(null);
-  const primaryRGBRef = useRef("59, 130, 246");
-
-  useEffect(() => {
-    // Resolve the theme's --primary color to an RGB triplet so we can
-    // draw particles with per-depth alpha without re-parsing every frame.
-    const probe = document.createElement("div");
-    probe.style.color = "var(--primary)";
-    probe.style.position = "absolute";
-    probe.style.opacity = "0";
-    probe.style.pointerEvents = "none";
-    document.body.appendChild(probe);
-    const resolved = getComputedStyle(probe).color;
-    document.body.removeChild(probe);
-    const match = resolved.match(/[\d.]+/g);
-    if (match && match.length >= 3) {
-      primaryRGBRef.current = `${match[0]}, ${match[1]}, ${match[2]}`;
-    }
-  }, []);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const container = containerRef.current;
-    const ctx = canvas.getContext("2d");
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    let raf;
-    let width = 0;
-    let height = 0;
-
-    // Fibonacci-sphere distribution gives an even "planet made of dots" look
-    const POINT_COUNT = 760;
-    const points = [];
-    const goldenAngle = Math.PI * (3 - Math.sqrt(5));
-    for (let i = 0; i < POINT_COUNT; i++) {
-      const y = 1 - (i / (POINT_COUNT - 1)) * 2;
-      const radiusAtY = Math.sqrt(Math.max(0, 1 - y * y));
-      const theta = goldenAngle * i;
-      points.push({
-        x: Math.cos(theta) * radiusAtY,
-        y,
-        z: Math.sin(theta) * radiusAtY,
-      });
-    }
-
-    const latRad = (lat * Math.PI) / 180;
-    const lonRad = (lon * Math.PI) / 180;
-    const marker = {
-      x: Math.cos(latRad) * Math.cos(lonRad),
-      y: Math.sin(latRad),
-      z: Math.cos(latRad) * Math.sin(lonRad),
-    };
-
-    let rotation = 0.4;
-
-    function resize() {
-      const rect = container.getBoundingClientRect();
-      width = rect.width;
-      height = rect.height;
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
-    resize();
-    window.addEventListener("resize", resize);
-
-    function draw() {
-      ctx.clearRect(0, 0, width, height);
-      const cx = width / 2;
-      const cy = height / 2;
-      const radius = Math.min(width, height) * 0.37;
-      const rgb = primaryRGBRef.current;
-
-      rotation += 0.0018;
-      const cosR = Math.cos(rotation);
-      const sinR = Math.sin(rotation);
-
-      // Faint outer rim to read as a sphere silhouette
-      ctx.beginPath();
-      ctx.arc(cx, cy, radius + 1, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(${rgb}, 0.14)`;
-      ctx.lineWidth = 1;
-      ctx.stroke();
-
-      const projected = points.map((p) => {
-        const x = p.x * cosR - p.z * sinR;
-        const z = p.x * sinR + p.z * cosR;
-        return { x, y: p.y, z };
-      });
-      projected.sort((a, b) => a.z - b.z);
-
-      projected.forEach((p) => {
-        const depth = (p.z + 1) / 2;
-        const px = cx + p.x * radius;
-        const py = cy + p.y * radius;
-        const size = 0.5 + depth * 1.5;
-        ctx.beginPath();
-        ctx.arc(px, py, size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${rgb}, ${0.12 + depth * 0.58})`;
-        ctx.fill();
-      });
-
-      // Marker for Knora Edu Academy
-      const mx = marker.x * cosR - marker.z * sinR;
-      const mz = marker.x * sinR + marker.z * cosR;
-      if (mz > -0.2) {
-        const px = cx + mx * radius;
-        const py = cy + marker.y * radius;
-        const pulse = 0.5 + 0.5 * Math.sin(Date.now() / 420);
-
-        ctx.beginPath();
-        ctx.arc(px, py, 9 + pulse * 6, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${rgb}, ${0.16 + pulse * 0.12})`;
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.arc(px, py, 3.6, 0, Math.PI * 2);
-        ctx.fillStyle = "#ffffff";
-        ctx.fill();
-        ctx.lineWidth = 1.4;
-        ctx.strokeStyle = `rgba(${rgb}, 0.9)`;
-        ctx.stroke();
-      }
-    }
-
-    function loop() {
-      draw();
-      raf = requestAnimationFrame(loop);
-    }
-    loop();
-
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("resize", resize);
-    };
-  }, [lat, lon]);
-
-  return (
-    <Box ref={containerRef} sx={{ position: "absolute", inset: 0 }}>
-      <canvas ref={canvasRef} style={{ display: "block", width: "100%", height: "100%" }} />
-    </Box>
-  );
-}
-
 export default function ContactUs() {
   const pageRef = useRef(null);
+  const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(
+    contactInfo.mapQuery,
+  )}&output=embed`;
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -448,10 +269,6 @@ export default function ContactUs() {
           "@keyframes pageIn": {
             "0%": { opacity: 0, transform: "translateY(18px)" },
             "100%": { opacity: 1, transform: "translateY(0)" },
-          },
-          "@keyframes spinSlow": {
-            "0%": { transform: "rotate(0deg)" },
-            "100%": { transform: "rotate(360deg)" },
           },
         }}
       >
@@ -595,7 +412,7 @@ export default function ContactUs() {
               </Button>
               <Button
                 component="a"
-                href="#globe"
+                href="#map"
                 startIcon={<Navigation size={17} />}
                 sx={{
                   minHeight: 46,
@@ -607,7 +424,7 @@ export default function ContactUs() {
                   textTransform: "none",
                 }}
               >
-                View Location
+                Open Map
               </Button>
             </Box>
           </Box>
@@ -639,7 +456,7 @@ export default function ContactUs() {
 
         <Box
           component="section"
-          id="globe"
+          id="map"
           className="contact-map-block"
           sx={{
             position: "relative",
@@ -689,7 +506,7 @@ export default function ContactUs() {
                     lineHeight: 0.98,
                   }}
                 >
-                  Find us on the map.
+                  Visit or connect online.
                 </Typography>
                 <Typography
                   sx={{
@@ -721,12 +538,6 @@ export default function ContactUs() {
                       bgcolor:
                         "color-mix(in oklab, var(--card) 80%, transparent)",
                       p: 2.2,
-                      transition: "border-color 0.25s ease, transform 0.25s ease",
-                      "&:hover": {
-                        borderColor:
-                          "color-mix(in oklab, var(--primary) 40%, var(--border))",
-                        transform: "translateX(4px)",
-                      },
                     }}
                   >
                     <Box
@@ -771,7 +582,6 @@ export default function ContactUs() {
               })}
             </Box>
 
-            {/* Particle globe replaces the Google Maps embed */}
             <Box
               sx={{
                 position: "relative",
@@ -780,64 +590,28 @@ export default function ContactUs() {
                 borderRadius: "8px",
                 border:
                   "1px solid color-mix(in oklab, var(--primary) 22%, var(--border))",
-                background:
-                  "radial-gradient(circle at 50% 42%, color-mix(in oklab, var(--primary) 10%, var(--card)), var(--card) 68%)",
+                bgcolor: "var(--card)",
               }}
             >
-              {/* soft glow behind the globe */}
               <Box
+                component="iframe"
+                title="Knora Edu Academy map"
+                src={mapSrc}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
                 sx={{
-                  pointerEvents: "none",
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  width: "62%",
-                  height: "62%",
-                  transform: "translate(-50%, -50%)",
-                  borderRadius: "50%",
-                  background:
-                    "radial-gradient(circle, color-mix(in oklab, var(--primary) 20%, transparent), transparent 72%)",
-                  filter: "blur(6px)",
+                  display: "block",
+                  width: "100%",
+                  height: "100%",
+                  minHeight: { xs: 420, md: 580 },
+                  border: 0,
+                  filter: "saturate(0.94) contrast(1.02)",
+                  ".dark &": {
+                    filter:
+                      "invert(0.9) hue-rotate(180deg) saturate(0.82) brightness(0.9)",
+                  },
                 }}
               />
-
-              {/* thin decorative orbit ring */}
-              <Box
-                sx={{
-                  pointerEvents: "none",
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  width: "70%",
-                  height: "70%",
-                  transform: "translate(-50%, -50%)",
-                  display: "grid",
-                  placeItems: "center",
-                }}
-              >
-                <Box
-                  component="svg"
-                  viewBox="0 0 400 400"
-                  sx={{
-                    width: "100%",
-                    height: "100%",
-                    opacity: 0.32,
-                    animation: "spinSlow 46s linear infinite",
-                  }}
-                >
-                  <circle
-                    cx="200"
-                    cy="200"
-                    r="188"
-                    fill="none"
-                    stroke="var(--primary)"
-                    strokeWidth="1"
-                    strokeDasharray="2 12"
-                  />
-                </Box>
-              </Box>
-
-              <ParticleGlobe lat={contactInfo.lat} lon={contactInfo.lon} />
 
               <Box
                 sx={{
@@ -862,7 +636,7 @@ export default function ContactUs() {
                     textTransform: "uppercase",
                   }}
                 >
-                  Campus Location
+                  Map Location
                 </Typography>
                 <Typography
                   className="font-display"
