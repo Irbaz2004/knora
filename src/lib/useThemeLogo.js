@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import logo from "@/assets/knoralogo.png";
+import logo from "@/assets/knora-logo-transparent.png";
 import logoWhite from "@/assets/knoralogowhite.png";
 
 function isDarkTheme() {
