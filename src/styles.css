@@ -650,8 +650,8 @@ html.dark body {
 .section-11,
 .section-12,
 .section-13 {
-  visibility: hidden;
-  opacity: 0;
+  visibility: visible;
+  opacity: 1;
 }
 
 .course-deck-wrap {
@@ -5208,7 +5208,7 @@ svg {
 }
 
 .home-scroll-wrapper {
-  height: var(--home-scroll-height);
+  min-height: 100vh;
 }
 
 .story-copy,
@@ -5239,7 +5239,7 @@ svg {
 
 @media (max-width: 760px) {
   .home-scroll-wrapper {
-    height: 558vh;
+    min-height: 100vh;
   }
 
   .letter-fade-char,

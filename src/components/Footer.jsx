@@ -1,5 +1,6 @@
 import { Box } from "@mui/material";
 import { ArrowRight, ArrowUp, Mail } from "lucide-react";
+import knoraLettermark from "@/assets/KNORALettermark.png";
 
 const primaryLinks = [
   { label: "Home", href: "/" },
@@ -290,48 +291,22 @@ const footerStyles = {
     zIndex: 2,
     left: "50%",
     right: "auto",
-    bottom: "-0.1em",
-    width: "max-content",
-    overflow: "visible",
+    bottom: "clamp(0.65rem, 1.2vw, 1.4rem)",
+    width: "clamp(34rem, 96vw, 112rem)",
+    height: "clamp(5.15rem, 14.6vw, 17rem)",
     transform: "translateX(-50%)",
-    background:
-      "linear-gradient(180deg, rgba(246, 250, 255, 0.96) 0%, rgba(209, 223, 246, 0.8) 28%, rgba(134, 157, 196, 0.58) 54%, rgba(42, 63, 104, 0.2) 86%)",
-    backgroundClip: "text",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-    color: "transparent",
-    fontFamily: "var(--font-display)",
-    fontSize: "clamp(9rem, 26.5vw, 31rem)",
-    fontWeight: 900,
-    letterSpacing: 0,
-    lineHeight: 0.7,
-    opacity: 0.94,
-    textAlign: "center",
-    whiteSpace: "nowrap",
-    filter: "saturate(0.92)",
-    textTransform: "none",
-    "&::after": {
-      content: '"Knora"',
-      position: "absolute",
-      left: "-0.5%",
-      top: "67%",
-      width: "100%",
-      transform: "scaleY(-0.44)",
-      transformOrigin: "top",
-      background:
-        "linear-gradient(180deg, rgba(218, 232, 255, 0.28), rgba(91, 121, 170, 0.12) 34%, transparent 72%)",
-      backgroundClip: "text",
-      WebkitBackgroundClip: "text",
-      WebkitTextFillColor: "transparent",
-      color: "transparent",
-      filter: "blur(7px)",
-      opacity: 0.34,
-      maskImage:
-        "linear-gradient(180deg, transparent 0%, black 18%, transparent 72%)",
-    },
+    display: "block",
+    objectFit: "cover",
+    objectPosition: "center 51.6%",
+    opacity: 0.58,
+    pointerEvents: "none",
+    userSelect: "none",
+    filter:
+      "brightness(0) invert(1) saturate(0) drop-shadow(0 1.15rem 2.4rem rgba(1, 10, 25, 0.32))",
     "@media (max-width: 720px)": {
-      fontSize: "clamp(6.2rem, 34vw, 12rem)",
-      bottom: "0.08em",
+      bottom: "0.8rem",
+      width: "clamp(24rem, 112vw, 42rem)",
+      height: "clamp(3.65rem, 17vw, 6.4rem)",
     },
   },
   srOnly: {
@@ -489,9 +464,13 @@ export default function Footer() {
         </Box>
       </Box>
 
-      <Box sx={footerStyles.wordmark} aria-hidden="true">
-        Knora
-      </Box>
+      <Box
+        component="img"
+        src={knoraLettermark}
+        alt=""
+        sx={footerStyles.wordmark}
+        aria-hidden="true"
+      />
     </Box>
   );
 }

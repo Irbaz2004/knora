@@ -60,9 +60,10 @@ import courseVisionImage from "@/assets/course-vision.svg";
 import facultyArjun from "@/assets/faculty-arjun.avif";
 import facultyAisha from "@/assets/faculty-aisha.avif";
 import facultyRahul from "@/assets/faculty-rahul.jpg";
+import aboutKnoraImage from "@/assets/Aboutknora.png";
+import knoraLettermark from "@/assets/KNORALettermark.png";
 
 const SCENE_COUNT = 9;
-const SCENE_SCROLL_HEIGHT = 80;
 const SCENE_SLOT = 1.42;
 
 const heroCards = [
@@ -427,32 +428,8 @@ function FacultyPortrait({ person, className = "" }) {
 
 function KnoraLogoHoverText() {
   return (
-    <span
-      className="knora-logo-word inline-flex items-baseline"
-      aria-label="KNORA"
-    >
-      {["K", "N"].map((letter) => (
-        <span
-          key={letter}
-          aria-hidden="true"
-          className="letter-fade-char inline-block will-change-[filter,opacity,transform]"
-        >
-          {letter}
-        </span>
-      ))}
-      <span
-        aria-hidden="true"
-        className="knora-logo-o letter-fade-char mx-[0.04em] inline-block will-change-[filter,opacity,transform]"
-      />
-      {["R", "A"].map((letter) => (
-        <span
-          key={letter}
-          aria-hidden="true"
-          className="letter-fade-char inline-block will-change-[filter,opacity,transform]"
-        >
-          {letter}
-        </span>
-      ))}
+    <span className="knora-logo-word" aria-label="KNORA">
+      <img src={knoraLettermark} alt="" aria-hidden="true" />
     </span>
   );
 }
@@ -711,8 +688,6 @@ export default function Home() {
     gsap.registerPlugin(ScrollTrigger);
     ScrollTrigger.config({ ignoreMobileResize: true });
     const ctx = gsap.context(() => {
-      const proxy = { p: 0 };
-      const sceneSlot = isMobile ? 1.08 : SCENE_SLOT;
       const scenes = sceneRefs.current.slice(0, SCENE_COUNT).filter(Boolean);
       const roadmapTrack = courseRoadmapTrackRef.current;
       const roadmapViewport = courseRoadmapViewportRef.current;
@@ -723,261 +698,149 @@ export default function Home() {
             (roadmapViewport?.clientWidth ?? 0),
         );
       gsap.set(scenes, { pointerEvents: "none" });
-      gsap.set(scenes.slice(1), { autoAlpha: 0, y: 56, zIndex: 0 });
+      gsap.set(scenes, {
+        autoAlpha: 1,
+        y: 0,
+        zIndex: "auto",
+        pointerEvents: "auto",
+      });
       if (roadmapTrack) {
         gsap.set(roadmapTrack, { x: 0 });
       }
-      gsap.set(scenes[0], {
-        autoAlpha: 1,
-        y: 0,
-        zIndex: 2,
-        pointerEvents: "auto",
+
+      const updateJourneyProgress = () => {
+        if (!wrapper.current) return;
+        const particleStops = [
+          0, 0.145, 0.235, 0.34, 0.5, 0.64, 0.74, 0.86, 0.96,
+        ];
+        const viewportAnchor = window.innerHeight * (isMobile ? 0.58 : 0.52);
+        let nextProgress = 0;
+
+        scenes.forEach((scene, index) => {
+          const rect = scene.getBoundingClientRect();
+          const isActive =
+            rect.top <= viewportAnchor && rect.bottom >= viewportAnchor;
+          if (!isActive) return;
+
+          const localProgress = Math.min(
+            1,
+            Math.max(0, (viewportAnchor - rect.top) / Math.max(1, rect.height)),
+          );
+          const currentStop = particleStops[index] ?? 1;
+          const nextStop = particleStops[index + 1] ?? 1;
+          nextProgress = currentStop + (nextStop - currentStop) * localProgress;
+        });
+
+        if (
+          wrapper.current.getBoundingClientRect().bottom <= window.innerHeight
+        ) {
+          nextProgress = 1;
+        }
+
+        journey.progress = nextProgress;
+      };
+
+      updateJourneyProgress();
+      window.addEventListener("scroll", updateJourneyProgress, {
+        passive: true,
       });
-      gsap.from(".hero-pop", {
-        y: 28,
-        autoAlpha: 0,
-        duration: 0.9,
-        stagger: 0.09,
-        ease: "power3.out",
-      });
-      gsap.from(".section-1 .letter-fade-char", {
-        y: 34,
-        autoAlpha: 0,
-        filter: isMobile ? "none" : "blur(12px)",
-        duration: isMobile ? 0.36 : 0.72,
-        stagger: { each: isMobile ? 0.006 : 0.018, from: "start" },
-        ease: "power3.out",
+      window.addEventListener("resize", updateJourneyProgress);
+      ScrollTrigger.addEventListener("refresh", updateJourneyProgress);
+
+      ScrollTrigger.create({
+        trigger: wrapper.current,
+        start: "top top",
+        end: "bottom bottom",
+        scrub: true,
+        invalidateOnRefresh: true,
+        onUpdate: updateJourneyProgress,
       });
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: wrapper.current,
-          start: "top top",
-          end: "bottom bottom",
-          scrub: isMobile ? 0.18 : journey.reducedMotion ? true : 0.58,
-          invalidateOnRefresh: true,
-          anticipatePin: isMobile ? 0.15 : 0.5,
-        },
-        defaults: { ease: "none" },
-      });
+      if (!journey.reducedMotion) {
+        const revealTargets = wrapper.current.querySelectorAll(
+          ".hero-pop, .holo-text, .motion-card",
+        );
+        revealTargets.forEach((target) => {
+          gsap.fromTo(
+            target,
+            {
+              y: isMobile ? 18 : 28,
+              autoAlpha: 0,
+              clipPath: "inset(0 0 18% 0)",
+            },
+            {
+              y: 0,
+              autoAlpha: 1,
+              clipPath: "inset(0 0 0% 0)",
+              duration: isMobile ? 0.46 : 0.66,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: target,
+                start: () => {
+                  const ratio = isMobile
+                    ? window.innerHeight < 700
+                      ? 0.9
+                      : 0.84
+                    : 0.82;
+                  return `top ${Math.round(window.innerHeight * ratio)}px`;
+                },
+                toggleActions: "play none none none",
+                once: true,
+              },
+            },
+          );
+        });
+      } else {
+        gsap.set(".hero-pop, .holo-text, .motion-card", {
+          autoAlpha: 1,
+          y: 0,
+          clipPath: "none",
+        });
+      }
 
-      tl.to(proxy, {
-        p: 1,
-        duration: SCENE_COUNT * sceneSlot,
-        onUpdate: () => {
-          journey.progress = proxy.p;
-          const timelineTime = proxy.p * SCENE_COUNT * sceneSlot;
-          const facultySceneElapsed = timelineTime - 5 * sceneSlot;
-          if (facultySceneElapsed >= -0.04 && facultySceneElapsed <= 1.44) {
-            const nextFacultyIndex =
-              facultySceneElapsed < 0.46
-                ? 0
-                : facultySceneElapsed < 0.86
-                  ? 1
-                  : facultySpotlights.length - 1;
+      const facultySection = sceneRefs.current[5];
+      if (facultySection) {
+        ScrollTrigger.create({
+          trigger: facultySection,
+          start: "top 65%",
+          end: "bottom 35%",
+          scrub: true,
+          onUpdate: ({ progress }) => {
+            const nextFacultyIndex = Math.min(
+              facultySpotlights.length - 1,
+              Math.floor(progress * facultySpotlights.length),
+            );
             if (facultyScrollIndexRef.current !== nextFacultyIndex) {
               facultyScrollIndexRef.current = nextFacultyIndex;
               setActiveFaculty(nextFacultyIndex);
             }
-          }
-        },
-      });
+          },
+        });
+      }
 
-      if (useFastScroll) {
-        scenes.forEach((el, i) => {
-          const start = i * sceneSlot;
-          tl.to(el, { autoAlpha: 1, y: 0, duration: 0.18 }, start);
-          if (i < scenes.length - 1) {
-            tl.to(el, { autoAlpha: 0, y: -24, duration: 0.18 }, start + 0.78);
-          }
+      if (roadmapTrack && roadmapViewport) {
+        const roadmapTween = gsap.to(roadmapTrack, {
+          x: () => -getRoadmapDistance(),
+          ease: "none",
+          scrollTrigger: {
+            trigger: roadmapViewport,
+            start: "top 76%",
+            end: "bottom 28%",
+            scrub: useFastScroll ? 0.18 : 0.58,
+            invalidateOnRefresh: true,
+          },
         });
 
-        if (roadmapTrack) {
-          tl.to(
-            roadmapTrack,
-            {
-              x: () => -getRoadmapDistance(),
-              duration: 0.62,
-              ease: "none",
-            },
-            4 * sceneSlot + 0.18,
-          );
-        }
-      } else {
-        const ease = "power2.inOut";
-        const hologramIn = (selector, at) => {
-          tl.fromTo(
-            selector,
-            {
-              y: 0,
-              autoAlpha: 0,
-              scale: 0.9,
-              filter: "blur(28px)",
-              transformOrigin: "50% 50%",
-            },
-            {
-              y: 0,
-              autoAlpha: 1,
-              scale: 1,
-              filter: "blur(0px)",
-              duration: 0.44,
-              stagger: 0.045,
-              ease,
-            },
-            at,
-          );
-        };
-        const lettersIn = (scene, at) => {
-          const letters = scene.querySelectorAll(".letter-fade-char");
-          if (!letters.length) return;
-          tl.fromTo(
-            letters,
-            {
-              y: 28,
-              autoAlpha: 0,
-              filter: "blur(12px)",
-            },
-            {
-              y: 0,
-              autoAlpha: 1,
-              filter: "blur(0px)",
-              duration: 0.52,
-              stagger: { each: 0.012, from: "start" },
-              ease: "power3.out",
-            },
-            at,
-          );
-        };
-        const lettersOut = (scene, at) => {
-          const letters = scene.querySelectorAll(".letter-fade-char");
-          if (!letters.length) return;
-          tl.fromTo(
-            letters,
-            {
-              y: 0,
-              autoAlpha: 1,
-              filter: "blur(0px)",
-            },
-            {
-              y: -22,
-              autoAlpha: 0,
-              filter: "blur(10px)",
-              duration: 0.42,
-              stagger: { each: 0.009, from: "end" },
-              ease: "power2.inOut",
-              immediateRender: false,
-            },
-            at,
-          );
-        };
-        const sectionOut = (scene, at) => {
-          const items = scene.querySelectorAll(
-            ".hero-pop:not(.letter-fade-parent), .holo-text:not(.letter-fade-parent), .motion-card",
-          );
-          lettersOut(scene, at - 0.04);
-          tl.fromTo(
-            items,
-            {
-              y: 0,
-              autoAlpha: 1,
-              scale: 1,
-              filter: "blur(0px)",
-            },
-            {
-              y: -18,
-              autoAlpha: 0,
-              scale: 1.04,
-              filter: "blur(18px)",
-              transformOrigin: "50% 50%",
-              duration: 0.46,
-              stagger: { amount: 0.28, from: "start" },
-              ease,
-              immediateRender: false,
-            },
-            at,
-          );
-        };
-        const facultySectionOut = (scene, at) => {
-          const liveElements = scene.querySelectorAll(
-            ".faculty-holo-member, .faculty-stage-arrow, .faculty-stage-dots, .faculty-profile-card",
-          );
-          tl.to(
-            liveElements,
-            {
-              y: -14,
-              autoAlpha: 0,
-              scale: 0.985,
-              filter: "blur(6px)",
-              transformOrigin: "50% 50%",
-              duration: 0.48,
-              stagger: { amount: 0.2, from: "end" },
-              ease,
-            },
-            at,
-          );
-          tl.to(
-            scene.querySelector(".faculty-showcase-shell"),
-            {
-              autoAlpha: 0,
-              scale: 0.99,
-              filter: "blur(4px)",
-              duration: 0.34,
-              ease,
-            },
-            at + 0.22,
-          );
-        };
-
-        scenes.forEach((scene, i) => {
-          const start = i * sceneSlot;
-          const selector = `.section-${i + 1}`;
-          if (i > 0) {
-            tl.set(scene, { zIndex: 3, pointerEvents: "auto" }, start - 0.02);
-            tl.to(scene, { y: 0, autoAlpha: 1, duration: 0.58, ease }, start);
-            hologramIn(`${selector} .holo-text`, start + 0.06);
-            lettersIn(scene, start + 0.16);
-            tl.from(
-              scene.querySelectorAll(".motion-card"),
-              { y: 22, autoAlpha: 0, stagger: 0.04, duration: 0.3, ease },
-              start + 0.2,
-            );
-          }
-          if (i < scenes.length - 1) {
-            const exitAt =
-              i === 5 ? start + 1.4 : i === 4 ? start + 1.34 : start + 0.9;
-            const hideAt =
-              i === 5 ? start + 1.54 : i === 4 ? start + 1.42 : start + 1.42;
-            if (i === 5) {
-              facultySectionOut(scene, exitAt);
-            } else {
-              sectionOut(scene, exitAt);
-            }
-            tl.to(
-              scene,
-              {
-                y: i === 5 ? -42 : -70,
-                autoAlpha: 0,
-                duration: i === 5 ? 0.28 : 0.22,
-                ease,
-              },
-              hideAt,
-            );
-            tl.set(scene, { zIndex: 0, pointerEvents: "none" }, hideAt + 0.24);
-          }
-        });
-
-        if (roadmapTrack) {
-          tl.to(
-            roadmapTrack,
-            {
-              x: () => -getRoadmapDistance(),
-              duration: 0.92,
-              ease: "none",
-            },
-            4 * sceneSlot + 0.42,
-          );
+        if (getRoadmapDistance() <= 0) {
+          roadmapTween.scrollTrigger?.disable();
         }
       }
+
+      return () => {
+        window.removeEventListener("scroll", updateJourneyProgress);
+        window.removeEventListener("resize", updateJourneyProgress);
+        ScrollTrigger.removeEventListener("refresh", updateJourneyProgress);
+      };
     }, wrapper);
 
     return () => {
@@ -993,49 +856,32 @@ export default function Home() {
             boxShadow: "none !important",
           },
           ".knora-logo-word": {
-            color: "var(--foreground)",
-            transition: "color 240ms ease",
+            display: "inline-flex",
+            justifyContent: "flex-start",
+            width: "min(100%, clamp(13.5rem, 42vw, 32rem))",
+            height: "clamp(2.05rem, 6.4vw, 4.85rem)",
+            overflow: "hidden",
+            verticalAlign: "baseline",
+            transform: "translateY(0.09em)",
+            transformOrigin: "left center",
           },
-          ".knora-logo-o": {
-            position: "relative",
-            width: "0.72em",
-            height: "0.72em",
-            border: "0.105em solid currentColor",
-            borderRadius: "999px",
-            transform: "translateY(0.025em)",
-            transition:
-              "border-color 240ms ease, transform 240ms ease, box-shadow 240ms ease",
+          ".knora-logo-word img": {
+            display: "block",
+            width: "128.95%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "center 51.6%",
+            filter: "drop-shadow(0 0.08em 0.14em rgba(1, 10, 25, 0.1))",
+            transform: "translateX(-10.8%)",
           },
-          ".knora-logo-o::before, .knora-logo-o::after": {
-            content: '""',
-            position: "absolute",
-            left: "50%",
-            width: "0.22em",
-            height: "0.17em",
-            borderRadius: "0.08em",
-            background: "var(--background)",
-            transform: "translateX(-50%)",
-            opacity: 0,
-            transition: "opacity 200ms ease",
+          ".dark .knora-logo-word img": {
+            filter:
+              "brightness(0) invert(1) saturate(0) drop-shadow(0 0.08em 0.18em rgba(255, 255, 255, 0.08))",
           },
-          ".knora-logo-o::before": {
-            top: "-0.14em",
-          },
-          ".knora-logo-o::after": {
-            bottom: "-0.14em",
-          },
-          ".headline-kinetic:hover .knora-logo-o": {
-            borderColor: "var(--primary)",
-            transform: "translateY(0.025em) scale(1.04)",
-            boxShadow:
-              "0 0 0 0.035em color-mix(in oklab, var(--primary) 18%, transparent)",
-          },
-          ".headline-kinetic:hover .knora-logo-o::before, .headline-kinetic:hover .knora-logo-o::after":
-            {
-              opacity: 1,
-            },
           ".launch-calendar-section": {
             isolation: "isolate",
+            overflowY: "auto",
+            paddingBottom: "clamp(1.25rem, 3vh, 2.5rem)",
             background:
               "radial-gradient(circle at 50% 18%, color-mix(in oklab, var(--primary) 14%, transparent), transparent 34%), linear-gradient(180deg, var(--background) 0%, color-mix(in oklab, var(--primary) 7%, var(--background)) 54%, var(--background) 100%)",
           },
@@ -1090,13 +936,13 @@ export default function Home() {
           ".launch-calendar-panel": {
             position: "relative",
             zIndex: 2,
-            width: "min(1120px, calc(100vw - 2rem))",
+            width: "min(1180px, calc(100vw - 2rem))",
             borderRadius: "10px",
             border:
               "1px solid color-mix(in oklab, var(--primary) 18%, var(--border))",
             background:
               "linear-gradient(180deg, color-mix(in oklab, var(--card) 92%, transparent), color-mix(in oklab, var(--card) 72%, transparent)), linear-gradient(135deg, color-mix(in oklab, var(--primary) 5%, var(--background)), var(--background))",
-            padding: "clamp(0.8rem, 1.5vw, 1rem)",
+            padding: "clamp(0.9rem, 1.6vw, 1.2rem)",
             overflow: "hidden",
           },
           ".launch-calendar-panel::before": {
@@ -1216,13 +1062,14 @@ export default function Home() {
             zIndex: 1,
             display: "grid",
             gridTemplateColumns: "repeat(7, minmax(0, 1fr))",
-            gridTemplateRows: "repeat(5, minmax(0, 1fr))",
+            gridTemplateRows: "repeat(5, minmax(7.8rem, 1fr))",
             gap: "0.38rem",
-            minHeight: "clamp(19rem, 49vh, 30.5rem)",
+            minHeight: "clamp(39rem, 72vh, 45rem)",
           },
           ".launch-calendar-cell": {
             position: "relative",
             minWidth: 0,
+            minHeight: "7.8rem",
             overflow: "hidden",
             borderRadius: "8px",
             border: "1px solid var(--border)",
@@ -1314,7 +1161,11 @@ export default function Home() {
               justifyContent: "flex-start",
             },
             ".launch-calendar-cells": {
-              minHeight: "clamp(20rem, 52vh, 26rem)",
+              gridTemplateRows: "repeat(5, minmax(7.2rem, 1fr))",
+              minHeight: "36rem",
+            },
+            ".launch-calendar-cell": {
+              minHeight: "7.2rem",
             },
           },
           "@media (max-width: 640px)": {
@@ -1328,7 +1179,13 @@ export default function Home() {
             ".launch-calendar-panel": {
               width: "calc(100vw - 1rem)",
               padding: "0.62rem",
+              overflowX: "auto",
+              WebkitOverflowScrolling: "touch",
             },
+            ".launch-calendar-toolbar, .launch-calendar-weekdays, .launch-calendar-cells":
+              {
+                minWidth: "42rem",
+              },
             ".launch-calendar-tags span:first-of-type": {
               display: "none",
             },
@@ -1341,10 +1198,12 @@ export default function Home() {
             },
             ".launch-calendar-cells": {
               gap: "0.22rem",
-              minHeight: "20rem",
+              gridTemplateRows: "repeat(5, minmax(5.7rem, 1fr))",
+              minHeight: "28.5rem",
             },
             ".launch-calendar-cell": {
               borderRadius: "6px",
+              minHeight: "5.7rem",
               padding: "0.34rem",
             },
             ".launch-calendar-date": {
@@ -1365,7 +1224,10 @@ export default function Home() {
               fontSize: "0.48rem",
             },
             ".launch-calendar-event small": {
-              display: "none",
+              display: "-webkit-box",
+              fontSize: "0.5rem",
+              lineHeight: 1.15,
+              WebkitLineClamp: 1,
             },
           },
         }}
@@ -1388,18 +1250,12 @@ export default function Home() {
         />
       </div>
 
-      <main
-        ref={wrapper}
-        className="home-scroll-wrapper relative w-full"
-        style={{
-          "--home-scroll-height": `${SCENE_COUNT * SCENE_SCROLL_HEIGHT}vh`,
-        }}
-      >
-        <div className="sticky top-0 h-screen w-full overflow-hidden">
+      <main ref={wrapper} className="home-scroll-wrapper relative w-full">
+        <div className="relative w-full overflow-hidden">
           <section
             id="home"
             ref={setSceneRef(0)}
-            className="section-1 absolute inset-0 grid w-full grid-cols-1 items-center gap-8 px-5 pt-24 sm:px-8 lg:grid-cols-[minmax(0,0.96fr)_minmax(0,1.04fr)] lg:gap-10 lg:px-12 xl:px-20 2xl:px-28"
+            className="section-1 relative grid min-h-screen w-full grid-cols-1 items-center gap-8 px-5 pt-24 sm:px-8 lg:grid-cols-[minmax(0,0.96fr)_minmax(0,1.04fr)] lg:gap-10 lg:px-12 xl:px-20 2xl:px-28"
           >
             <div className="relative z-10 max-w-[720px]">
               <Typography
@@ -1423,7 +1279,9 @@ export default function Home() {
                 <KnoraLogoHoverText />
                 <br />
                 <span className="inline-block whitespace-nowrap">
-                  <LetterFadeText text="Edu" />{" "}
+                  <span className="text-black">
+                    <LetterFadeText text="Edu" />
+                  </span>{" "}
                   <span className="hero-learn relative inline-block text-primary">
                     <LetterFadeText text="Academy" />
                   </span>
@@ -1556,9 +1414,16 @@ export default function Home() {
           <section
             id="welcome"
             ref={setSceneRef(1)}
-            className="section-2 hologram-section absolute inset-0 mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-6 pt-24 lg:grid-cols-[0.9fr_1.1fr] lg:px-10"
+            className="section-2 hologram-section relative mx-auto grid min-h-screen max-w-7xl grid-cols-1 items-center gap-8 px-6 py-24 lg:grid-cols-[0.9fr_1.1fr] lg:px-10"
           >
-            <div className="hidden lg:block" />
+            <div className="motion-card relative z-10 overflow-hidden rounded-[2rem] border border-border/70 bg-card/70 shadow-[var(--shadow-glass)]">
+              <img
+                src={aboutKnoraImage}
+                alt="Knora Academy campus reception"
+                className="aspect-[2/1] w-full object-cover"
+                loading="lazy"
+              />
+            </div>
             <div className="relative z-10 grid gap-5 lg:ml-auto lg:max-w-[720px]">
               <SceneTitle
                 eyebrow="Welcome / Vision Snapshot"
@@ -1596,7 +1461,7 @@ export default function Home() {
           <section
             id="director-message"
             ref={setSceneRef(2)}
-            className="section-3 hologram-section absolute inset-0 mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-6 pt-24 lg:grid-cols-[0.9fr_1.1fr] lg:px-10"
+            className="section-3 hologram-section relative mx-auto grid min-h-screen max-w-7xl grid-cols-1 items-center gap-8 px-6 py-24 lg:grid-cols-[0.9fr_1.1fr] lg:px-10"
           >
             <div className="holo-text">
               <Badge>Founder / Director Message</Badge>
@@ -1671,7 +1536,7 @@ export default function Home() {
           <section
             id="why-join"
             ref={setSceneRef(3)}
-            className="section-4 hologram-section absolute inset-0 flex flex-col items-center justify-center px-6 pt-24 text-center"
+            className="section-4 hologram-section relative flex min-h-screen flex-col items-center justify-center px-6 py-24 text-center"
           >
             <SceneTitle
               eyebrow="Why Join Us"
@@ -1706,7 +1571,7 @@ export default function Home() {
           <section
             id="courses"
             ref={setSceneRef(4)}
-            className="section-5 hologram-section absolute inset-0 mx-auto flex w-full max-w-none flex-col items-center justify-start overflow-hidden px-0 pt-28 sm:pt-30 lg:pt-32"
+            className="section-5 hologram-section relative mx-auto flex min-h-screen w-full max-w-none flex-col items-center justify-start overflow-hidden px-0 py-28 sm:py-30 lg:py-32"
           >
             <SceneTitle
               eyebrow="Courses Offered"
@@ -1739,7 +1604,7 @@ export default function Home() {
           <section
             id="faculty"
             ref={setSceneRef(5)}
-            className="section-6 hologram-section absolute inset-0 mx-auto flex max-w-7xl items-center justify-center px-6 pt-24 lg:px-10"
+            className="section-6 hologram-section relative mx-auto flex min-h-screen max-w-7xl items-center justify-center px-6 py-24 lg:px-10"
           >
             <div className="motion-card faculty-showcase-shell faculty-meet-showcase relative z-10 grid w-full grid-cols-1 gap-8 rounded-[2.25rem] p-5 lg:grid-cols-[1.05fr_0.95fr] lg:p-7">
               <div className="faculty-hologram-stage relative min-h-[34rem]">
@@ -1887,7 +1752,7 @@ export default function Home() {
           <section
             id="hybrid-learning"
             ref={setSceneRef(6)}
-            className="section-7 hybrid-editorial-section hologram-section absolute inset-0 mx-auto flex w-full max-w-none items-center overflow-hidden px-4 pt-24 sm:px-6 lg:px-7"
+            className="section-7 hybrid-editorial-section hologram-section relative mx-auto flex min-h-screen w-full max-w-none items-center overflow-hidden px-4 py-24 sm:px-6 lg:px-7"
           >
             <div className="hybrid-editorial-grid relative z-10">
               <div className="holo-text hybrid-copy-column">
@@ -1941,7 +1806,7 @@ export default function Home() {
           <section
             id="campus"
             ref={setSceneRef(7)}
-            className="section-8 hologram-section absolute inset-0 flex flex-col items-center justify-center px-6 pt-24 text-center"
+            className="section-8 hologram-section relative flex min-h-screen flex-col items-center justify-center px-6 py-24 text-center"
           >
             <SceneTitle
               eyebrow="Campus / Facility Preview"
@@ -1976,7 +1841,7 @@ export default function Home() {
           <section
             id="events"
             ref={setSceneRef(8)}
-            className="section-9 launch-calendar-section hologram-section absolute inset-0 flex flex-col items-center justify-center overflow-hidden px-4 pt-20 sm:px-6 lg:px-10"
+            className="section-9 launch-calendar-section hologram-section relative flex min-h-screen flex-col items-center justify-center overflow-visible px-4 py-20 sm:px-6 lg:px-10"
           >
             <div className="launch-calendar-grid-bg" aria-hidden="true" />
             <div className="holo-text launch-calendar-heading text-center">
