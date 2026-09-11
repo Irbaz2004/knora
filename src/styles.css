@@ -60,15 +60,15 @@
   --radius: 1rem;
   --ice: oklch(0.985 0.008 240);
   --navy: oklch(0.26 0.062 262);
-  --electric: #0572ea;
-  --glow: #0572ea;
+  --electric: #002888;
+  --glow: #002888;
   --background: oklch(0.987 0.007 238);
   --foreground: oklch(0.26 0.062 262);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.26 0.062 262);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.26 0.062 262);
-  --primary: #0572ea;
+  --primary: #002888;
   --primary-foreground: oklch(0.99 0.005 240);
   --secondary: oklch(0.955 0.017 240);
   --secondary-foreground: oklch(0.32 0.06 262);
@@ -80,20 +80,20 @@
   --destructive-foreground: oklch(0.99 0.003 247);
   --border: oklch(0.912 0.019 244);
   --input: oklch(0.912 0.019 244);
-  --ring: #0572ea;
-  --chart-1: #0572ea;
+  --ring: #002888;
+  --chart-1: #002888;
   --chart-2: oklch(0.72 0.13 240);
   --chart-3: oklch(0.5 0.14 262);
   --chart-4: oklch(0.82 0.09 245);
   --chart-5: oklch(0.4 0.1 258);
   --sidebar: oklch(0.985 0.008 240);
   --sidebar-foreground: oklch(0.26 0.062 262);
-  --sidebar-primary: #0572ea;
+  --sidebar-primary: #002888;
   --sidebar-primary-foreground: oklch(0.99 0.005 240);
   --sidebar-accent: oklch(0.955 0.017 240);
   --sidebar-accent-foreground: oklch(0.3 0.06 262);
   --sidebar-border: oklch(0.912 0.019 244);
-  --sidebar-ring: #0572ea;
+  --sidebar-ring: #002888;
   --glass-bg: color-mix(in oklab, white 62%, transparent);
   --glass-border: color-mix(in oklab, var(--electric) 16%, transparent);
   --shadow-glass: 0 18px 50px -24px
@@ -112,15 +112,15 @@
 .dark {
   --ice: oklch(0.95 0.016 228);
   --navy: oklch(0.19 0.052 259);
-  --electric: #0572ea;
-  --glow: #0572ea;
+  --electric: #002888;
+  --glow: #002888;
   --background: oklch(0.135 0.034 258);
   --foreground: oklch(0.96 0.012 230);
   --card: oklch(0.205 0.04 255);
   --card-foreground: oklch(0.96 0.012 230);
   --popover: oklch(0.19 0.043 255);
   --popover-foreground: oklch(0.96 0.012 230);
-  --primary: #0572ea;
+  --primary: #002888;
   --primary-foreground: #ffffff;
   --secondary: oklch(0.245 0.043 250);
   --secondary-foreground: oklch(0.93 0.014 230);
@@ -130,20 +130,20 @@
   --accent-foreground: oklch(0.96 0.012 230);
   --border: oklch(0.88 0.03 230 / 15%);
   --input: oklch(0.88 0.03 230 / 18%);
-  --ring: #0572ea;
-  --chart-1: #0572ea;
+  --ring: #002888;
+  --chart-1: #002888;
   --chart-2: #3d8df4;
   --chart-3: oklch(0.72 0.12 270);
   --chart-4: oklch(0.82 0.09 155);
   --chart-5: oklch(0.7 0.13 242);
   --sidebar: oklch(0.16 0.036 258);
   --sidebar-foreground: oklch(0.96 0.012 230);
-  --sidebar-primary: #0572ea;
+  --sidebar-primary: #002888;
   --sidebar-primary-foreground: oklch(0.105 0.03 255);
   --sidebar-accent: oklch(0.24 0.043 250);
   --sidebar-accent-foreground: oklch(0.96 0.012 230);
   --sidebar-border: oklch(0.88 0.03 230 / 15%);
-  --sidebar-ring: #0572ea;
+  --sidebar-ring: #002888;
   --glass-bg: color-mix(in oklab, var(--card) 68%, transparent);
   --glass-border: color-mix(in oklab, var(--glow) 20%, transparent);
   --shadow-glass: 0 18px 54px -30px rgba(0, 0, 0, 0.64);
@@ -250,6 +250,7 @@ html.dark body {
     inset: 0;
     z-index: 9999;
     mix-blend-mode: normal;
+    display: block;
   }
 
   .cursor-dot,
@@ -264,9 +265,9 @@ html.dark body {
   }
 
   .cursor-dot {
-    width: 0.38rem;
-    height: 0.38rem;
-    background: var(--primary);
+    width: 0.34rem;
+    height: 0.34rem;
+    background: color-mix(in oklab, var(--navy) 88%, black);
     box-shadow:
       0 0 0 1px color-mix(in oklab, var(--background) 80%, transparent),
       0 10px 24px color-mix(in oklab, var(--primary) 28%, transparent);
@@ -277,9 +278,9 @@ html.dark body {
   }
 
   .cursor-ring {
-    width: 2.15rem;
-    height: 2.15rem;
-    border: 1px solid color-mix(in oklab, var(--primary) 76%, var(--navy));
+    width: 1.55rem;
+    height: 1.55rem;
+    border: 1px solid color-mix(in oklab, var(--navy) 82%, black);
     background:
       radial-gradient(
         circle at 32% 24%,
@@ -311,36 +312,13 @@ html.dark body {
   }
 
   .custom-cursor[data-cursor-mode="nav"] .cursor-ring {
-    width: 3.8rem;
-    height: 4.35rem;
-    border-radius: 0.7rem;
-    border-color: color-mix(in oklab, var(--primary) 82%, var(--navy));
-    clip-path: polygon(
-      18% 5%,
-      83% 55%,
-      55% 61%,
-      72% 94%,
-      55% 100%,
-      38% 67%,
-      17% 89%
-    );
-    background:
-      radial-gradient(
-        circle at 34% 18%,
-        color-mix(in oklab, var(--card) 78%, transparent),
-        transparent 26%
-      ),
-      linear-gradient(
-        135deg,
-        color-mix(in oklab, var(--primary) 24%, transparent),
-        color-mix(in oklab, var(--primary) 8%, transparent)
-      );
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.95),
-      inset 0 -14px 26px rgba(37, 99, 235, 0.12),
-      0 12px 38px rgba(37, 99, 235, 0.2),
-      0 0 0 1px rgba(255, 255, 255, 0.22);
-    backdrop-filter: blur(3px) saturate(140%);
+    width: 1.05rem;
+    height: 1.05rem;
+    border-radius: 999px;
+    border-color: color-mix(in oklab, var(--navy) 92%, black);
+    background: color-mix(in oklab, var(--navy) 72%, transparent);
+    box-shadow: 0 8px 20px rgba(8, 20, 42, 0.18);
+    backdrop-filter: blur(2px) saturate(120%);
   }
 
   .custom-cursor[data-cursor-mode="text"] .cursor-dot {
@@ -384,11 +362,11 @@ html.dark body {
   }
 
   html.dark .cursor-dot {
-    background: rgba(255, 255, 255, 0.82);
+    background: rgba(10, 18, 32, 0.94);
   }
 
   html.dark .cursor-ring {
-    border-color: rgba(255, 255, 255, 0.68);
+    border-color: rgba(10, 18, 32, 0.72);
     background:
       radial-gradient(
         circle at 32% 24%,
@@ -403,18 +381,8 @@ html.dark body {
   }
 
   html.dark .custom-cursor[data-cursor-mode="nav"] .cursor-ring {
-    border-color: rgba(255, 255, 255, 0.78);
-    background:
-      radial-gradient(
-        circle at 34% 18%,
-        rgba(255, 255, 255, 0.86),
-        transparent 26%
-      ),
-      linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.42),
-        rgba(59, 130, 246, 0.1)
-      );
+    border-color: rgba(10, 18, 32, 0.88);
+    background: rgba(10, 18, 32, 0.76);
   }
 
   html.dark .custom-cursor[data-cursor-mode="text"] .cursor-ring {
@@ -2866,8 +2834,8 @@ html.dark body {
     ),
     linear-gradient(
       180deg,
-      color-mix(in oklab, #0572ea 25%, transparent),
-      color-mix(in oklab, #0572ea 10%, transparent)
+      color-mix(in oklab, #002888 25%, transparent),
+      color-mix(in oklab, #002888 10%, transparent)
     );
   transform-origin: 50% 0;
   will-change: transform, opacity, clip-path;
@@ -2881,11 +2849,11 @@ html.dark body {
   height: 42%;
   pointer-events: none;
   background:
-    radial-gradient(circle, #0572ea 0 1px, transparent 1.4px),
-    radial-gradient(circle, #0572ea 0 1.6px, transparent 2.1px),
+    radial-gradient(circle, #002888 0 1px, transparent 1.4px),
+    radial-gradient(circle, #002888 0 1.6px, transparent 2.1px),
     linear-gradient(
       180deg,
-      color-mix(in oklab, #0572ea 22%, transparent),
+      color-mix(in oklab, #002888 22%, transparent),
       transparent
     );
   background-position:
@@ -2919,7 +2887,7 @@ html.dark body {
   position: absolute;
   inset: 0 0 0 auto;
   width: 1px;
-  background: color-mix(in oklab, #0572ea 12%, transparent);
+  background: color-mix(in oklab, #002888 12%, transparent);
 }
 
 .splash-column:first-child {
@@ -2942,8 +2910,8 @@ html.dark body {
     ),
     linear-gradient(
       180deg,
-      color-mix(in oklab, #0572ea 22%, transparent),
-      color-mix(in oklab, #0572ea 8%, transparent)
+      color-mix(in oklab, #002888 22%, transparent),
+      color-mix(in oklab, #002888 8%, transparent)
     );
 }
 
@@ -2951,13 +2919,13 @@ html.dark body {
   background:
     radial-gradient(
       circle at 50% calc(14% + var(--column) * 4%),
-      color-mix(in oklab, #0572ea 16%, transparent),
+      color-mix(in oklab, #002888 16%, transparent),
       transparent 28%
     ),
     linear-gradient(
       180deg,
-      color-mix(in oklab, #0572ea 24%, transparent),
-      color-mix(in oklab, #0572ea 9%, transparent)
+      color-mix(in oklab, #002888 24%, transparent),
+      color-mix(in oklab, #002888 9%, transparent)
     );
 }
 
@@ -2969,6 +2937,55 @@ html.dark body {
   place-items: center;
   padding: 2rem;
   will-change: transform, opacity, filter;
+}
+
+.opening-video-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 11000;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #000000;
+}
+
+.opening-video-splash-media {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000000;
+}
+
+.opening-video-splash-button {
+  position: fixed;
+  left: 50%;
+  bottom: clamp(2rem, 6vh, 4rem);
+  z-index: 2;
+  transform: translateX(-50%);
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #10213d;
+  cursor: pointer !important;
+  font-family: var(--font-sans);
+  font-size: 0.92rem;
+  font-weight: 900;
+  padding: 0.9rem 1.35rem;
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(16px) saturate(150%);
+}
+
+.opening-video-splash-button:hover {
+  border-color: rgba(255, 255, 255, 0.88);
+  color: var(--primary);
+}
+
+.splash-screen[data-mode="initial"] .splash-content {
+  padding: 0;
+}
+
+.splash-screen[data-mode="initial"] .splash-logo-card {
+  display: none;
 }
 
 .splash-logo-card {
@@ -3028,8 +3045,8 @@ html.dark body {
   gap: 0.7rem;
   justify-items: center;
   text-align: center;
-  color: #0572ea;
-  text-shadow: 0 16px 40px color-mix(in oklab, #0572ea 18%, transparent);
+  color: #002888;
+  text-shadow: 0 16px 40px color-mix(in oklab, #002888 18%, transparent);
 }
 
 .splash-route-kicker {
@@ -3037,7 +3054,7 @@ html.dark body {
   font-weight: 800;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: color-mix(in oklab, #0572ea 78%, white);
+  color: color-mix(in oklab, #002888 78%, white);
 }
 
 .splash-route-title {
@@ -3052,8 +3069,8 @@ html.dark body {
   position: absolute;
   z-index: 3;
   border-radius: 40% 60% 52% 48%;
-  background: #0572ea;
-  box-shadow: 0 0 4px color-mix(in oklab, #0572ea 18%, transparent);
+  background: #002888;
+  box-shadow: 0 0 4px color-mix(in oklab, #002888 18%, transparent);
   opacity: 0;
   will-change: transform, opacity;
 }
@@ -3066,7 +3083,7 @@ html.dark body {
   background:
     radial-gradient(
       circle at 50% 50%,
-      color-mix(in oklab, #0572ea 8%, transparent),
+      color-mix(in oklab, #002888 8%, transparent),
       transparent 46%
     ),
     var(--background);
@@ -3077,13 +3094,13 @@ html.dark body {
     linear-gradient(
       180deg,
       color-mix(in oklab, var(--card) 82%, transparent),
-      color-mix(in oklab, #0572ea 9%, transparent) 40%,
+      color-mix(in oklab, #002888 9%, transparent) 40%,
       color-mix(in oklab, var(--card) 68%, transparent)
     ),
     linear-gradient(
       180deg,
-      color-mix(in oklab, #0572ea 26%, transparent),
-      color-mix(in oklab, #0572ea 8%, transparent)
+      color-mix(in oklab, #002888 26%, transparent),
+      color-mix(in oklab, #002888 8%, transparent)
     );
 }
 
@@ -3093,18 +3110,18 @@ html.dark body {
     linear-gradient(
       180deg,
       color-mix(in oklab, var(--card) 78%, transparent),
-      color-mix(in oklab, #0572ea 10%, transparent) 38%,
+      color-mix(in oklab, #002888 10%, transparent) 38%,
       color-mix(in oklab, var(--background) 72%, transparent)
     ),
     linear-gradient(
       180deg,
-      color-mix(in oklab, #0572ea 25%, transparent),
-      color-mix(in oklab, #0572ea 7%, transparent)
+      color-mix(in oklab, #002888 25%, transparent),
+      color-mix(in oklab, #002888 7%, transparent)
     );
 }
 
 .dark .splash-column::after {
-  background: color-mix(in oklab, #0572ea 18%, transparent);
+  background: color-mix(in oklab, #002888 18%, transparent);
 }
 
 .dark .splash-logo-card::before,
@@ -3113,8 +3130,8 @@ html.dark body {
 }
 
 .dark .splash-route-copy {
-  color: #0572ea;
-  text-shadow: 0 16px 40px color-mix(in oklab, #0572ea 18%, transparent);
+  color: #002888;
+  text-shadow: 0 16px 40px color-mix(in oklab, #002888 18%, transparent);
 }
 
 .hero-cap {
@@ -3304,10 +3321,10 @@ html.dark body {
   background:
     radial-gradient(
       circle at 14% 92%,
-      rgba(5, 114, 234, 0.08),
+      rgba(0, 40, 136, 0.08),
       transparent 28%
     ),
-    radial-gradient(circle at 78% 0%, rgba(5, 114, 234, 0.08), transparent 28%),
+    radial-gradient(circle at 78% 0%, rgba(0, 40, 136, 0.08), transparent 28%),
     #ffffff;
 }
 
@@ -3324,7 +3341,7 @@ html.dark body {
   width: 21rem;
   height: 10rem;
   background-image: radial-gradient(
-    rgba(5, 114, 234, 0.22) 1px,
+    rgba(0, 40, 136, 0.22) 1px,
     transparent 1.5px
   );
   background-size: 17px 17px;
@@ -3337,7 +3354,7 @@ html.dark body {
   bottom: -7rem;
   width: 33rem;
   height: 15rem;
-  border: 1px solid rgba(5, 114, 234, 0.1);
+  border: 1px solid rgba(0, 40, 136, 0.1);
   border-radius: 50%;
 }
 
@@ -3434,7 +3451,7 @@ html.dark body {
 }
 
 .auth-input:focus-within {
-  border-color: #0572ea;
+  border-color: #002888;
   background: #ffffff;
   transform: translateY(-1px);
 }
@@ -3466,7 +3483,7 @@ html.dark body {
 .auth-icon-button:hover,
 .auth-icon-button:focus-visible {
   background: #edf5ff;
-  color: #0572ea;
+  color: #002888;
 }
 
 .auth-forgot {
@@ -3576,8 +3593,8 @@ html.dark body {
 
 .auth-social-button:hover,
 .auth-social-button:focus-visible {
-  border-color: #0572ea;
-  color: #0572ea;
+  border-color: #002888;
+  color: #002888;
   transform: translateY(-1px);
 }
 
@@ -3587,7 +3604,7 @@ html.dark body {
   height: 1.25rem;
   place-items: center;
   border-radius: 999px;
-  background: #0572ea;
+  background: #002888;
   color: #ffffff;
   font-size: 0.78rem;
   font-weight: 900;
@@ -3772,7 +3789,7 @@ html.dark body {
   background: radial-gradient(
     circle,
     rgba(255, 255, 255, 0.28),
-    rgba(5, 114, 234, 0.26)
+    rgba(0, 40, 136, 0.26)
   );
 }
 
@@ -3889,7 +3906,7 @@ html.dark body {
 
 .auth-screen-charts b {
   border-radius: 999px;
-  background: conic-gradient(#0572ea 0 68%, #dcecff 68% 100%);
+  background: conic-gradient(#002888 0 68%, #dcecff 68% 100%);
 }
 
 .auth-laptop-base {
@@ -3981,7 +3998,7 @@ html.dark body {
   place-items: center;
   border-radius: 999px;
   background: #f0f6ff;
-  color: #0572ea;
+  color: #002888;
   font-weight: 900;
 }
 
@@ -4134,7 +4151,7 @@ html.dark body {
   padding: clamp(1.5rem, 2.6vw, 2.7rem) clamp(2.2rem, 6vw, 7.5rem)
     clamp(1rem, 1.9vw, 1.6rem);
   background:
-    radial-gradient(circle at 8% 94%, rgba(5, 114, 234, 0.07), transparent 24%),
+    radial-gradient(circle at 8% 94%, rgba(0, 40, 136, 0.07), transparent 24%),
     linear-gradient(145deg, #ffffff 0%, #ffffff 58%, #f2f8ff 100%);
 }
 
@@ -4193,7 +4210,7 @@ html.dark body {
 }
 
 .auth-copy h1 span {
-  color: #0572ea;
+  color: #002888;
 }
 
 .auth-copy p {
@@ -4207,7 +4224,7 @@ html.dark body {
   min-width: 0;
   margin: 0 0 0.9rem;
   padding: 0;
-  color: #0572ea;
+  color: #002888;
   font-family: var(--font-sans);
   font-size: 0.82rem;
   font-weight: 800;
@@ -4238,7 +4255,7 @@ html.dark body {
 .auth-text-field
   .MuiOutlinedInput-root.Mui-focused
   .MuiOutlinedInput-notchedOutline {
-  border-color: #0572ea;
+  border-color: #002888;
 }
 
 .auth-text-field .MuiInputBase-input {
@@ -4267,7 +4284,7 @@ html.dark body {
 .auth-link.MuiButton-root {
   min-width: 0;
   padding: 0;
-  color: #0572ea;
+  color: #002888;
   font-family: var(--font-sans);
   font-size: 0.92rem;
   font-weight: 800;
@@ -4286,7 +4303,7 @@ html.dark body {
 }
 
 .auth-primary.MuiButton-root:hover {
-  background: linear-gradient(135deg, #0758d8, #0572ea);
+  background: linear-gradient(135deg, #0758d8, #002888);
 }
 
 .auth-divider.MuiDivider-root {
@@ -4319,9 +4336,9 @@ html.dark body {
 }
 
 .auth-social-button.MuiIconButton-root:hover {
-  border-color: #0572ea;
+  border-color: #002888;
   background: #f4f9ff;
-  color: #0572ea;
+  color: #002888;
 }
 
 .auth-social-button.MuiIconButton-root svg {
@@ -4353,7 +4370,7 @@ html.dark body {
 .auth-switch .MuiButton-root {
   min-width: 0;
   padding: 0;
-  color: #0572ea;
+  color: #002888;
   font-family: var(--font-sans);
   font-size: 0.96rem;
   font-weight: 900;
@@ -4460,7 +4477,7 @@ html.dark body {
   content: "";
   width: 0.72rem;
   height: 0.72rem;
-  border: 2px solid #0572ea;
+  border: 2px solid #002888;
   border-radius: 999px;
 }
 
@@ -4473,7 +4490,7 @@ html.dark body {
 
 .auth-footer-item strong {
   display: block;
-  color: #0572ea;
+  color: #002888;
   font-size: clamp(0.68rem, 0.82vw, 0.8rem);
   font-weight: 900;
 }
@@ -4621,7 +4638,7 @@ html.dark body {
   justify-content: center;
   padding: clamp(1.5rem, 3vw, 2.5rem) clamp(2rem, 5vw, 5rem);
   background:
-    radial-gradient(circle at 8% 94%, rgba(5, 114, 234, 0.06), transparent 24%),
+    radial-gradient(circle at 8% 94%, rgba(0, 40, 136, 0.06), transparent 24%),
     #ffffff;
 }
 
@@ -4739,7 +4756,7 @@ html.dark body {
 }
 
 .auth-copy h1 span {
-  color: #0572ea;
+  color: #002888;
 }
 
 .auth-copy p {
@@ -4769,7 +4786,7 @@ html.dark body {
 .auth-text-field
   .MuiOutlinedInput-root.Mui-focused
   .MuiOutlinedInput-notchedOutline {
-  border-color: #0572ea;
+  border-color: #002888;
 }
 
 .auth-text-field .MuiInputAdornment-positionStart {
@@ -4813,7 +4830,7 @@ html.dark body {
 .auth-switch .MuiButton-root {
   cursor: pointer !important;
   min-width: 0;
-  color: #0572ea;
+  color: #002888;
   font-family: var(--font-sans);
   font-weight: 900;
   text-transform: none;
@@ -4845,7 +4862,7 @@ html.dark body {
 }
 
 .auth-primary.MuiButton-root:hover {
-  background: linear-gradient(135deg, #0758d8, #0572ea);
+  background: linear-gradient(135deg, #0758d8, #002888);
 }
 
 .auth-divider.MuiDivider-root {
@@ -4879,9 +4896,9 @@ html.dark body {
 }
 
 .auth-social-button.MuiIconButton-root:hover {
-  border-color: #0572ea;
+  border-color: #002888;
   background: #f4f9ff;
-  color: #0572ea;
+  color: #002888;
 }
 
 .auth-social-google.MuiIconButton-root {
@@ -4915,7 +4932,7 @@ html.dark body {
   place-items: center;
   border-radius: 999px;
   background: #dceaff;
-  color: #0572ea;
+  color: #002888;
 }
 
 .auth-note p {
@@ -5033,7 +5050,7 @@ html.dark body {
   place-items: center;
   border-radius: 999px;
   background: #f0f6ff;
-  color: #0572ea;
+  color: #002888;
 }
 
 .auth-footer-item span::before {
@@ -5051,7 +5068,7 @@ html.dark body {
 .auth-footer-item strong,
 .auth-copyright strong {
   display: block;
-  color: #0572ea;
+  color: #002888;
   font-size: 0.82rem;
   font-weight: 900;
 }

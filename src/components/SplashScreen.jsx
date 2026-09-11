@@ -56,6 +56,12 @@ export default function SplashScreen({
 
     timelineRef.current?.kill();
 
+    if (transitionKey === 0 && !routeTitle) {
+      gsap.set(root, { autoAlpha: 0, display: "none", pointerEvents: "none" });
+      didMountRef.current = true;
+      return undefined;
+    }
+
     if (reduceMotion) {
       gsap.set(root, {
         autoAlpha: 1,
@@ -77,6 +83,7 @@ export default function SplashScreen({
 
     const isInitial = !didMountRef.current;
     didMountRef.current = true;
+
     const tl = gsap.timeline({
       defaults: { ease: "power3.inOut" },
       onComplete: () => {
@@ -205,7 +212,7 @@ export default function SplashScreen({
         timelineRef.current = null;
       }
     };
-  }, [transitionKey, onCovered, onComplete, variant]);
+  }, [transitionKey, routeTitle, onCovered, onComplete, variant]);
 
   const isRouteTransition = Boolean(routeTitle);
 

@@ -62,6 +62,13 @@ import facultyAisha from "@/assets/faculty-aisha.avif";
 import facultyRahul from "@/assets/faculty-rahul.jpg";
 import aboutKnoraImage from "@/assets/Aboutknora.png";
 import knoraLettermark from "@/assets/KNORALettermark.png";
+import letterK from "@/assets/k.png";
+import letterN from "@/assets/n.png";
+import letterO from "@/assets/o.png";
+import letterR from "@/assets/r.png";
+import letterA from "@/assets/a.png";
+import learningImage from "@/assets/courseimg.webp";
+import "./HomeImages.css";
 
 const SCENE_COUNT = 9;
 const SCENE_SLOT = 1.42;
@@ -339,6 +346,12 @@ const hybridHighlights = [
 ];
 
 const HERO_LETTERS = ["K", "N", "O", "R", "A"];
+const HERO_LETTER_IMAGES = [letterK, letterN, letterO, letterR, letterA];
+const hybridImages = [
+  { src: learningImage, alt: "AI course learning preview" },
+  { src: aboutKnoraImage, alt: "KNORA campus reception" },
+  { src: coursePythonImage, alt: "Python course and practice track" },
+];
 
 function Badge({ children }) {
   return (
@@ -757,6 +770,43 @@ export default function Home() {
       });
 
       if (!journey.reducedMotion) {
+        gsap.fromTo(
+          ".welcome-photo",
+          {
+            y: isMobile ? 28 : 70,
+            opacity: 0,
+            scale: 0.94,
+          },
+          {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            stagger: 0.14,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: ".welcome-image-layout",
+              start: "top 88%",
+              end: "center 55%",
+              scrub: 0.8,
+            },
+          },
+        );
+        gsap.utils.toArray(".hybrid-photo img").forEach((image) => {
+          gsap.fromTo(
+            image,
+            { scale: 1.12 },
+            {
+              scale: 1,
+              ease: "none",
+              scrollTrigger: {
+                trigger: image,
+                start: "top bottom",
+                end: "bottom center",
+                scrub: 0.8,
+              },
+            },
+          );
+        });
         const revealTargets = wrapper.current.querySelectorAll(
           ".hero-pop, .holo-text, .motion-card",
         );
@@ -1279,7 +1329,7 @@ export default function Home() {
                 <KnoraLogoHoverText />
                 <br />
                 <span className="inline-block whitespace-nowrap">
-                  <span className="text-black">
+                  <span className="hero-edu-text">
                     <LetterFadeText text="Edu" />
                   </span>{" "}
                   <span className="hero-learn relative inline-block text-primary">
@@ -1294,7 +1344,7 @@ export default function Home() {
               </p>
               <div className="hero-pop mt-7 flex flex-wrap items-center gap-3">
                 <a
-                  href="/apply-online"
+                  href="/courses"
                   className="lift arrow-shift flex min-h-12 items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-medium text-primary-foreground glow-soft sm:px-6 sm:py-3.5"
                 >
                   Apply Now <ArrowRight className="arrow size-4" />
@@ -1349,13 +1399,14 @@ export default function Home() {
                     onClick={rotateHeroLetter}
                   >
                     <span className="hero-letter-orbit hero-letter-orbit-third" />
-                    <span
+                    <img
                       key={heroLetter}
-                      className="hero-morph-letter"
-                      data-letter={heroLetter}
-                    >
-                      {heroLetter}
-                    </span>
+                      className="hero-letter-image"
+                      src={HERO_LETTER_IMAGES[heroLetterIndex]}
+                      alt={heroLetter}
+                      width="200"
+                      height="200"
+                    />
                   </button>
                 </div>
                 <div className="hero-cap absolute">
@@ -1416,13 +1467,37 @@ export default function Home() {
             ref={setSceneRef(1)}
             className="section-2 hologram-section relative mx-auto grid min-h-screen max-w-7xl grid-cols-1 items-center gap-8 px-6 py-24 lg:grid-cols-[0.9fr_1.1fr] lg:px-10"
           >
-            <div className="motion-card relative z-10 overflow-hidden rounded-[2rem] border border-border/70 bg-card/70 shadow-[var(--shadow-glass)]">
-              <img
-                src={aboutKnoraImage}
-                alt="Knora Academy campus reception"
-                className="aspect-[2/1] w-full object-cover"
-                loading="lazy"
-              />
+            <div className="welcome-image-layout">
+              <figure className="welcome-photo welcome-photo-campus">
+                <img
+                  src={aboutKnoraImage}
+                  alt="KNORA Academy campus reception"
+                  loading="lazy"
+                />
+                <figcaption>
+                  <span>01 / THE SPACE</span>A place to begin.
+                </figcaption>
+              </figure>
+              <figure className="welcome-photo welcome-photo-learning">
+                <img
+                  src={learningImage}
+                  alt="AI learning and tools preview"
+                  loading="lazy"
+                />
+                <figcaption>
+                  <span>02 / THE POSSIBILITIES</span>Explore AI.
+                </figcaption>
+              </figure>
+              <figure className="welcome-photo welcome-photo-mentor">
+                <img
+                  src={facultyAisha}
+                  alt="KNORA faculty mentor"
+                  loading="lazy"
+                />
+                <figcaption>
+                  <span>03 / THE GUIDANCE</span>Learn with mentors.
+                </figcaption>
+              </figure>
             </div>
             <div className="relative z-10 grid gap-5 lg:ml-auto lg:max-w-[720px]">
               <SceneTitle
@@ -1780,14 +1855,20 @@ export default function Home() {
               </div>
 
               <div className="hybrid-highlight-list">
-                {hybridHighlights.map((item) => (
+                {hybridHighlights.map((item, index) => (
                   <div key={item.number} className="motion-card hybrid-row">
                     <div>
                       <span className="hybrid-row-number">+ {item.number}</span>
                       <h3>{item.title}</h3>
                       <p>{item.copy}</p>
                     </div>
-                    <HybridIllustration variant={item.variant} />
+                    <div className="hybrid-photo">
+                      <img
+                        src={hybridImages[index].src}
+                        alt={hybridImages[index].alt}
+                        loading="lazy"
+                      />
+                    </div>
                   </div>
                 ))}
               </div>

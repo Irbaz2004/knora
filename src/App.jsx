@@ -5,8 +5,10 @@ import AdmissionProcess from "@/pages/AdmissionProcess";
 import ApplyOnline from "@/pages/ApplyOnline";
 import Career from "@/pages/Career";
 import ContactUs from "@/pages/ContactUs";
+import Counselling from "@/pages/Counselling";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import OpeningVideoSplash from "@/components/OpeningVideoSplash";
 import SplashScreen from "@/components/SplashScreen";
 import CourseDetails from "@/pages/CourseDetails";
 import Courses from "@/pages/Courses";
@@ -31,6 +33,7 @@ const routes = {
   "/apply-online": ApplyOnline,
   "/career": Career,
   "/contact-us": ContactUs,
+  "/counselling": Counselling,
   "/courses": Courses,
   "/events-news": EventsNews,
   "/faculty": Faculty,
@@ -53,6 +56,7 @@ const routeLabels = {
   "/apply-online": "Apply Online",
   "/career": "Career",
   "/contact-us": "Contact Us",
+  "/counselling": "Counselling",
   "/courses": "Courses",
   "/events-news": "Events & News",
   "/faculty": "Faculty",
@@ -217,6 +221,7 @@ export default function App() {
       <Page />
       {!isAuthRoute && <Footer />}
       <Toaster richColors position="top-right" />
+      {!isAuthRoute && <OpeningVideoSplash />}
       <SplashScreen
         transitionKey={transitionKey}
         routeTitle={transitionLabel}

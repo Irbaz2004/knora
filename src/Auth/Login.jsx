@@ -88,7 +88,7 @@ const loginStyles = {
     justifyContent: "center",
     p: "clamp(1.5rem, 3vw, 2.5rem) clamp(2rem, 5vw, 5rem)",
     background:
-      "radial-gradient(circle at 8% 94%, rgba(5, 114, 234, 0.06), transparent 24%), #ffffff",
+      "radial-gradient(circle at 8% 94%, rgba(0, 40, 136, 0.06), transparent 24%), #ffffff",
     "@media (max-width: 1024px)": {
       minHeight: "auto",
       p: "5.5rem clamp(1.25rem, 6vw, 4rem) 1.5rem",
@@ -151,7 +151,7 @@ const loginStyles = {
     fontWeight: 900,
     lineHeight: 1.04,
     "& span": {
-      color: "#0572ea",
+      color: "#002888",
     },
     "@media (max-height: 820px) and (min-width: 1025px)": {
       fontSize: "clamp(2rem, 3vw, 3.1rem)",
@@ -189,7 +189,7 @@ const loginStyles = {
     },
     "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline, & .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
       {
-        borderColor: "#0572ea",
+        borderColor: "#002888",
       },
     "& .MuiInputAdornment-positionStart": {
       mr: "0.8rem",
@@ -224,7 +224,7 @@ const loginStyles = {
   link: {
     minWidth: 0,
     p: 0,
-    color: "#0572ea",
+    color: "#002888",
     cursor: "pointer !important",
     fontFamily: "var(--font-sans)",
     fontSize: "0.92rem",
@@ -246,7 +246,7 @@ const loginStyles = {
     fontWeight: 900,
     textTransform: "none",
     "&:hover": {
-      background: "linear-gradient(135deg, #0758d8, #0572ea)",
+      background: "linear-gradient(135deg, #0758d8, #002888)",
     },
     "&:disabled": {
       cursor: "wait",
@@ -276,7 +276,7 @@ const loginStyles = {
     placeItems: "center",
     borderRadius: "999px",
     background: "#dceaff",
-    color: "#0572ea",
+    color: "#002888",
   },
   noteText: {
     m: 0,
@@ -301,7 +301,7 @@ const loginStyles = {
     "& .MuiButton-root": {
       minWidth: 0,
       p: 0,
-      color: "#0572ea",
+      color: "#002888",
       cursor: "pointer !important",
       fontFamily: "var(--font-sans)",
       fontSize: "0.94rem",
@@ -417,7 +417,7 @@ const loginStyles = {
     placeItems: "center",
     borderRadius: "999px",
     background: "#f0f6ff",
-    color: "#0572ea",
+    color: "#002888",
   },
   footerText: {
     m: 0,
@@ -427,7 +427,7 @@ const loginStyles = {
   },
   footerTitle: {
     display: "block",
-    color: "#0572ea",
+    color: "#002888",
     fontSize: "0.82rem",
     fontWeight: 900,
   },

@@ -364,7 +364,7 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
   const annLineMaterial = useMemo(
     () =>
       new THREE.LineBasicMaterial({
-        color: new THREE.Color(0x0572ea),
+        color: new THREE.Color(0x002888),
         transparent: true,
         opacity: 0,
         depthWrite: false,
@@ -376,7 +376,7 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
   const campusLineMaterial = useMemo(
     () =>
       new THREE.LineBasicMaterial({
-        color: new THREE.Color(0x0572ea),
+        color: new THREE.Color(0x002888),
         transparent: true,
         opacity: 0,
         depthWrite: false,

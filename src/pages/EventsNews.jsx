@@ -544,7 +544,7 @@ export default function EventsNews() {
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
           },
-          ".en-event-blue": { background: "#0572ea" },
+          ".en-event-blue": { background: "#002888" },
           ".en-event-cyan": { background: "#0f93b8" },
           ".en-event-green": { background: "#188a63" },
           ".en-event-violet": { background: "#7161ef" },

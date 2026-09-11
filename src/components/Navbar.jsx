@@ -28,6 +28,7 @@ const menu = [
     ],
   },
   { label: "Courses", href: "/courses" },
+  { label: "Counselling", href: "/counselling" },
   { label: "Placements", href: "/placements" },
   {
     label: "Media",
@@ -37,7 +38,7 @@ const menu = [
       { label: "Testimonials", href: "/testimonials" },
     ],
   },
-  { label: "Career", href: "/career" },
+  // { label: "Career", href: "/career" },
   { label: "Contact Us", href: "/contact-us" },
 ];
 
@@ -438,11 +439,12 @@ export default function Navbar() {
       "/faculty": "About",
       "/courses": "Courses",
       "/course": "Courses",
+      "/counselling": "Counselling",
       "/placements": "Placements",
       "/events-news": "Media",
       "/gallery": "Media",
       "/testimonials": "Media",
-      "/career": "Career",
+      // "/career": "Career",
       "/contact-us": "Contact Us",
     };
     const onScroll = () => {
