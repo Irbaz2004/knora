@@ -22,7 +22,6 @@ import RocketLaunchRoundedIcon from "@mui/icons-material/RocketLaunchRounded";
 import ShoppingCartRoundedIcon from "@mui/icons-material/ShoppingCartRounded";
 import SmartToyRoundedIcon from "@mui/icons-material/SmartToyRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
-import CursorEffect from "@/components/CursorEffect";
 import courseImage from "@/assets/courseimg.webp";
 
 const courseCatalog = [
@@ -365,7 +364,7 @@ export default function CourseDetails() {
           },
         }}
       />
-      <CursorEffect />
+
       <main className="course-detail-page min-h-screen px-4 py-28 text-foreground sm:px-8 lg:px-16">
         <Container maxWidth={false} sx={{ maxWidth: 1280 }}>
           <Button

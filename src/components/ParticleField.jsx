@@ -19,10 +19,10 @@ import {
 } from "@/lib/particleTargets";
 
 function useParticleCount() {
-  const [count, setCount] = useState(7000);
+  const [count, setCount] = useState(5200);
   useEffect(() => {
     const w = window.innerWidth;
-    setCount(w < 360 ? 1800 : w < 640 ? 2600 : w < 1024 ? 4800 : 7600);
+    setCount(w < 360 ? 1400 : w < 640 ? 2200 : w < 1024 ? 3600 : 5200);
   }, []);
   return count;
 }
@@ -40,6 +40,9 @@ function useAnchorCenterPx(anchorRef) {
     const measure = () => {
       const rect = el.getBoundingClientRect();
       if (rect.width === 0 && rect.height === 0) return;
+      // Do not replace the stable hero fallback while the carousel keeps the
+      // orb off-screen. Updating this on every scroll rebuilt all formations.
+      if (rect.bottom <= 0 || rect.top >= window.innerHeight) return;
       setCenter({
         x: rect.left + rect.width / 2,
         y: rect.top + rect.height / 2,
@@ -158,13 +161,13 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
       const cy = rect.top + rect.height / 2;
       const dx = e.clientX - cx;
       const dy = e.clientY - cy;
-      const radius = Math.min(rect.width, rect.height) * 0.48;
+      const radius = (sphereR / viewport.width) * size.width;
       const inside = dx * dx + dy * dy < radius * radius;
       hoverRef.current = inside ? 1 : 0;
       if (inside) {
         pointerWorldRef.current = {
-          x: heroCenter[0] + (dx / radius) * sphereR,
-          y: heroCenter[1] - (dy / radius) * sphereR,
+          x: (e.clientX / size.width - 0.5) * viewport.width,
+          y: (0.5 - e.clientY / size.height) * viewport.height,
         };
         const last = lastPointerRef.current;
         if (last) {
@@ -195,7 +198,16 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
       window.removeEventListener("pointermove", updateHover);
       window.removeEventListener("pointerleave", clearHover);
     };
-  }, [heroAnchorRef, heroHoverRef, heroCenter, sphereR]);
+  }, [
+    heroAnchorRef,
+    heroHoverRef,
+    heroCenter,
+    sphereR,
+    viewport.width,
+    viewport.height,
+    size.width,
+    size.height,
+  ]);
 
   const courseCenter = useMemo(
     () => [isNarrow ? 0 : -vw * 0.3, isNarrow ? -0.35 : -1.25, 0],
@@ -413,11 +425,11 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
       1.42,
       directorQuiet,
     );
-    material.uniforms.uGlobalAlpha.value = THREE.MathUtils.lerp(
-      1,
-      0.78,
-      directorQuiet,
-    );
+    // Fade the decorative field before the calendar and footer. Those areas
+    // should stay clean instead of inheriting the final particle formation.
+    const finalFade = 1 - THREE.MathUtils.smoothstep(p, 0.82, 0.865);
+    material.uniforms.uGlobalAlpha.value =
+      THREE.MathUtils.lerp(1, 0.78, directorQuiet) * finalFade;
 
     const {
       spherePositions,
@@ -432,8 +444,10 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
       render,
     } = data;
 
-    const travelStart = 0.068;
-    const travelEnd = 0.145;
+    // Keep the opening sphere locked to the hero's K orb. It should only
+    // begin travelling after the hero has nearly cleared the viewport.
+    const travelStart = 0.125;
+    const travelEnd = 0.17;
     const directorStart = 0.17;
     const directorEnd = 0.235;
     const spreadStart = 0.3;
@@ -589,10 +603,9 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
     const scratch = scratchRef.current;
     const scratchVector = scratchVectorRef.current;
     const pointerWorld = pointerWorldRef.current;
-    const sphereLike = 1 - THREE.MathUtils.smoothstep(p, 0.035, travelStart);
-    const breathe = journey.reducedMotion
-      ? 1
-      : 1 + Math.sin(t * 0.75) * 0.02 + hover * 0.17 * sphereLike;
+    const sphereLike =
+      1 - THREE.MathUtils.smoothstep(p, travelStart, travelEnd);
+    const breathe = journey.reducedMotion ? 1 : 1 + Math.sin(t * 0.75) * 0.02;
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
       let x = live[i3];
@@ -634,6 +647,12 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
         const globalPush = hover * 0.045 * sphereLike;
         const scratchPush = scratch * localPull * sphereLike;
         const len = Math.max(0.001, Math.hypot(dx, dy));
+        // A persistent local opening follows the pointer, even while it rests.
+        const gapRadius = sphereR * 0.36;
+        const gap = Math.max(0, gapRadius - len) * hover * sphereLike;
+        const angle = seed * Math.PI * 2;
+        x += (len > 0.002 ? dx / len : Math.cos(angle)) * gap;
+        y += (len > 0.002 ? dy / len : Math.sin(angle)) * gap;
         x += (x - breatheCenterX) * globalPush;
         y += (y - breatheCenterY) * globalPush;
         x += (dx / len + scratchVector.x * 2.1) * scratchPush * seedPush;
@@ -652,11 +671,13 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
     // Keep connection lines only while the particle structure is sphere-like.
     // The spread/wave states are dot-driven so they stay clean behind content.
     lineMaterial.opacity =
-      p < travelEnd ? THREE.MathUtils.lerp(0.18, 0.045, travelProgress) : 0;
+      (p < travelEnd ? THREE.MathUtils.lerp(0.18, 0.045, travelProgress) : 0) *
+      finalFade;
     annLineMaterial.opacity =
       THREE.MathUtils.smoothstep(p, 0.305, 0.34) *
       (1 - THREE.MathUtils.smoothstep(p, 0.385, 0.43)) *
-      0.2;
+      0.2 *
+      finalFade;
     campusLineMaterial.opacity = 0;
   });
 

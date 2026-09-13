@@ -1,0 +1,59 @@
+.navigation-video-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 14000;
+  display: none;
+  place-items: center;
+  width: 100%;
+  height: 100dvh;
+  background: #fff;
+  overflow: clip;
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+  transition: opacity 0.25s ease;
+}
+.navigation-video-overlay video {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+  background: #fff;
+  /* The source clip contains a vertical edge near its right side. A centered
+     overscan keeps that source edge outside the viewport on every ratio. */
+  transform: scale(1.34);
+  transform-origin: center;
+}
+
+html.navigation-video-active,
+html.navigation-video-active body {
+  overflow: clip !important;
+  scrollbar-width: none !important;
+  scrollbar-gutter: auto !important;
+}
+html.navigation-video-active *::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+}
+@media (max-width: 760px) {
+  .opening-video-splash.ai-entry {
+    height: 100dvh;
+  }
+  .opening-video-splash.ai-entry .ai-entry-video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #fff;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .navigation-video-overlay {
+    transition: none;
+  }
+}

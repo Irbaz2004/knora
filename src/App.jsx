@@ -1,3 +1,5 @@
+import SmoothScroll from "@/components/SmoothScroll";
+import CursorEffect from "@/components/CursorEffect";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Toaster } from "sonner";
 import AboutUs from "@/pages/AboutUs";
@@ -220,8 +222,10 @@ export default function App() {
       {!isAuthRoute && <Navbar />}
       <Page />
       {!isAuthRoute && <Footer />}
+      <SmoothScroll />
+      <CursorEffect />
       <Toaster richColors position="top-right" />
-      {!isAuthRoute && <OpeningVideoSplash />}
+      {!isAuthRoute && transitionKey === 0 && <OpeningVideoSplash />}
       <SplashScreen
         transitionKey={transitionKey}
         routeTitle={transitionLabel}

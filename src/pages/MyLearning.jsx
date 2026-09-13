@@ -1,5 +1,4 @@
 import { BookOpenCheck, Clock3, GraduationCap } from "lucide-react";
-import CursorEffect from "@/components/CursorEffect";
 
 const learningStats = [
   { label: "Active Courses", value: "0", Icon: GraduationCap },
@@ -10,7 +9,6 @@ const learningStats = [
 export default function MyLearning() {
   return (
     <>
-      <CursorEffect />
       <main className="min-h-screen bg-background px-6 py-32 text-foreground sm:px-10 lg:px-20">
         <section className="mx-auto max-w-6xl">
           <span className="hero-badge inline-flex w-fit rounded-full px-4 py-2 text-[0.7rem] font-semibold tracking-[0.2em] text-primary uppercase">

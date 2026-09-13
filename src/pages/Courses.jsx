@@ -25,7 +25,6 @@ import RocketLaunchRoundedIcon from "@mui/icons-material/RocketLaunchRounded";
 import SmartToyRoundedIcon from "@mui/icons-material/SmartToyRounded";
 import VideocamRoundedIcon from "@mui/icons-material/VideocamRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
-import CursorEffect from "@/components/CursorEffect";
 import courseAiImage from "@/assets/course-ai.svg";
 import courseGenAiImage from "@/assets/course-genai.svg";
 import courseImage from "@/assets/courseimg.webp";
@@ -1816,7 +1815,6 @@ export default function Courses() {
           },
         }}
       />
-      <CursorEffect />
 
       <Box
         component="main"

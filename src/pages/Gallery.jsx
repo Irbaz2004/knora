@@ -14,7 +14,6 @@ import {
 } from "@mui/material";
 import { ChevronLeft, ChevronRight, Close } from "@mui/icons-material";
 import gsap from "gsap";
-import CursorEffect from "@/components/CursorEffect";
 
 const IMAGE_COUNT = 40;
 const galleryCategories = [
@@ -448,7 +447,6 @@ export default function Gallery() {
 
   return (
     <>
-      <CursorEffect />
       <Box
         component="main"
         sx={{

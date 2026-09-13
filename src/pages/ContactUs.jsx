@@ -14,10 +14,9 @@ import {
   SupportAgentOutlined,
   SwapHorizOutlined,
 } from "@mui/icons-material";
-import DottedMap from "dotted-map";
+import ContactGlobe from "@/components/ContactGlobe";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import CursorEffect from "@/components/CursorEffect";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -140,246 +139,6 @@ function Reveal({ children, delay = 0, y = 34, sx, ...props }) {
   return (
     <Box ref={ref} sx={sx} {...props}>
       {children}
-    </Box>
-  );
-}
-
-function ChennaiDottedMap() {
-  const [map, setMap] = useState(null);
-  const mapRef = useRef(null);
-
-  useEffect(() => {
-    const dm = new DottedMap({ height: 50, grid: "diagonal" });
-    const point = dm.addPin({
-      lat: CHENNAI_OFFICE.lat,
-      lng: CHENNAI_OFFICE.lng,
-      svgOptions: { color: "transparent", radius: 0.01 },
-    });
-
-    const svg = dm.getSVG({
-      radius: 0.24,
-      color: "currentColor",
-      shape: "circle",
-      backgroundColor: "transparent",
-    });
-
-    setMap({ svg, width: dm.width, height: dm.height, pin: point });
-  }, []);
-
-  useEffect(() => {
-    if (!map || !mapRef.current) return undefined;
-
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    const dots = mapRef.current.querySelectorAll("circle");
-
-    if (reduceMotion) {
-      gsap.set(dots, { autoAlpha: 1, scale: 1 });
-      return undefined;
-    }
-
-    const timeline = gsap.timeline({
-      scrollTrigger: {
-        trigger: mapRef.current,
-        start: "top 82%",
-        toggleActions: "restart none none reverse",
-      },
-    });
-
-    timeline
-      .fromTo(
-        dots,
-        {
-          autoAlpha: 0,
-          scale: 0,
-          x: () => gsap.utils.random(-34, 34),
-          y: () => gsap.utils.random(-24, 24),
-          transformOrigin: "50% 50%",
-        },
-        {
-          autoAlpha: 1,
-          scale: 1,
-          x: 0,
-          y: 0,
-          duration: 0.75,
-          ease: "power3.out",
-          stagger: { amount: 1.05, from: "center", grid: "auto" },
-        },
-      )
-      .fromTo(
-        ".contact-map-pin",
-        { autoAlpha: 0, scale: 0.4, y: 12 },
-        { autoAlpha: 1, scale: 1, y: 0, duration: 0.5, ease: "back.out(1.8)" },
-        "-=0.15",
-      );
-
-    return () => {
-      timeline.scrollTrigger?.kill();
-      timeline.kill();
-    };
-  }, [map]);
-
-  if (!map) {
-    return (
-      <Box
-        sx={{
-          width: "100%",
-          aspectRatio: "99 / 50",
-          borderRadius: "8px",
-          bgcolor: "color-mix(in oklab, var(--primary) 7%, var(--card))",
-        }}
-      />
-    );
-  }
-
-  const left = `${(map.pin.x / map.width) * 100}%`;
-  const top = `${(map.pin.y / map.height) * 100}%`;
-
-  return (
-    <Box
-      sx={{
-        position: "relative",
-        overflow: "visible",
-        border: 0,
-        borderRadius: "8px",
-        background:
-          "linear-gradient(180deg, color-mix(in oklab, var(--card) 86%, transparent), color-mix(in oklab, var(--background) 96%, transparent))",
-        p: { xs: 1.5, sm: 2.4, md: 3 },
-      }}
-    >
-      <Box
-        sx={{
-          pointerEvents: "none",
-          position: "absolute",
-          inset: 0,
-          backgroundImage:
-            "linear-gradient(color-mix(in oklab, var(--primary) 9%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in oklab, var(--primary) 9%, transparent) 1px, transparent 1px)",
-          backgroundSize: { xs: "34px 34px", md: "56px 56px" },
-          opacity: 0.48,
-        }}
-      />
-
-      <Box
-        ref={mapRef}
-        sx={{
-          position: "relative",
-          color: "color-mix(in oklab, var(--primary) 44%, var(--foreground))",
-          opacity: 0.76,
-          transition: "opacity 0.3s ease",
-          "& svg": {
-            display: "block",
-            width: "100%",
-            height: "auto",
-            overflow: "visible",
-          },
-        }}
-        dangerouslySetInnerHTML={{ __html: map.svg }}
-      />
-
-      <Box
-        component="a"
-        href="https://www.google.com/maps/search/?api=1&query=Knora%20Academy%20Chennai"
-        target="_blank"
-        rel="noreferrer"
-        className="contact-map-pin"
-        aria-label="Open Knora Academy Chennai in Google Maps"
-        sx={{
-          position: "absolute",
-          left,
-          top,
-          zIndex: 4,
-          display: "block",
-          transform: "translate(-50%, -50%)",
-          textDecoration: "none",
-          cursor: "pointer",
-        }}
-      >
-        <Box
-          sx={{
-            position: "absolute",
-            left: "50%",
-            bottom: "calc(100% + 0.8rem)",
-            minWidth: { xs: 168, sm: 198 },
-            transform: "translateX(-50%)",
-            border:
-              "1px solid color-mix(in oklab, var(--primary) 24%, transparent)",
-            borderRadius: "8px",
-            bgcolor: "color-mix(in oklab, var(--card) 94%, transparent)",
-            color: "var(--foreground)",
-            p: { xs: 1.05, sm: 1.25 },
-            textAlign: "center",
-            backdropFilter: "blur(14px) saturate(145%)",
-            "&::after": {
-              content: '""',
-              position: "absolute",
-              left: "50%",
-              top: "100%",
-              width: 10,
-              height: 10,
-              borderRight:
-                "1px solid color-mix(in oklab, var(--primary) 24%, transparent)",
-              borderBottom:
-                "1px solid color-mix(in oklab, var(--primary) 24%, transparent)",
-              bgcolor: "color-mix(in oklab, var(--card) 94%, transparent)",
-              transform: "translate(-50%, -50%) rotate(45deg)",
-            },
-          }}
-        >
-          <Typography sx={{ fontSize: "0.84rem", fontWeight: 900 }}>
-            Knora Academy Chennai
-          </Typography>
-          <Typography
-            sx={{
-              mt: 0.25,
-              color: "var(--muted-foreground)",
-              fontSize: "0.72rem",
-            }}
-          >
-            Click to open map
-          </Typography>
-        </Box>
-
-        <Box
-          sx={{
-            display: "grid",
-            width: { xs: 34, sm: 40 },
-            height: { xs: 34, sm: 40 },
-            placeItems: "center",
-            border: "2px solid var(--card)",
-            borderRadius: "999px",
-            bgcolor: "var(--primary)",
-            color: "var(--primary-foreground)",
-          }}
-        >
-          <PlaceOutlined sx={{ fontSize: { xs: 21, sm: 25 } }} />
-        </Box>
-        <Box
-          sx={{
-            position: "absolute",
-            left: "50%",
-            top: "50%",
-            zIndex: -1,
-            width: 52,
-            height: 52,
-            m: "auto",
-            borderRadius: "999px",
-            bgcolor: "color-mix(in oklab, var(--primary) 34%, transparent)",
-            animation: "contactPinPulse 1.9s ease-out infinite",
-            transform: "translate(-50%, -50%)",
-            "@keyframes contactPinPulse": {
-              "0%": {
-                opacity: 0.58,
-                transform: "translate(-50%, -50%) scale(0.45)",
-              },
-              "100%": {
-                opacity: 0,
-                transform: "translate(-50%, -50%) scale(1.65)",
-              },
-            },
-          }}
-        />
-      </Box>
     </Box>
   );
 }
@@ -572,7 +331,6 @@ export default function ContactUs() {
 
   return (
     <>
-      <CursorEffect />
       <Box
         ref={pageRef}
         component="main"
@@ -644,7 +402,7 @@ export default function ContactUs() {
           </Box>
 
           <Reveal delay={0.05}>
-            <ChennaiDottedMap />
+            <ContactGlobe />
           </Reveal>
 
           <Reveal delay={0.12} sx={{ mt: { xs: 6, md: 9 } }}>

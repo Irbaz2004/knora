@@ -3319,11 +3319,7 @@ html.dark body {
   justify-content: center;
   padding: clamp(2rem, 4.8vw, 4.6rem) clamp(2rem, 6.2vw, 7.2rem);
   background:
-    radial-gradient(
-      circle at 14% 92%,
-      rgba(0, 40, 136, 0.08),
-      transparent 28%
-    ),
+    radial-gradient(circle at 14% 92%, rgba(0, 40, 136, 0.08), transparent 28%),
     radial-gradient(circle at 78% 0%, rgba(0, 40, 136, 0.08), transparent 28%),
     #ffffff;
 }
@@ -5573,4 +5569,20 @@ svg {
   .auth-footer-item:nth-child(n + 3) {
     display: none;
   }
+}
+html.page-scroll-locked,
+html.page-scroll-locked body {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+  scrollbar-width: none !important;
+  scrollbar-gutter: auto !important;
+}
+html.page-scroll-locked::-webkit-scrollbar,
+html.page-scroll-locked body::-webkit-scrollbar {
+  display: none !important;
+  width: 0;
+}
+html.lenis,
+html.lenis body {
+  scroll-behavior: auto !important;
 }

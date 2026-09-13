@@ -9,7 +9,6 @@ import {
 import gsap from "gsap";
 import { Draggable } from "gsap/Draggable";
 import { InertiaPlugin } from "gsap/InertiaPlugin";
-import CursorEffect from "@/components/CursorEffect";
 
 gsap.registerPlugin(Draggable, InertiaPlugin);
 
@@ -399,7 +398,6 @@ export default function Testimonial() {
 
   return (
     <>
-      <CursorEffect />
       <Box
         sx={{
           position: "relative",

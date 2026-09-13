@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { Box } from "@mui/material";
@@ -29,7 +29,7 @@ const menu = [
   },
   { label: "Courses", href: "/courses" },
   { label: "Counselling", href: "/counselling" },
-  { label: "Placements", href: "/placements" },
+
   {
     label: "Media",
     items: [
@@ -53,6 +53,8 @@ const navbarStyles = {
     px: { xs: "0.75rem", sm: "1.5rem" },
   },
   nav: {
+    position: "relative",
+    zIndex: 70,
     display: "flex",
     width: "100%",
     maxWidth: "1820px",
@@ -171,17 +173,17 @@ const navbarStyles = {
   dropdownPanel: {
     borderRadius: "1.5rem",
     border: "1px solid color-mix(in oklab, var(--primary) 16%, white)",
-    background:
-      "linear-gradient(180deg, color-mix(in oklab, white 72%, transparent), color-mix(in oklab, white 48%, transparent)), color-mix(in oklab, var(--background) 42%, transparent)",
+    background: "#ffffff",
+    color: "#000000",
     boxShadow:
       "0 24px 64px -34px color-mix(in oklab, var(--navy) 38%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.72)",
     backdropFilter: "blur(26px) saturate(180%)",
     WebkitBackdropFilter: "blur(26px) saturate(180%)",
     p: "0.5rem",
     ".dark &": {
-      borderColor: "color-mix(in oklab, var(--primary) 24%, transparent)",
-      background:
-        "linear-gradient(180deg, color-mix(in oklab, var(--card) 72%, transparent), color-mix(in oklab, var(--background) 62%, transparent)), color-mix(in oklab, var(--background) 50%, transparent)",
+      borderColor: "#e2e8f0",
+      background: "#ffffff",
+      color: "#000000",
       boxShadow:
         "0 24px 68px -36px rgba(0, 0, 0, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.12)",
     },
@@ -193,7 +195,7 @@ const navbarStyles = {
     border: 0,
     borderRadius: "1rem",
     background: "transparent",
-    color: "var(--muted-foreground)",
+    color: "#000000",
     cursor: "pointer",
     font: "inherit",
     fontSize: "0.88rem",
@@ -289,17 +291,24 @@ const navbarStyles = {
     display: { xs: "flex", xl: "none" },
   },
   mobileMenu: {
-    position: "absolute",
-    left: "50%",
-    top: { xs: "6.25rem", sm: "6.9rem" },
+    position: "fixed",
+    inset: 0,
     zIndex: 60,
-    width: "calc(100% - 1.5rem)",
-    maxWidth: "28rem",
-    maxHeight: "calc(100vh - 7rem)",
+    width: "100vw",
+    maxWidth: "none",
+    height: "100dvh",
+    maxHeight: "none",
     overflowY: "auto",
-    transform: "translateX(-50%)",
-    borderRadius: "1.5rem",
-    p: "1rem",
+    transform: "none",
+    borderRadius: 0,
+    background: "#ffffff",
+    color: "#000000",
+    px: "1.25rem",
+    pb: "2rem",
+    pt: { xs: "6.5rem", sm: "7.25rem" },
+    "& a, & button, & p": {
+      color: "#000000",
+    },
   },
   mobileGroup: {
     display: "grid",
@@ -315,7 +324,7 @@ const navbarStyles = {
     alignItems: "center",
     justifyContent: "space-between",
     mb: "0.5rem",
-    color: "var(--foreground)",
+    color: "#000000",
     fontSize: "0.88rem",
     fontWeight: 700,
   },
@@ -326,7 +335,7 @@ const navbarStyles = {
   mobileLink: {
     display: "block",
     borderRadius: "1rem",
-    color: "var(--muted-foreground)",
+    color: "#000000",
     fontSize: "0.88rem",
     fontWeight: 700,
     px: "1rem",
@@ -364,7 +373,7 @@ const navbarStyles = {
   },
 };
 
-function DesktopItem({ item, active, onSelect }) {
+function DesktopItem({ item, active, onSelect, isOpen, onToggle }) {
   if (!item.items) {
     return (
       <Box
@@ -383,34 +392,57 @@ function DesktopItem({ item, active, onSelect }) {
   }
 
   return (
-    <Box sx={navbarStyles.desktopItemWrap}>
+    <Box
+      sx={navbarStyles.desktopItemWrap}
+      onPointerEnter={() => onToggle(true)}
+      onPointerLeave={() => onToggle(false)}
+    >
       <Box
         component="button"
         type="button"
+        aria-expanded={isOpen}
+        aria-haspopup="menu"
+        onClick={onToggle}
         sx={navbarStyles.desktopTrigger(active === item.label)}
       >
         {item.label}
         <Box
           component={ChevronDown}
           data-chevron="true"
-          sx={navbarStyles.chevron}
+          sx={{
+            ...navbarStyles.chevron,
+            transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+          }}
         />
       </Box>
-      <Box data-menu-panel="true" sx={navbarStyles.dropdownShell}>
-        <Box sx={navbarStyles.dropdownPanel}>
-          {item.items.map((child) => (
-            <Box
-              component="a"
-              key={child.label}
-              href={child.href}
-              onClick={() => onSelect(item.label)}
-              sx={navbarStyles.dropdownLink}
-            >
-              {child.label}
-            </Box>
-          ))}
+      {isOpen && (
+        <Box
+          data-menu-panel="true"
+          role="menu"
+          sx={{
+            ...navbarStyles.dropdownShell,
+            pointerEvents: "auto",
+            opacity: 1,
+          }}
+        >
+          <Box sx={navbarStyles.dropdownPanel}>
+            {item.items.map((child) => (
+              <Box
+                component="a"
+                key={child.label}
+                href={child.href}
+                onClick={() => {
+                  onSelect(item.label);
+                  onToggle(false);
+                }}
+                sx={navbarStyles.dropdownLink}
+              >
+                {child.label}
+              </Box>
+            ))}
+          </Box>
         </Box>
-      </Box>
+      )}
     </Box>
   );
 }
@@ -419,8 +451,20 @@ export default function Navbar() {
   const [active, setActive] = useState("Home");
   const [open, setOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [desktopMenuOpen, setDesktopMenuOpen] = useState(null);
+  const [mobileGroupOpen, setMobileGroupOpen] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
+  const headerRef = useRef(null);
   const logo = useThemeLogo();
+
+  useEffect(() => {
+    const closeOnOutsideClick = (event) => {
+      if (!headerRef.current?.contains(event.target)) setDesktopMenuOpen(null);
+    };
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    return () =>
+      document.removeEventListener("pointerdown", closeOnOutsideClick);
+  }, []);
 
   const userName =
     userProfile?.fullName || userProfile?.displayName || userProfile?.email;
@@ -460,8 +504,11 @@ export default function Navbar() {
       const doc = document.documentElement;
       const p =
         doc.scrollTop / Math.max(1, doc.scrollHeight - window.innerHeight);
-      const order = ["Home", "Courses", "Placements", "About", "Contact Us"];
-      setActive(order[Math.min(order.length - 1, Math.floor(p * 5))] ?? "Home");
+      const order = ["Home", "Courses", "About", "Contact Us"];
+      setActive(
+        order[Math.min(order.length - 1, Math.floor(p * order.length))] ??
+          "Home",
+      );
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -529,7 +576,7 @@ export default function Navbar() {
   };
 
   return (
-    <Box component="header" sx={navbarStyles.header}>
+    <Box ref={headerRef} component="header" sx={navbarStyles.header}>
       <Box component="nav" sx={navbarStyles.nav}>
         <Box component="a" href="/" sx={navbarStyles.logoLink}>
           <Box component="span" sx={navbarStyles.logoFrame}>
@@ -548,7 +595,22 @@ export default function Navbar() {
               key={item.label}
               item={item}
               active={active}
-              onSelect={setActive}
+              onSelect={(label) => {
+                setActive(label);
+                setDesktopMenuOpen(null);
+              }}
+              isOpen={desktopMenuOpen === item.label}
+              onToggle={(forceClose) =>
+                setDesktopMenuOpen((current) =>
+                  forceClose === false
+                    ? null
+                    : forceClose === true
+                      ? item.label
+                      : current === item.label
+                        ? null
+                        : item.label,
+                )
+              }
             />
           ))}
         </Box>
@@ -696,7 +758,24 @@ export default function Navbar() {
               <Box key={item.label}>
                 {item.items ? (
                   <Box sx={navbarStyles.mobileParent}>
-                    <Box sx={navbarStyles.mobileHeading}>
+                    <Box
+                      component="button"
+                      type="button"
+                      aria-expanded={mobileGroupOpen === item.label}
+                      onClick={() =>
+                        setMobileGroupOpen((current) =>
+                          current === item.label ? null : item.label,
+                        )
+                      }
+                      sx={{
+                        ...navbarStyles.mobileHeading,
+                        width: "100%",
+                        border: 0,
+                        background: "transparent",
+                        cursor: "pointer",
+                        textAlign: "left",
+                      }}
+                    >
                       {item.label}
                       <Box
                         component={ChevronDown}
@@ -704,25 +783,35 @@ export default function Navbar() {
                           width: "1rem",
                           height: "1rem",
                           color: "var(--primary)",
+                          transform:
+                            mobileGroupOpen === item.label
+                              ? "rotate(180deg)"
+                              : "rotate(0deg)",
+                          transition: "transform 200ms ease",
                         }}
                       />
                     </Box>
-                    <Box sx={navbarStyles.mobileChildList}>
-                      {item.items.map((child) => (
-                        <Box
-                          component="a"
-                          key={child.label}
-                          href={child.href}
-                          onClick={() => setOpen(false)}
-                          sx={{
-                            ...navbarStyles.mobileLink,
-                            ...navbarStyles.mobileChildLink,
-                          }}
-                        >
-                          {child.label}
-                        </Box>
-                      ))}
-                    </Box>
+                    {mobileGroupOpen === item.label && (
+                      <Box sx={navbarStyles.mobileChildList}>
+                        {item.items.map((child) => (
+                          <Box
+                            component="a"
+                            key={child.label}
+                            href={child.href}
+                            onClick={() => {
+                              setOpen(false);
+                              setMobileGroupOpen(null);
+                            }}
+                            sx={{
+                              ...navbarStyles.mobileLink,
+                              ...navbarStyles.mobileChildLink,
+                            }}
+                          >
+                            {child.label}
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
                   </Box>
                 ) : (
                   <Box

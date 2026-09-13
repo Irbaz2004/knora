@@ -1,0 +1,7 @@
+html:not(.smooth-cursor-enabled) * {
+  cursor: revert !important;
+}
+html.smooth-cursor-enabled *,
+html.smooth-cursor-enabled .auth-page * {
+  cursor: none !important;
+}

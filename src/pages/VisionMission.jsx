@@ -15,7 +15,6 @@ import {
 } from "@mui/icons-material";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import CursorEffect from "@/components/CursorEffect";
 import courseImage from "@/assets/courseimg.webp";
 import facultyAisha from "@/assets/faculty-aisha.avif";
 import facultyRahul from "@/assets/faculty-rahul.jpg";
@@ -848,7 +847,6 @@ export default function VissionMission() {
 
   return (
     <>
-      <CursorEffect />
       <Box
         ref={pageRef}
         component="main"

@@ -19,7 +19,6 @@ import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded
 import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
 import NewspaperRoundedIcon from "@mui/icons-material/NewspaperRounded";
 import PlayCircleRoundedIcon from "@mui/icons-material/PlayCircleRounded";
-import CursorEffect from "@/components/CursorEffect";
 import eventImage from "@/assets/authright.png";
 
 const FONT_DISPLAY = "'Archivo', 'Helvetica Neue', sans-serif";
@@ -673,7 +672,6 @@ export default function EventsNews() {
           },
         }}
       />
-      <CursorEffect />
 
       <Box
         component="main"

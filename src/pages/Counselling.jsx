@@ -7,7 +7,6 @@ import RouteRoundedIcon from "@mui/icons-material/RouteRounded";
 import SupportAgentRoundedIcon from "@mui/icons-material/SupportAgentRounded";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import CursorEffect from "@/components/CursorEffect";
 import courseImage from "@/assets/courseimg.webp";
 import facultyAisha from "@/assets/faculty-aisha.avif";
 import facultyRahul from "@/assets/faculty-rahul.jpg";
@@ -108,7 +107,6 @@ export default function Counselling() {
 
   return (
     <>
-      <CursorEffect />
       <Box
         ref={pageRef}
         component="main"

@@ -51,7 +51,6 @@ import {
 } from "lucide-react";
 import ParticleField from "@/components/ParticleField";
 import AiChip from "@/components/AiChip";
-import CursorEffect from "@/components/CursorEffect";
 import { journey } from "@/lib/journey";
 import courseAiImage from "@/assets/course-ai.svg";
 import coursePythonImage from "@/assets/course-python.svg";
@@ -60,7 +59,9 @@ import courseVisionImage from "@/assets/course-vision.svg";
 import facultyArjun from "@/assets/faculty-arjun.avif";
 import facultyAisha from "@/assets/faculty-aisha.avif";
 import facultyRahul from "@/assets/faculty-rahul.jpg";
-import aboutKnoraImage from "@/assets/Aboutknora.png";
+import aboutKnoraImage from "@/assets/Aboutknora1.png";
+import aboutKnoraImage2 from "@/assets/Aboutknora2.png";
+import aboutKnoraImage3 from "@/assets/Aboutknora3.png";
 import knoraLettermark from "@/assets/KNORALettermark.png";
 import letterK from "@/assets/k.png";
 import letterN from "@/assets/n.png";
@@ -68,6 +69,11 @@ import letterO from "@/assets/o.png";
 import letterR from "@/assets/r.png";
 import letterA from "@/assets/a.png";
 import learningImage from "@/assets/courseimg.webp";
+import slide1Image from "@/assets/slide1.png";
+import slide2Image from "@/assets/slide2.png";
+import slide3Image from "@/assets/slide3.png";
+import slide4Image from "@/assets/slide4.png";
+import slide5Image from "@/assets/slide5.png";
 import "./HomeImages.css";
 
 const SCENE_COUNT = 9;
@@ -352,6 +358,144 @@ const hybridImages = [
   { src: aboutKnoraImage, alt: "KNORA campus reception" },
   { src: coursePythonImage, alt: "Python course and practice track" },
 ];
+
+const academySlides = [
+  [
+    slide1Image,
+    "Learn together",
+    "Where ambitious minds become builders",
+    "Small cohorts, active mentoring, and a community that grows with every project.",
+  ],
+  [
+    slide2Image,
+    "Future-ready learning",
+    "Turn curiosity into career confidence",
+    "A practical academy experience designed around tomorrow’s technology careers.",
+  ],
+  [
+    slide3Image,
+    "Mentor-led practice",
+    "Build real skills, not just notes",
+    "Learn by doing with guided labs, thoughtful feedback, and portfolio-ready work.",
+  ],
+  [
+    slide4Image,
+    "Hybrid by design",
+    "Your classroom, wherever you learn best",
+    "Move seamlessly between live online sessions, recordings, and campus support.",
+  ],
+  [
+    slide5Image,
+    "Admissions 2026",
+    "Start your next chapter at Knora",
+    "Join the founding batch and help shape a modern academy built around learners.",
+  ],
+].map(([image, eyebrow, title, copy]) => ({ image, eyebrow, title, copy }));
+
+function AcademyCarousel() {
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const carouselRef = useRef(null);
+  const selectSlide = (index) =>
+    setActiveSlide((index + academySlides.length) % academySlides.length);
+
+  useEffect(() => {
+    if (paused || window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+      return undefined;
+    const timer = window.setInterval(
+      () => setActiveSlide((current) => (current + 1) % academySlides.length),
+      6500,
+    );
+    return () => window.clearInterval(timer);
+  }, [paused]);
+
+  const handlePointerMove = (event) => {
+    const element = carouselRef.current;
+    if (!element) return;
+    const rect = element.getBoundingClientRect();
+    element.style.setProperty(
+      "--carousel-x",
+      `${((event.clientX - rect.left) / rect.width - 0.5) * 18}px`,
+    );
+    element.style.setProperty(
+      "--carousel-y",
+      `${((event.clientY - rect.top) / rect.height - 0.5) * 12}px`,
+    );
+  };
+
+  return (
+    <section
+      ref={carouselRef}
+      className="academy-carousel"
+      aria-roledescription="carousel"
+      aria-label="Knora Academy highlights"
+      onPointerMove={handlePointerMove}
+      onPointerEnter={() => setPaused(true)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={() => setPaused(false)}
+      onPointerLeave={() => {
+        setPaused(false);
+        carouselRef.current?.style.setProperty("--carousel-x", "0px");
+        carouselRef.current?.style.setProperty("--carousel-y", "0px");
+      }}
+    >
+      {academySlides.map((slide, index) => (
+        <article
+          key={slide.title}
+          className={`academy-slide ${index === activeSlide ? "is-active" : ""}`}
+          aria-hidden={index !== activeSlide}
+        >
+          <img
+            src={slide.image}
+            alt=""
+            loading={index === 0 ? "eager" : "lazy"}
+          />
+          <div className="academy-slide-shade" />
+          <div className="academy-slide-copy">
+            <span>{slide.eyebrow}</span>
+            <h2>{slide.title}</h2>
+            <p>{slide.copy}</p>
+            <a href="/apply-now">
+              Explore admissions <ArrowRight className="size-4" />
+            </a>
+          </div>
+        </article>
+      ))}
+      <div className="academy-carousel-controls">
+        <button
+          type="button"
+          onClick={() => selectSlide(activeSlide - 1)}
+          aria-label="Previous slide"
+        >
+          <ChevronLeftRoundedIcon />
+        </button>
+        <div className="academy-carousel-dots">
+          {academySlides.map((slide, index) => (
+            <button
+              key={slide.title}
+              type="button"
+              className={index === activeSlide ? "is-active" : ""}
+              onClick={() => selectSlide(index)}
+              aria-label={`Show slide ${index + 1}`}
+              aria-current={index === activeSlide ? "true" : undefined}
+            />
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => selectSlide(activeSlide + 1)}
+          aria-label="Next slide"
+        >
+          <ChevronRightRoundedIcon />
+        </button>
+      </div>
+      <div className="academy-slide-count" aria-hidden="true">
+        <strong>{String(activeSlide + 1).padStart(2, "0")}</strong>
+        <span>/ {String(academySlides.length).padStart(2, "0")}</span>
+      </div>
+    </section>
+  );
+}
 
 function Badge({ children }) {
   return (
@@ -662,8 +806,17 @@ export default function Home() {
   const heroCoreRef = useRef(null);
   const courseRoadmapViewportRef = useRef(null);
   const courseRoadmapTrackRef = useRef(null);
+  const welcomeVideoRef = useRef(null);
   const [activeFaculty, setActiveFaculty] = useState(0);
   const [heroLetterIndex, setHeroLetterIndex] = useState(0);
+  const [showParticles, setShowParticles] = useState(false);
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 761px)");
+    const update = () => setShowParticles(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
   const facultyScrollIndexRef = useRef(0);
 
   const setSceneRef = (index) => (el) => {
@@ -697,6 +850,7 @@ export default function Home() {
     ).matches;
     const isMobile = window.matchMedia("(max-width: 760px)").matches;
     const useFastScroll = journey.reducedMotion || isMobile;
+    const revealText = window.matchMedia("(min-width: 640px)").matches;
 
     gsap.registerPlugin(ScrollTrigger);
     ScrollTrigger.config({ ignoreMobileResize: true });
@@ -770,27 +924,50 @@ export default function Home() {
       });
 
       if (!journey.reducedMotion) {
-        gsap.fromTo(
-          ".welcome-photo",
-          {
-            y: isMobile ? 28 : 70,
-            opacity: 0,
-            scale: 0.94,
-          },
-          {
-            y: 0,
-            opacity: 1,
-            scale: 1,
-            stagger: 0.14,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: ".welcome-image-layout",
-              start: "top 88%",
-              end: "center 55%",
-              scrub: 0.8,
+        if (welcomeVideoRef.current) {
+          gsap.fromTo(
+            welcomeVideoRef.current.querySelector(".welcome-video-frame"),
+            { scale: 1, borderRadius: 0 },
+            {
+              scale: 0.76,
+              borderRadius: 32,
+              ease: "none",
+              scrollTrigger: {
+                trigger: welcomeVideoRef.current,
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 0.8,
+              },
             },
-          },
-        );
+          );
+        }
+        gsap.utils.toArray(".welcome-generation").forEach((frame) => {
+          const image = frame.querySelector("img");
+          const loader = frame.querySelector(".welcome-generation-dots");
+          const dots = loader.querySelectorAll("span");
+          gsap.set(image, { opacity: 0 });
+          gsap.set(loader, { autoAlpha: 1 });
+          const reveal = gsap.timeline({
+            scrollTrigger: { trigger: frame, start: "top 88%", once: true },
+          });
+          reveal
+            .fromTo(
+              dots,
+              { opacity: 0.15, scale: 0.5 },
+              {
+                opacity: 0.9,
+                scale: 1,
+                duration: 0.35,
+                stagger: { each: 0.006, from: "center" },
+                repeat: 1,
+                yoyo: true,
+                ease: "sine.inOut",
+              },
+              0,
+            )
+            .to(loader, { autoAlpha: 0, duration: 0.35 }, 1.65)
+            .to(image, { opacity: 1, duration: 0.35 }, 1.65);
+        });
         gsap.utils.toArray(".hybrid-photo img").forEach((image) => {
           gsap.fromTo(
             image,
@@ -808,7 +985,9 @@ export default function Home() {
           );
         });
         const revealTargets = wrapper.current.querySelectorAll(
-          ".hero-pop, .holo-text, .motion-card",
+          !revealText
+            ? ".motion-card:not(:has(p, h2, h3))"
+            : ".hero-pop, .holo-text, .motion-card",
         );
         revealTargets.forEach((target) => {
           gsap.fromTo(
@@ -846,6 +1025,28 @@ export default function Home() {
           y: 0,
           clipPath: "none",
         });
+      }
+
+      if (!journey.reducedMotion && revealText) {
+        gsap.utils
+          .toArray(
+            ".home-scroll-wrapper h2, .home-scroll-wrapper h3, .home-scroll-wrapper p",
+          )
+          .forEach((text) => {
+            if (text.closest(".hero-pop, .holo-text, .motion-card")) return;
+            gsap.fromTo(
+              text,
+              { autoAlpha: 0, y: 20, clipPath: "inset(0 0 100% 0)" },
+              {
+                autoAlpha: 1,
+                y: 0,
+                clipPath: "inset(0 0 0% 0)",
+                duration: 0.75,
+                ease: "power3.out",
+                scrollTrigger: { trigger: text, start: "top 90%", once: true },
+              },
+            );
+          });
       }
 
       const facultySection = sceneRefs.current[5];
@@ -1282,10 +1483,8 @@ export default function Home() {
           },
         }}
       />
-      <CursorEffect />
-      <ParticleField heroAnchorRef={heroCoreRef} heroHoverRef={heroVisualRef} />
 
-      <div className="pointer-events-none fixed inset-0 -z-10">
+      <div className="home-ambient-background pointer-events-none fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-background" />
         <div className="bloom absolute left-1/2 top-1/3 size-[70vw] -translate-x-1/2 rounded-full opacity-50 blur-3xl" />
         <div
@@ -1302,6 +1501,13 @@ export default function Home() {
 
       <main ref={wrapper} className="home-scroll-wrapper relative w-full">
         <div className="relative w-full overflow-hidden">
+          {showParticles && (
+            <ParticleField
+              heroAnchorRef={heroCoreRef}
+              heroHoverRef={heroVisualRef}
+            />
+          )}
+          <AcademyCarousel />
           <section
             id="home"
             ref={setSceneRef(0)}
@@ -1382,7 +1588,7 @@ export default function Home() {
               </dl>
             </div>
 
-            <div className="pointer-events-none relative hidden h-full min-w-0 items-center justify-center lg:flex">
+            <div className="relative hidden h-full min-w-0 items-center justify-center lg:flex">
               <div
                 ref={heroVisualRef}
                 className="hero-visual absolute left-1/2 top-1/2 flex size-[41rem] -translate-x-1/2 -translate-y-[49%] items-center justify-center"
@@ -1390,12 +1596,12 @@ export default function Home() {
                 <div
                   ref={heroCoreRef}
                   className="hero-core relative flex size-[18rem] items-center justify-center rounded-full"
+                  onPointerEnter={rotateHeroLetter}
                 >
                   <button
                     type="button"
                     className="hero-k-mark"
                     aria-label={`Knora animated letter ${heroLetter}`}
-                    onPointerEnter={rotateHeroLetter}
                     onClick={rotateHeroLetter}
                   >
                     <span className="hero-letter-orbit hero-letter-orbit-third" />
@@ -1469,34 +1675,46 @@ export default function Home() {
           >
             <div className="welcome-image-layout">
               <figure className="welcome-photo welcome-photo-campus">
-                <img
-                  src={aboutKnoraImage}
-                  alt="KNORA Academy campus reception"
-                  loading="lazy"
-                />
-                <figcaption>
-                  <span>01 / THE SPACE</span>A place to begin.
-                </figcaption>
+                <div className="welcome-generation">
+                  <img
+                    src={aboutKnoraImage}
+                    alt="KNORA Academy campus reception"
+                    loading="lazy"
+                  />
+                  <div className="welcome-generation-dots" aria-hidden="true">
+                    {Array.from({ length: 64 }, (_, index) => (
+                      <span key={index} />
+                    ))}
+                  </div>
+                </div>
               </figure>
               <figure className="welcome-photo welcome-photo-learning">
-                <img
-                  src={learningImage}
-                  alt="AI learning and tools preview"
-                  loading="lazy"
-                />
-                <figcaption>
-                  <span>02 / THE POSSIBILITIES</span>Explore AI.
-                </figcaption>
+                <div className="welcome-generation">
+                  <img
+                    src={aboutKnoraImage2}
+                    alt="KNORA Academy learning space"
+                    loading="lazy"
+                  />
+                  <div className="welcome-generation-dots" aria-hidden="true">
+                    {Array.from({ length: 64 }, (_, index) => (
+                      <span key={index} />
+                    ))}
+                  </div>
+                </div>
               </figure>
               <figure className="welcome-photo welcome-photo-mentor">
-                <img
-                  src={facultyAisha}
-                  alt="KNORA faculty mentor"
-                  loading="lazy"
-                />
-                <figcaption>
-                  <span>03 / THE GUIDANCE</span>Learn with mentors.
-                </figcaption>
+                <div className="welcome-generation">
+                  <img
+                    src={aboutKnoraImage3}
+                    alt="KNORA Academy campus interior"
+                    loading="lazy"
+                  />
+                  <div className="welcome-generation-dots" aria-hidden="true">
+                    {Array.from({ length: 64 }, (_, index) => (
+                      <span key={index} />
+                    ))}
+                  </div>
+                </div>
               </figure>
             </div>
             <div className="relative z-10 grid gap-5 lg:ml-auto lg:max-w-[720px]">
@@ -1529,6 +1747,41 @@ export default function Home() {
                 >
                   Read More <ArrowRight className="arrow size-4" />
                 </a>
+              </div>
+            </div>
+          </section>
+
+          <section
+            ref={welcomeVideoRef}
+            className="welcome-video-plan"
+            aria-label="Welcome video preview"
+          >
+            <div className="welcome-video-frame">
+              <img
+                src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=2400&q=88"
+                alt="Students attending an academy welcome session"
+                loading="lazy"
+              />
+              <div className="welcome-video-overlay" />
+              <div className="welcome-video-copy">
+                <span>
+                  <MonitorPlay className="size-4" /> Welcome film — planned
+                </span>
+                <h2>Meet the people behind your learning journey.</h2>
+                <p>
+                  This cinematic placeholder is ready to be replaced with your
+                  academy welcome video.
+                </p>
+                <button
+                  type="button"
+                  disabled
+                  aria-label="Welcome video coming soon"
+                >
+                  <span className="welcome-play">
+                    <ArrowRight className="size-5" />
+                  </span>
+                  Video coming soon
+                </button>
               </div>
             </div>
           </section>
@@ -1941,6 +2194,26 @@ export default function Home() {
             </div>
 
             <div className="motion-card launch-calendar-panel">
+              <div className="calendar-mobile-agenda">
+                <h3>Upcoming events</h3>
+                {launchCalendarDays
+                  .filter((day) => launchEventByDate[day.key])
+                  .map((day) => {
+                    const event = launchEventByDate[day.key];
+                    return (
+                      <a key={day.key} href="/courses">
+                        <span className="calendar-agenda-date">
+                          {day.label}
+                        </span>
+                        <span>
+                          <strong>{event.title}</strong>
+                          <small>{event.time}</small>
+                          <p>{event.copy}</p>
+                        </span>
+                      </a>
+                    );
+                  })}
+              </div>
               <div className="launch-calendar-toolbar">
                 <Typography component="h3" className="launch-calendar-range">
                   Aug 31, 2026 - Oct 4, 2026

@@ -1,5 +1,7 @@
-﻿import { useEffect, useRef, useState } from "react";
-import { ArrowUpRight, AudioLines } from "lucide-react";
+import WelcomeImageReveal from "./WelcomeImageReveal";
+import { lockPageScroll } from "@/lib/scrollLock";
+import { useEffect, useRef, useState } from "react";
+import { ArrowUpRight } from "lucide-react";
 import gsap from "gsap";
 import splashVideo from "@/assets/splash.mp4";
 import knoraLogo from "@/assets/knora-logo-transparent.png";
@@ -12,7 +14,7 @@ export default function OpeningVideoSplash() {
   const rootRef = useRef(null);
   const videoRef = useRef(null);
   const startRef = useRef(null);
-  const skipRef = useRef(null);
+
   const finishRef = useRef(() => {});
   const activeRef = useRef(false);
   const pendingRef = useRef(false);
@@ -27,8 +29,7 @@ export default function OpeningVideoSplash() {
     let finished = false;
     let exitTween;
     const previousFocus = document.activeElement;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const releaseScroll = lockPageScroll();
     startRef.current?.focus({ preventScroll: true });
     finishRef.current = () => {
       if (finished || !activeRef.current) return;
@@ -53,7 +54,7 @@ export default function OpeningVideoSplash() {
       exitTween?.kill();
       transitionRef.current?.kill();
       video?.pause();
-      document.body.style.overflow = previousOverflow;
+      releaseScroll();
       if (previousFocus?.isConnected)
         previousFocus.focus({ preventScroll: true });
     };
@@ -81,7 +82,7 @@ export default function OpeningVideoSplash() {
         .timeline({
           onComplete: () => {
             setPhase("playing");
-            skipRef.current?.focus({ preventScroll: true });
+            rootRef.current?.focus({ preventScroll: true });
           },
         })
         .to(welcome, {
@@ -114,6 +115,10 @@ export default function OpeningVideoSplash() {
     const buttons = [
       ...rootRef.current.querySelectorAll("button:not(:disabled)"),
     ];
+    if (!buttons.length) {
+      event.preventDefault();
+      return;
+    }
     const first = buttons[0];
     const last = buttons[buttons.length - 1];
     if (event.shiftKey && document.activeElement === first) {
@@ -132,6 +137,7 @@ export default function OpeningVideoSplash() {
       ref={rootRef}
       className="opening-video-splash ai-entry"
       role="dialog"
+      tabIndex={-1}
       aria-modal="true"
       aria-label="Welcome to KNORA"
       onKeyDown={handleKeys}
@@ -148,7 +154,7 @@ export default function OpeningVideoSplash() {
       />
       {phase !== "playing" && (
         <div className="ai-entry-welcome">
-          <div className="ai-entry-grid" aria-hidden="true" />
+          <WelcomeImageReveal />
           <header className="ai-entry-header">
             <span className="ai-entry-edition">KNORA EDU ACADEMY</span>
             <span className="ai-entry-edition">LEARNING, WITH DIRECTION.</span>
@@ -188,32 +194,14 @@ export default function OpeningVideoSplash() {
               </span>
               <ArrowUpRight size={21} />
             </button>
-            <span className="ai-entry-audio">
-              <AudioLines size={15} /> Intro plays with sound
-            </span>
             {error && (
               <p className="ai-entry-error" role="alert">
                 {error}
               </p>
             )}
           </div>
-          <footer className="ai-entry-footer">
-            <span>BUILT AROUND YOUR NEXT STEP.</span>
-            <span>
-              AI <i /> PYTHON <i /> GEN AI
-            </span>
-          </footer>
         </div>
       )}
-      <button
-        ref={skipRef}
-        type="button"
-        className="ai-entry-skip"
-        onClick={() => finishRef.current()}
-      >
-        {phase === "playing" ? "Skip intro" : "Explore website"}
-        <ArrowUpRight size={14} />
-      </button>
     </div>
   );
 }

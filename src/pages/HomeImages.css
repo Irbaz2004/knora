@@ -20,10 +20,12 @@
   position: relative;
   z-index: 10;
   display: grid;
-  grid-template-columns: 1.15fr 1fr;
+  grid-template-columns: 1.15fr 0.85fr;
   gap: 16px;
   width: 100%;
   align-items: start;
+  padding: 22px 0;
+  perspective: 1000px;
 }
 .welcome-photo {
   min-width: 0;
@@ -40,22 +42,32 @@
 }
 .welcome-photo-campus {
   grid-column: 1 / -1;
-  margin-right: 28px;
+  grid-row: 1;
+  margin-right: 42px;
 }
 .welcome-photo-campus img {
-  aspect-ratio: 1.65;
+  aspect-ratio: 1.35;
 }
 .welcome-photo-learning {
-  margin-top: 6px;
+  grid-column: 1;
+  grid-row: 2;
+  margin-top: -40px;
+  margin-left: 18px;
+  z-index: 2;
+  border: 6px solid var(--card);
 }
 .welcome-photo-learning img {
   aspect-ratio: 1.3;
 }
 .welcome-photo-mentor {
-  margin-top: 30px;
+  grid-column: 2;
+  grid-row: 2;
+  margin-top: -92px;
+  z-index: 3;
+  border: 6px solid var(--card);
 }
 .welcome-photo-mentor img {
-  aspect-ratio: 1.3;
+  aspect-ratio: 0.85;
   object-position: center 25%;
 }
 .welcome-photo figcaption {
@@ -75,7 +87,7 @@
   letter-spacing: 0.12em;
 }
 .hybrid-row .hybrid-photo {
-  width: clamp(130px, 15vw, 230px);
+  width: 100%;
   align-self: stretch;
   flex-shrink: 0;
   overflow: hidden;
@@ -116,14 +128,558 @@
     letter-spacing: 0.07em;
   }
   .hybrid-row .hybrid-photo {
-    width: 112px;
+    width: 100%;
   }
   .hybrid-photo img {
     min-height: 130px;
   }
 }
+@media (max-width: 760px) {
+  .home-ambient-background {
+    display: none;
+  }
+  .home-scroll-wrapper {
+    --background: #fff;
+    --foreground: #10213d;
+    --card: #fff;
+    --card-foreground: #10213d;
+    --muted-foreground: #526580;
+    --border: #dce3ee;
+    --secondary: #f3f6fb;
+    --muted: #f3f6fb;
+    background: #fff;
+    color: var(--foreground);
+  }
+  .dark .home-scroll-wrapper .hero-edu-text {
+    color: #10213d;
+  }
+  .welcome-photo-campus {
+    margin-right: 16px;
+  }
+  .welcome-photo-learning {
+    margin-top: -22px;
+    margin-left: 0;
+  }
+  .welcome-photo-mentor {
+    margin-top: -48px;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .hero-k-mark .hero-letter-image {
     animation: none;
+  }
+}
+
+.academy-carousel {
+  --carousel-x: 0px;
+  --carousel-y: 0px;
+  position: relative;
+  height: min(94vh, 940px);
+  min-height: 700px;
+  overflow: hidden;
+  isolation: isolate;
+  background: #07121f;
+  color: #fff;
+}
+.academy-slide {
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+  opacity: 0;
+  transform: scale(1.035);
+  transition:
+    opacity 1s ease,
+    visibility 1s,
+    transform 7s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.academy-slide.is-active {
+  visibility: visible;
+  opacity: 1;
+  transform: scale(1);
+  z-index: 1;
+}
+.academy-slide img {
+  width: calc(100% + 44px);
+  height: calc(100% + 36px);
+  margin: -18px -22px;
+  object-fit: cover;
+  transform: translate3d(var(--carousel-x), var(--carousel-y), 0) scale(1.025);
+  transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.academy-slide-shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(3, 12, 24, 0.9) 0%,
+      rgba(3, 12, 24, 0.48) 48%,
+      rgba(3, 12, 24, 0.1) 78%
+    ),
+    linear-gradient(0deg, rgba(3, 12, 24, 0.72), transparent 55%);
+}
+.academy-slide-copy {
+  position: absolute;
+  z-index: 2;
+  left: clamp(1.5rem, 7vw, 7rem);
+  bottom: clamp(4.75rem, 10vh, 7rem);
+  width: min(700px, calc(100% - 3rem));
+}
+.academy-slide-copy > span {
+  display: inline-flex;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  padding: 0.55rem 0.9rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  backdrop-filter: blur(12px);
+}
+.academy-slide-copy h2 {
+  max-width: 680px;
+  margin-top: 1.25rem;
+  font-family: var(--font-display);
+  font-size: clamp(2.65rem, 5.8vw, 6rem);
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 0.96;
+  color: #fff;
+}
+.academy-slide-copy p {
+  max-width: 580px;
+  margin-top: 1.2rem;
+  font-size: clamp(0.95rem, 1.4vw, 1.14rem);
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+.academy-slide-copy a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+  border-radius: 999px;
+  padding: 0.85rem 1.15rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.academy-carousel-controls {
+  position: absolute;
+  z-index: 4;
+  left: clamp(1.5rem, 7vw, 7rem);
+  bottom: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.academy-carousel-controls > button {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  background: rgba(4, 13, 25, 0.3);
+  color: #fff;
+  backdrop-filter: blur(10px);
+  transition: 0.25s ease;
+}
+.academy-carousel-controls > button:hover {
+  background: #fff;
+  color: #081424;
+  transform: scale(1.06);
+}
+.academy-carousel-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.academy-carousel-dots button {
+  width: 7px;
+  height: 7px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.45);
+  transition:
+    width 0.35s ease,
+    background 0.35s ease;
+}
+.academy-carousel-dots button.is-active {
+  width: 35px;
+  background: #fff;
+}
+.academy-slide-count {
+  position: absolute;
+  z-index: 4;
+  right: clamp(1.5rem, 6vw, 6rem);
+  bottom: 1.25rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+.academy-slide-count strong {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: #fff;
+}
+
+.welcome-video-plan {
+  position: relative;
+  height: 112vh;
+  background: transparent;
+}
+
+/* The WebGL sphere sits above the translucent orb surface while the K,
+   floating cards, cap and controls stay crisp above the particles. */
+.section-1 .hero-k-mark,
+.section-1 .hero-float-card,
+.section-1 .hero-cap {
+  z-index: 4;
+}
+
+/* Keep the shared particle canvas visible inside the opening letter orb.
+   In every following section its content sits above the canvas, so particles
+   remain atmospheric background rather than crossing text and cards. */
+.home-scroll-wrapper section {
+  position: relative;
+  z-index: 1;
+}
+
+/* Let the background particle sphere remain visible through the hero orb
+   without placing the WebGL canvas above page content. */
+.section-1 .hero-core {
+  background:
+    radial-gradient(
+      circle at 34% 26%,
+      rgba(255, 255, 255, 0.58),
+      transparent 24%
+    ),
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(255, 255, 255, 0.2),
+      rgba(219, 235, 255, 0.12) 55%,
+      rgba(31, 111, 255, 0.08)
+    );
+  box-shadow:
+    inset 0 0 30px rgba(255, 255, 255, 0.36),
+    inset 0 -18px 42px rgba(37, 99, 235, 0.1),
+    0 30px 84px -38px rgba(37, 99, 235, 0.48);
+}
+.welcome-video-frame {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  transform-origin: center bottom;
+  background: #07121f;
+  color: #fff;
+}
+.welcome-video-frame > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.welcome-video-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(3, 12, 24, 0.84), rgba(3, 12, 24, 0.28)),
+    linear-gradient(0deg, rgba(3, 12, 24, 0.55), transparent);
+}
+.welcome-video-copy {
+  position: absolute;
+  left: clamp(1.5rem, 8vw, 8rem);
+  top: 50%;
+  width: min(720px, calc(100% - 3rem));
+  transform: translateY(-50%);
+}
+.welcome-video-copy > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.welcome-video-copy h2 {
+  margin-top: 1.3rem;
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5.5vw, 5.8rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 0.96;
+  color: #fff;
+}
+.welcome-video-copy p {
+  max-width: 590px;
+  margin-top: 1.25rem;
+  color: rgba(255, 255, 255, 0.78) !important;
+  font-size: 1rem;
+  line-height: 1.65;
+}
+.welcome-video-copy button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 1.7rem;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.88;
+}
+.welcome-play {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff;
+  color: #07121f;
+}
+
+@media (max-width: 760px) {
+  .home-scroll-wrapper .section-1 {
+    align-items: start;
+    padding-top: 1.5rem !important;
+    text-align: start;
+  }
+  .home-scroll-wrapper .section-1 > div:first-child {
+    margin-inline: 0;
+  }
+  .home-scroll-wrapper .section-1 .hero-pop {
+    justify-content: flex-start;
+  }
+  .academy-carousel {
+    height: 64svh;
+    min-height: 470px;
+  }
+  .academy-slide-shade {
+    background: linear-gradient(
+      0deg,
+      rgba(3, 12, 24, 0.9) 0%,
+      rgba(3, 12, 24, 0.18) 78%
+    );
+  }
+  .academy-slide-copy {
+    bottom: 5.2rem;
+  }
+  .academy-slide-copy h2 {
+    font-size: clamp(2rem, 10vw, 3.25rem);
+  }
+  .academy-slide-copy p {
+    margin-top: 0.75rem;
+    line-height: 1.5;
+  }
+  .academy-slide-count {
+    display: none;
+  }
+  .academy-carousel-controls {
+    bottom: 0.75rem;
+  }
+  .welcome-video-plan {
+    height: 108svh;
+  }
+  .welcome-video-frame {
+    height: 100svh;
+  }
+  .welcome-video-copy h2 {
+    font-size: clamp(2.35rem, 11vw, 4rem);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .academy-slide,
+  .academy-slide img {
+    transition: none;
+    transform: none;
+  }
+  .welcome-video-frame {
+    transform: none !important;
+    border-radius: 0 !important;
+  }
+}
+.calendar-mobile-agenda {
+  display: none;
+}
+@media (max-width: 640px) {
+  #home ~ .launch-calendar-section,
+  .home-scroll-wrapper .launch-calendar-section {
+    min-width: 0;
+    width: 100%;
+  }
+  .home-scroll-wrapper .launch-calendar-panel {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .home-scroll-wrapper .launch-calendar-toolbar,
+  .home-scroll-wrapper .launch-calendar-weekdays,
+  .home-scroll-wrapper .launch-calendar-cells {
+    min-width: 0;
+    width: 100%;
+  }
+  .home-scroll-wrapper .launch-calendar-cells {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-rows: repeat(5, 48px);
+    min-height: 0;
+  }
+  .home-scroll-wrapper .launch-calendar-cell {
+    min-height: 0;
+    padding: 5px;
+  }
+  .home-scroll-wrapper .launch-calendar-date {
+    font-size: 11px;
+  }
+  .home-scroll-wrapper .launch-calendar-cell .launch-calendar-event {
+    inset: auto 5px 5px;
+    height: 6px;
+    min-height: 0;
+    padding: 0;
+    border-radius: 4px;
+    pointer-events: none;
+  }
+  .home-scroll-wrapper .launch-calendar-cell .launch-calendar-event > * {
+    display: none;
+  }
+  .home-scroll-wrapper .launch-calendar-tags {
+    flex-wrap: wrap;
+  }
+  .calendar-mobile-agenda {
+    display: grid;
+    gap: 12px;
+    order: 1;
+    margin-top: 24px;
+  }
+  .calendar-mobile-agenda h3 {
+    font-family: Archivo, sans-serif;
+    font-size: 18px;
+    color: var(--foreground);
+  }
+  .calendar-mobile-agenda a {
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr);
+    gap: 12px;
+    border-top: 1px solid var(--border);
+    padding: 14px 0;
+    color: var(--foreground);
+  }
+  .calendar-agenda-date {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary);
+  }
+  .calendar-mobile-agenda strong {
+    font-size: 14px;
+  }
+  .calendar-mobile-agenda small {
+    display: block;
+    margin-top: 5px;
+    color: var(--primary);
+  }
+  .calendar-mobile-agenda p {
+    margin-top: 6px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--muted-foreground);
+  }
+}
+.welcome-generation {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: var(--card);
+}
+.welcome-generation img {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+.welcome-generation-dots {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  place-items: center;
+  padding: 12%;
+  background: var(--card);
+  visibility: hidden;
+  opacity: 0;
+}
+.welcome-generation-dots span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+@media (prefers-reduced-motion: reduce) {
+  .welcome-generation-dots {
+    display: none;
+  }
+}
+/* Editorial image-only collage. */
+.welcome-image-layout {
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 18px;
+  padding: 20px 0;
+}
+.welcome-photo {
+  border-radius: 18px;
+  box-shadow: none;
+}
+.welcome-photo-campus {
+  margin-right: 32px;
+}
+.welcome-photo-campus .welcome-generation {
+  aspect-ratio: 1.35;
+}
+.welcome-photo-learning {
+  margin-top: -24px;
+  margin-left: 12px;
+}
+.welcome-photo-mentor {
+  margin-top: -64px;
+}
+.welcome-photo-mentor .welcome-generation {
+  aspect-ratio: 0.8;
+}
+html:not(.dark) .home-scroll-wrapper {
+  --muted-foreground: #000;
+  --foreground: #000;
+}
+html:not(.dark) .home-scroll-wrapper p,
+html:not(.dark) .home-scroll-wrapper dd {
+  color: #000;
+}
+@media (max-width: 760px) {
+  .home-scroll-wrapper {
+    --muted-foreground: #000;
+    --foreground: #000;
+  }
+  .home-scroll-wrapper p,
+  .home-scroll-wrapper dd {
+    color: #000;
+  }
+  .welcome-image-layout {
+    gap: 10px;
+  }
+  .welcome-photo-campus {
+    margin-right: 12px;
+  }
+  .welcome-photo-learning {
+    margin-left: 0;
+    margin-top: -16px;
+  }
+  .welcome-photo-mentor {
+    margin-top: -36px;
   }
 }
