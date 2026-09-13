@@ -466,6 +466,22 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
       0,
       1,
     );
+
+    // Follow the actual DOM orb while it enters below the carousel. This is a
+    // cheap group translation (no React updates or geometry regeneration), so
+    // the sphere cannot appear before or away from the letter image.
+    if (groupRef.current && heroAnchorRef?.current) {
+      const rect = heroAnchorRef.current.getBoundingClientRect();
+      const anchorWorldX =
+        ((rect.left + rect.width / 2 - size.width / 2) / size.width) *
+        viewport.width;
+      const anchorWorldY =
+        -((rect.top + rect.height / 2 - size.height / 2) / size.height) *
+        viewport.height;
+      const follow = 1 - travelProgress;
+      groupRef.current.position.x = (anchorWorldX - heroCenter[0]) * follow;
+      groupRef.current.position.y = (anchorWorldY - heroCenter[1]) * follow;
+    }
     const directorProgress = THREE.MathUtils.clamp(
       (p - directorStart) / (directorEnd - directorStart),
       0,

@@ -3,7 +3,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Html, Line, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import worldDots from "@/assets/world-dots.json";
-import campusImage from "@/assets/Aboutknora1.png";
+import campusImage from "@/assets/Aboutknora1.webp";
 import "./ContactGlobe.css";
 
 // Only Chennai represents an academy location. Other nodes illustrate online connections.

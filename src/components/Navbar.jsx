@@ -862,11 +862,11 @@ export default function Navbar() {
                     ...navbarStyles.dropdownLink,
                     justifyContent: "center",
                     background: "var(--primary)",
-                    color: "var(--primary-foreground)",
+                    color: "#ffffff !important",
                     textAlign: "center",
                     "&:hover": {
                       background: "var(--primary)",
-                      color: "var(--primary-foreground)",
+                      color: "#ffffff !important",
                     },
                   }}
                 >

@@ -1,32 +1,41 @@
 import SmoothScroll from "@/components/SmoothScroll";
 import CursorEffect from "@/components/CursorEffect";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Suspense,
+  lazy,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Toaster } from "sonner";
-import AboutUs from "@/pages/AboutUs";
-import AdmissionProcess from "@/pages/AdmissionProcess";
-import ApplyOnline from "@/pages/ApplyOnline";
-import Career from "@/pages/Career";
-import ContactUs from "@/pages/ContactUs";
-import Counselling from "@/pages/Counselling";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import OpeningVideoSplash from "@/components/OpeningVideoSplash";
 import SplashScreen from "@/components/SplashScreen";
-import CourseDetails from "@/pages/CourseDetails";
-import Courses from "@/pages/Courses";
-import EventsNews from "@/pages/EventsNews";
-import Faculty from "@/pages/Faculty";
-import Gallery from "@/pages/Gallery";
-import Home from "@/pages/Home";
-import MyLearning from "@/pages/MyLearning";
-import Placements from "@/pages/Placements";
-import ForgotPassword from "@/Auth/ForgotPassword";
-import Login from "@/Auth/Login";
-import SignUp from "@/Auth/SignUp";
-import StudentLogin from "@/pages/StudentLogin";
-import TeacherLogin from "@/pages/TeacherLogin";
-import Testimonials from "@/pages/Testimonials";
-import VisionMission from "@/pages/VisionMission";
+
+const AboutUs = lazy(() => import("@/pages/AboutUs"));
+const AdmissionProcess = lazy(() => import("@/pages/AdmissionProcess"));
+const ApplyOnline = lazy(() => import("@/pages/ApplyOnline"));
+const Career = lazy(() => import("@/pages/Career"));
+const ContactUs = lazy(() => import("@/pages/ContactUs"));
+const Counselling = lazy(() => import("@/pages/Counselling"));
+const CourseDetails = lazy(() => import("@/pages/CourseDetails"));
+const Courses = lazy(() => import("@/pages/Courses"));
+const EventsNews = lazy(() => import("@/pages/EventsNews"));
+const Faculty = lazy(() => import("@/pages/Faculty"));
+const Gallery = lazy(() => import("@/pages/Gallery"));
+const Home = lazy(() => import("@/pages/Home"));
+const MyLearning = lazy(() => import("@/pages/MyLearning"));
+const Placements = lazy(() => import("@/pages/Placements"));
+const ForgotPassword = lazy(() => import("@/Auth/ForgotPassword"));
+const Login = lazy(() => import("@/Auth/Login"));
+const SignUp = lazy(() => import("@/Auth/SignUp"));
+const StudentLogin = lazy(() => import("@/pages/StudentLogin"));
+const TeacherLogin = lazy(() => import("@/pages/TeacherLogin"));
+const Testimonials = lazy(() => import("@/pages/Testimonials"));
+const VisionMission = lazy(() => import("@/pages/VisionMission"));
 
 const routes = {
   "/": Home,
@@ -220,7 +229,9 @@ export default function App() {
   return (
     <>
       {!isAuthRoute && <Navbar />}
-      <Page />
+      <Suspense fallback={<div className="min-h-screen bg-background" />}>
+        <Page />
+      </Suspense>
       {!isAuthRoute && <Footer />}
       <SmoothScroll />
       <CursorEffect />

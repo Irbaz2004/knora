@@ -1,8 +1,10 @@
 import {
   Children,
   Fragment,
+  Suspense,
   cloneElement,
   isValidElement,
+  lazy,
   useEffect,
   useRef,
   useState,
@@ -49,7 +51,6 @@ import {
   Users,
   Wifi,
 } from "lucide-react";
-import ParticleField from "@/components/ParticleField";
 import AiChip from "@/components/AiChip";
 import { journey } from "@/lib/journey";
 import courseAiImage from "@/assets/course-ai.svg";
@@ -59,9 +60,9 @@ import courseVisionImage from "@/assets/course-vision.svg";
 import facultyArjun from "@/assets/faculty-arjun.avif";
 import facultyAisha from "@/assets/faculty-aisha.avif";
 import facultyRahul from "@/assets/faculty-rahul.jpg";
-import aboutKnoraImage from "@/assets/Aboutknora1.png";
-import aboutKnoraImage2 from "@/assets/Aboutknora2.png";
-import aboutKnoraImage3 from "@/assets/Aboutknora3.png";
+import aboutKnoraImage from "@/assets/Aboutknora1.webp";
+import aboutKnoraImage2 from "@/assets/Aboutknora2.webp";
+import aboutKnoraImage3 from "@/assets/Aboutknora3.webp";
 import knoraLettermark from "@/assets/KNORALettermark.png";
 import letterK from "@/assets/k.png";
 import letterN from "@/assets/n.png";
@@ -69,12 +70,14 @@ import letterO from "@/assets/o.png";
 import letterR from "@/assets/r.png";
 import letterA from "@/assets/a.png";
 import learningImage from "@/assets/courseimg.webp";
-import slide1Image from "@/assets/slide1.png";
-import slide2Image from "@/assets/slide2.png";
-import slide3Image from "@/assets/slide3.png";
-import slide4Image from "@/assets/slide4.png";
-import slide5Image from "@/assets/slide5.png";
+import slide1Image from "@/assets/slide1.webp";
+import slide2Image from "@/assets/slide2.webp";
+import slide3Image from "@/assets/slide3.webp";
+import slide4Image from "@/assets/slide4.webp";
+import slide5Image from "@/assets/slide5.webp";
 import "./HomeImages.css";
+
+const ParticleField = lazy(() => import("@/components/ParticleField"));
 
 const SCENE_COUNT = 9;
 const SCENE_SLOT = 1.42;
@@ -812,10 +815,27 @@ export default function Home() {
   const [showParticles, setShowParticles] = useState(false);
   useEffect(() => {
     const media = window.matchMedia("(min-width: 761px)");
-    const update = () => setShowParticles(media.matches);
+    let idleId;
+    let timerId;
+    const update = () => {
+      if (!media.matches) {
+        setShowParticles(false);
+        return;
+      }
+      const enable = () => setShowParticles(true);
+      if ("requestIdleCallback" in window) {
+        idleId = window.requestIdleCallback(enable, { timeout: 1600 });
+      } else {
+        timerId = window.setTimeout(enable, 900);
+      }
+    };
     update();
     media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
+    return () => {
+      media.removeEventListener("change", update);
+      if (idleId) window.cancelIdleCallback(idleId);
+      if (timerId) window.clearTimeout(timerId);
+    };
   }, []);
   const facultyScrollIndexRef = useRef(0);
 
@@ -1502,10 +1522,12 @@ export default function Home() {
       <main ref={wrapper} className="home-scroll-wrapper relative w-full">
         <div className="relative w-full overflow-hidden">
           {showParticles && (
-            <ParticleField
-              heroAnchorRef={heroCoreRef}
-              heroHoverRef={heroVisualRef}
-            />
+            <Suspense fallback={null}>
+              <ParticleField
+                heroAnchorRef={heroCoreRef}
+                heroHoverRef={heroVisualRef}
+              />
+            </Suspense>
           )}
           <AcademyCarousel />
           <section
