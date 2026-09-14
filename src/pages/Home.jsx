@@ -30,6 +30,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import CodeIcon from "@mui/icons-material/Code";
 import DataObjectIcon from "@mui/icons-material/DataObject";
 import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
@@ -826,7 +827,7 @@ export default function Home() {
     const offerTimer = window.setTimeout(() => {
       setShowCourseOffer(true);
       sessionStorage.setItem("knora-course-offer-seen", "true");
-    }, 5000);
+    }, 7000);
 
     return () => window.clearTimeout(offerTimer);
   }, []);
@@ -1699,7 +1700,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="hero-scroll-cue absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-muted-foreground">
+            <div className="hero-scroll-cue absolute inset-x-0 bottom-8 flex w-full flex-col items-center gap-2 text-center text-muted-foreground">
               <Mouse className="size-5 animate-bounce text-primary" />
               <span className="text-[0.7rem] tracking-[0.22em] uppercase">
                 Scroll to explore
@@ -2357,7 +2358,7 @@ export default function Home() {
           <MuiIconButton
             className="contact-float-action contact-float-call"
             component="a"
-            href="tel:+919876543210"
+            href="tel:+919042778325"
             aria-label="Call KNORA"
             sx={{
               width: { xs: 50, sm: 56 },
@@ -2429,8 +2430,10 @@ export default function Home() {
         maxWidth="sm"
         PaperProps={{
           sx: {
-            width: { xs: "calc(100% - 24px)", sm: "100%" },
-            m: { xs: 1.5, sm: 4 },
+            width: { xs: "calc(100% - 32px)", sm: "100%" },
+            maxWidth: 480,
+            m: { xs: 2, sm: 4 },
+            p: { xs: 1, sm: 1.25 },
             borderRadius: { xs: "16px", sm: "22px" },
             overflow: "hidden",
             bgcolor: "var(--card)",
@@ -2440,21 +2443,35 @@ export default function Home() {
           },
         }}
       >
-        <DialogContent sx={{ p: 0, position: "relative" }}>
+        <DialogContent
+          sx={{
+            p: "0 !important",
+            position: "relative",
+            overflow: "hidden",
+            borderRadius: { xs: "11px", sm: "16px" },
+          }}
+        >
           <MuiIconButton
             aria-label="Close offer"
             onClick={() => setShowCourseOffer(false)}
             sx={{
               position: "absolute",
-              top: 12,
-              right: 12,
+              top: 10,
+              right: 10,
               zIndex: 1,
+              width: 36,
+              minWidth: 36,
+              height: 36,
+              minHeight: 36,
+              p: 0,
+              borderRadius: "50%",
               bgcolor: "rgba(0,0,0,0.62)",
               color: "#fff",
+              border: "1px solid rgba(255,255,255,0.55)",
               "&:hover": { bgcolor: "rgba(0,0,0,0.78)" },
             }}
           >
-            <span aria-hidden="true">×</span>
+            <CloseRoundedIcon sx={{ fontSize: 20 }} />
           </MuiIconButton>
           <Box
             component="img"
@@ -2465,9 +2482,16 @@ export default function Home() {
               width: "100%",
               maxHeight: { xs: "54vh", sm: "58vh" },
               objectFit: "cover",
+              borderRadius: { xs: "10px 10px 0 0", sm: "15px 15px 0 0" },
             }}
           />
-          <Box sx={{ p: { xs: 2.25, sm: 3 } }}>
+          <Box
+            sx={{
+              px: { xs: 2, sm: 2.75 },
+              pt: { xs: 2, sm: 2.5 },
+              pb: { xs: 2.25, sm: 2.75 },
+            }}
+          >
             <Typography
               component="h2"
               sx={{

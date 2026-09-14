@@ -900,11 +900,14 @@ export default function Navbar() {
                   sx={{
                     ...navbarStyles.mobileLink,
                     background: "var(--primary)",
-                    color: "var(--primary-foreground)",
+                    color: "#fff !important",
                     textAlign: "center",
+                    "&:visited, & span, & svg": {
+                      color: "#fff !important",
+                    },
                     "&:hover": {
                       background: "var(--primary)",
-                      color: "var(--primary-foreground)",
+                      color: "#fff !important",
                     },
                   }}
                 >

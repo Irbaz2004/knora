@@ -5459,13 +5459,13 @@ svg {
   }
 
   .section-1 .hero-scroll-cue {
-    position: relative !important;
-    left: 50% !important;
+    position: static !important;
     grid-column: 1 / -1;
+    align-items: center !important;
     justify-self: center;
     margin-top: 0.25rem;
-    width: 100vw;
-    transform: translateX(-50%) !important;
+    width: 100% !important;
+    transform: none !important;
     text-align: center;
   }
 
