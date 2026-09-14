@@ -6,6 +6,8 @@ import {
   OAuthProvider,
 } from "firebase/auth";
 import {
+  addDoc,
+  collection,
   doc,
   getDoc,
   getFirestore,
@@ -63,4 +65,20 @@ export async function saveUserProfile(user, profile = {}) {
     },
     { merge: true },
   );
+}
+
+export async function submitCounsellingRequest(request) {
+  if (!db) {
+    throw new Error("Firebase is not configured yet.");
+  }
+
+  const requestRef = await addDoc(collection(db, "counsellingRequests"), {
+    ...request,
+    status: "new",
+    source: "counselling-page",
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+
+  return requestRef.id;
 }

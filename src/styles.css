@@ -2,6 +2,114 @@
 @source "../src";
 @import "tw-animate-css";
 
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) var(--background);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--primary) 78%, var(--muted));
+  border: 2px solid var(--background);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+.contact-float-action {
+  isolation: isolate;
+  animation: contact-vibrate 3.2s ease-in-out infinite;
+}
+
+.contact-float-action::before,
+.contact-float-action::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -1px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  animation: contact-wave 2.6s cubic-bezier(0.2, 0.65, 0.35, 1) infinite;
+}
+
+.contact-float-action::after {
+  animation-delay: 0.7s;
+}
+
+.contact-float-call::before,
+.contact-float-call::after {
+  border-color: var(--primary);
+}
+
+.contact-float-whatsapp::before,
+.contact-float-whatsapp::after {
+  border-color: #25d366;
+}
+
+.contact-float-whatsapp,
+.contact-float-whatsapp::before,
+.contact-float-whatsapp::after {
+  animation-delay: 1.6s;
+}
+
+.contact-float-whatsapp::after {
+  animation-delay: 2.3s;
+}
+
+@keyframes contact-vibrate {
+  0%,
+  12%,
+  100% {
+    transform: rotate(0deg);
+  }
+  2% {
+    transform: rotate(-8deg) scale(1.04);
+  }
+  4% {
+    transform: rotate(8deg) scale(1.04);
+  }
+  6% {
+    transform: rotate(-6deg) scale(1.04);
+  }
+  8% {
+    transform: rotate(6deg) scale(1.04);
+  }
+  10% {
+    transform: rotate(-3deg);
+  }
+}
+
+@keyframes contact-wave {
+  0% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.85);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-float-action,
+  .contact-float-action::before,
+  .contact-float-action::after {
+    animation: none;
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -5343,8 +5451,32 @@ svg {
   }
 
   .section-1 {
+    min-height: auto !important;
     padding-inline: 1rem !important;
     padding-top: 6.6rem !important;
+    padding-bottom: 1.5rem !important;
+    row-gap: 1.5rem !important;
+  }
+
+  .section-1 .hero-scroll-cue {
+    position: relative !important;
+    left: 50% !important;
+    grid-column: 1 / -1;
+    justify-self: center;
+    margin-top: 0.25rem;
+    width: 100vw;
+    transform: translateX(-50%) !important;
+    text-align: center;
+  }
+
+  .section-1 .hero-scroll-cue svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .section-1 .hero-scroll-cue span {
+    font-size: clamp(0.56rem, 2.1vw, 0.66rem) !important;
+    letter-spacing: 0.18em !important;
   }
 
   .section-1 h1,
@@ -5357,8 +5489,43 @@ svg {
   .hero-copy-text,
   .hologram-section p,
   .courses-hero-copy.MuiTypography-root {
-    font-size: 0.95rem !important;
+    font-size: clamp(0.84rem, 3.7vw, 0.95rem) !important;
     line-height: 1.55 !important;
+  }
+
+  .home-scroll-wrapper h2,
+  .home-scroll-wrapper .MuiTypography-h2 {
+    font-size: clamp(1.75rem, 8vw, 2.45rem) !important;
+    line-height: 1.08 !important;
+  }
+
+  .home-scroll-wrapper h3,
+  .home-scroll-wrapper .MuiTypography-h3 {
+    font-size: clamp(1.05rem, 5vw, 1.4rem) !important;
+    line-height: 1.2 !important;
+  }
+
+  .home-scroll-wrapper p,
+  .home-scroll-wrapper li {
+    font-size: clamp(0.8rem, 3.5vw, 0.94rem);
+  }
+
+  .home-scroll-wrapper button,
+  .home-scroll-wrapper .MuiButton-root {
+    font-size: clamp(0.75rem, 3.2vw, 0.88rem);
+  }
+
+  .faculty-profile-card .font-display.text-3xl {
+    font-size: clamp(0.92rem, 4.3vw, 1.15rem) !important;
+    line-height: 1.15 !important;
+    white-space: nowrap;
+  }
+
+  .faculty-profile-card .faculty-chip.MuiChip-root {
+    flex-shrink: 0;
+    height: 1.35rem;
+    font-size: 0.56rem;
+    letter-spacing: 0.04em;
   }
 
   .section-1 .hero-pop.mt-7 {
@@ -5388,11 +5555,52 @@ svg {
   }
 
   .course-roadmap-viewport {
-    padding-inline: 0.75rem;
+    padding-inline: 0.5rem;
   }
 
   .course-roadmap-card.MuiCard-root {
-    width: min(18.5rem, calc(100vw - 2.5rem));
+    width: min(22.5rem, calc(100vw - 2rem));
+    min-height: 14.25rem;
+    padding: clamp(0.9rem, 4vw, 1.15rem);
+    border-radius: clamp(1rem, 5vw, 1.35rem);
+  }
+
+  .course-roadmap-card .MuiStack-root {
+    min-width: 0;
+  }
+
+  .course-roadmap-title.MuiTypography-root {
+    font-size: clamp(1rem, 4.8vw, 1.25rem) !important;
+    overflow-wrap: normal;
+  }
+
+  .course-roadmap-copy.MuiTypography-root {
+    font-size: clamp(0.78rem, 3.45vw, 0.9rem) !important;
+    line-height: 1.48 !important;
+  }
+
+  .course-roadmap-meta {
+    padding: 0.32rem 0.5rem;
+    font-size: clamp(0.62rem, 2.8vw, 0.72rem);
+  }
+
+  .course-roadmap-button.MuiButton-root {
+    min-height: 2.45rem;
+    font-size: clamp(0.72rem, 3.2vw, 0.82rem);
+  }
+
+  .hologram-section:not(.section-1) {
+    min-height: auto !important;
+    padding-top: clamp(3.5rem, 14vw, 5rem) !important;
+    padding-bottom: clamp(3.5rem, 14vw, 5rem) !important;
+  }
+
+  .section-5.hologram-section {
+    padding-bottom: 2.75rem !important;
+  }
+
+  .section-6.hologram-section {
+    padding-top: 2.75rem !important;
   }
 
   .course-feature-card {

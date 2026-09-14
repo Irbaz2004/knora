@@ -299,10 +299,14 @@ const footerStyles = {
     objectFit: "cover",
     objectPosition: "center 51.6%",
     opacity: 0.58,
+    WebkitMaskImage:
+      "linear-gradient(to bottom, #000 0%, #000 55%, rgba(0,0,0,0.72) 72%, transparent 100%)",
+    maskImage:
+      "linear-gradient(to bottom, #000 0%, #000 55%, rgba(0,0,0,0.72) 72%, transparent 100%)",
     pointerEvents: "none",
     userSelect: "none",
     filter:
-      "brightness(0) invert(1) saturate(0) drop-shadow(0 1.15rem 2.4rem rgba(1, 10, 25, 0.32))",
+      "brightness(0) invert(1) saturate(0) blur(0.35px) drop-shadow(0 1.15rem 2.4rem rgba(1, 10, 25, 0.32))",
     "@media (max-width: 720px)": {
       bottom: "0.8rem",
       width: "clamp(24rem, 112vw, 42rem)",

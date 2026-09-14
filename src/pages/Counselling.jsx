@@ -1,7 +1,24 @@
-import { useEffect, useRef } from "react";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
+import {
+  Alert,
+  Box,
+  Button,
+  Checkbox,
+  CircularProgress,
+  Dialog,
+  DialogContent,
+  FormControl,
+  FormControlLabel,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import PsychologyRoundedIcon from "@mui/icons-material/PsychologyRounded";
 import RouteRoundedIcon from "@mui/icons-material/RouteRounded";
 import SupportAgentRoundedIcon from "@mui/icons-material/SupportAgentRounded";
@@ -10,6 +27,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import courseImage from "@/assets/courseimg.webp";
 import facultyAisha from "@/assets/faculty-aisha.avif";
 import facultyRahul from "@/assets/faculty-rahul.jpg";
+import { auth, submitCounsellingRequest } from "@/firebase";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -71,8 +89,91 @@ const primaryButton = {
   },
 };
 
+const initialForm = {
+  fullName: "",
+  email: "",
+  phone: "",
+  careerStage: "",
+  courseInterest: "",
+  learningGoal: "",
+  contactMethod: "Phone call",
+  preferredTime: "",
+  consent: false,
+};
+
+const fieldSx = {
+  "& .MuiOutlinedInput-root": {
+    borderRadius: "8px",
+    bgcolor: "var(--background)",
+    color: "var(--foreground)",
+    "& fieldset": { borderColor: "var(--border)" },
+    "&:hover fieldset": { borderColor: "var(--primary)" },
+  },
+  "& .MuiInputLabel-root": { color: "var(--muted-foreground)" },
+};
+
 export default function Counselling() {
   const pageRef = useRef(null);
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [form, setForm] = useState(initialForm);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [requestId, setRequestId] = useState("");
+
+  const openBooking = () => {
+    const user = auth?.currentUser;
+    setForm((current) => ({
+      ...current,
+      fullName: current.fullName || user?.displayName || "",
+      email: current.email || user?.email || "",
+      phone: current.phone || user?.phoneNumber || "",
+    }));
+    setBookingOpen(true);
+  };
+
+  const closeBooking = () => {
+    if (!submitting) setBookingOpen(false);
+  };
+
+  const updateField = (event) => {
+    const { name, value, checked, type } = event.target;
+    setForm((current) => ({
+      ...current,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setSubmitting(true);
+    setSubmitError("");
+
+    try {
+      const id = await submitCounsellingRequest({
+        fullName: form.fullName.trim(),
+        email: form.email.trim().toLowerCase(),
+        phone: form.phone.trim(),
+        careerStage: form.careerStage,
+        courseInterest: form.courseInterest,
+        learningGoal: form.learningGoal.trim(),
+        contactMethod: form.contactMethod,
+        preferredTime: form.preferredTime,
+        userId: auth?.currentUser?.uid || null,
+      });
+      setRequestId(id);
+      setBookingOpen(false);
+      setForm(initialForm);
+    } catch (error) {
+      console.error("Unable to submit counselling request", error);
+      setSubmitError(
+        error?.message === "Firebase is not configured yet."
+          ? "Booking is temporarily unavailable. Please check the Firebase configuration."
+          : "We couldn't send your request. Please try again in a moment.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
   useEffect(() => {
     const media = gsap.matchMedia();
     media.add("(prefers-reduced-motion: no-preference)", () => {
@@ -208,7 +309,7 @@ export default function Counselling() {
                 sx={{ pt: 1 }}
               >
                 <Button
-                  href="/contact-us"
+                  onClick={openBooking}
                   disableElevation
                   endIcon={<ArrowForwardRoundedIcon />}
                   sx={primaryButton}
@@ -570,7 +671,7 @@ export default function Counselling() {
               </Typography>
             </Box>
             <Button
-              href="/contact-us"
+              onClick={openBooking}
               disableElevation
               endIcon={<ArrowForwardRoundedIcon />}
               sx={primaryButton}
@@ -580,6 +681,393 @@ export default function Counselling() {
           </Box>
         </Box>
       </Box>
+
+      <Dialog
+        open={bookingOpen && !requestId}
+        onClose={closeBooking}
+        fullWidth
+        maxWidth="md"
+        PaperProps={{
+          sx: {
+            width: { xs: "calc(100% - 24px)", sm: "calc(100% - 64px)" },
+            maxWidth: 880,
+            maxHeight: { xs: "calc(100% - 24px)", sm: "calc(100% - 64px)" },
+            m: { xs: 1.5, sm: 4 },
+            borderRadius: { xs: "16px", sm: "22px" },
+            border: "1px solid var(--border)",
+            bgcolor: "var(--card)",
+            color: "var(--foreground)",
+            backgroundImage: "none",
+            overflow: "hidden",
+          },
+        }}
+      >
+        <Box
+          sx={{
+            height: 5,
+            background:
+              "linear-gradient(90deg, var(--primary), color-mix(in oklab, var(--primary) 45%, white))",
+          }}
+        />
+        <DialogContent sx={{ p: { xs: 2.25, sm: 4, md: 5 } }}>
+          <Stack
+            direction="row"
+            sx={{ justifyContent: "space-between", gap: 2 }}
+          >
+            <Box>
+              <Typography sx={eyebrow}>Free personal guidance</Typography>
+              <Typography
+                component="h2"
+                sx={{
+                  ...heading,
+                  mt: 1,
+                  fontSize: { xs: "1.8rem", sm: "2.2rem" },
+                }}
+              >
+                {requestId
+                  ? "Your request is in."
+                  : "Book your counselling call"}
+              </Typography>
+            </Box>
+            <Button
+              aria-label="Close counselling form"
+              onClick={closeBooking}
+              sx={{
+                minWidth: 40,
+                width: 40,
+                height: 40,
+                color: "var(--foreground)",
+              }}
+            >
+              <CloseRoundedIcon />
+            </Button>
+          </Stack>
+
+          {!requestId && (
+            <Stack
+              direction="row"
+              sx={{
+                flexWrap: "wrap",
+                gap: { xs: 1, sm: 2.5 },
+                mt: 2.5,
+                py: 1.5,
+                px: 2,
+                border: "1px solid var(--border)",
+                borderRadius: "10px",
+                bgcolor: "color-mix(in oklab, var(--primary) 5%, var(--card))",
+              }}
+            >
+              {["30-minute conversation", "1-to-1 mentor", "No cost"].map(
+                (item) => (
+                  <Stack
+                    key={item}
+                    direction="row"
+                    spacing={0.7}
+                    alignItems="center"
+                  >
+                    <CheckRoundedIcon
+                      sx={{ fontSize: 16, color: "var(--primary)" }}
+                    />
+                    <Typography sx={{ fontSize: "0.76rem", fontWeight: 650 }}>
+                      {item}
+                    </Typography>
+                  </Stack>
+                ),
+              )}
+            </Stack>
+          )}
+
+          {requestId ? (
+            <Box sx={{ pt: 4, pb: 1 }}>
+              <Box
+                sx={{
+                  width: 52,
+                  height: 52,
+                  display: "grid",
+                  placeItems: "center",
+                  borderRadius: "50%",
+                  bgcolor:
+                    "color-mix(in oklab, var(--primary) 12%, transparent)",
+                  color: "var(--primary)",
+                  mb: 2.5,
+                }}
+              >
+                <CheckRoundedIcon />
+              </Box>
+              <Typography sx={{ fontSize: "1.05rem", fontWeight: 650, mb: 1 }}>
+                A KNORA mentor will contact you within one working day.
+              </Typography>
+              <Typography
+                sx={{ color: "var(--muted-foreground)", lineHeight: 1.7 }}
+              >
+                We’ll discuss your goals, recommend a suitable learning path,
+                and help you choose a batch. Reference:{" "}
+                {requestId.slice(0, 8).toUpperCase()}
+              </Typography>
+              <Button
+                onClick={() => {
+                  setRequestId("");
+                  setBookingOpen(false);
+                }}
+                sx={{ ...primaryButton, mt: 4, width: "100%" }}
+              >
+                Done
+              </Button>
+            </Box>
+          ) : (
+            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
+              <Typography
+                sx={{
+                  color: "var(--muted-foreground)",
+                  fontSize: "0.88rem",
+                  mb: 3,
+                }}
+              >
+                Tell us where you are headed. Required fields are marked with *.
+              </Typography>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+                  gap: 2,
+                }}
+              >
+                <TextField
+                  required
+                  label="Full name"
+                  name="fullName"
+                  value={form.fullName}
+                  onChange={updateField}
+                  sx={fieldSx}
+                />
+                <TextField
+                  required
+                  type="email"
+                  label="Email"
+                  name="email"
+                  value={form.email}
+                  onChange={updateField}
+                  sx={fieldSx}
+                />
+                <TextField
+                  required
+                  label="Phone number"
+                  name="phone"
+                  value={form.phone}
+                  onChange={updateField}
+                  inputProps={{ inputMode: "tel", pattern: "[0-9+() -]{7,20}" }}
+                  sx={fieldSx}
+                />
+                <FormControl required sx={fieldSx}>
+                  <InputLabel>Current stage</InputLabel>
+                  <Select
+                    label="Current stage"
+                    name="careerStage"
+                    value={form.careerStage}
+                    onChange={updateField}
+                  >
+                    <MenuItem value="Student">Student</MenuItem>
+                    <MenuItem value="Working professional">
+                      Working professional
+                    </MenuItem>
+                    <MenuItem value="Career switcher">Career switcher</MenuItem>
+                    <MenuItem value="Business owner">Business owner</MenuItem>
+                    <MenuItem value="Other">Other</MenuItem>
+                  </Select>
+                </FormControl>
+                <FormControl
+                  required
+                  sx={{ ...fieldSx, gridColumn: { sm: "1 / -1" } }}
+                >
+                  <InputLabel>Course interest</InputLabel>
+                  <Select
+                    label="Course interest"
+                    name="courseInterest"
+                    value={form.courseInterest}
+                    onChange={updateField}
+                  >
+                    <MenuItem value="Artificial Intelligence">
+                      Artificial Intelligence
+                    </MenuItem>
+                    <MenuItem value="Python">Python</MenuItem>
+                    <MenuItem value="Data Analytics">Data Analytics</MenuItem>
+                    <MenuItem value="Generative AI">Generative AI</MenuItem>
+                    <MenuItem value="Not sure yet">
+                      Not sure — help me choose
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+                <TextField
+                  label="What would you like to achieve?"
+                  name="learningGoal"
+                  value={form.learningGoal}
+                  onChange={updateField}
+                  multiline
+                  minRows={3}
+                  inputProps={{ maxLength: 600 }}
+                  sx={{ ...fieldSx, gridColumn: { sm: "1 / -1" } }}
+                />
+                <FormControl required sx={fieldSx}>
+                  <InputLabel>Contact me by</InputLabel>
+                  <Select
+                    label="Contact me by"
+                    name="contactMethod"
+                    value={form.contactMethod}
+                    onChange={updateField}
+                  >
+                    <MenuItem value="Phone call">Phone call</MenuItem>
+                    <MenuItem value="WhatsApp">WhatsApp</MenuItem>
+                    <MenuItem value="Email">Email</MenuItem>
+                  </Select>
+                </FormControl>
+                <FormControl required sx={fieldSx}>
+                  <InputLabel>Preferred time</InputLabel>
+                  <Select
+                    label="Preferred time"
+                    name="preferredTime"
+                    value={form.preferredTime}
+                    onChange={updateField}
+                  >
+                    <MenuItem value="9 AM – 12 PM">9 AM – 12 PM</MenuItem>
+                    <MenuItem value="12 PM – 3 PM">12 PM – 3 PM</MenuItem>
+                    <MenuItem value="3 PM – 6 PM">3 PM – 6 PM</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+              <FormControlLabel
+                sx={{ mt: 2, alignItems: "flex-start" }}
+                control={
+                  <Checkbox
+                    required
+                    name="consent"
+                    checked={form.consent}
+                    onChange={updateField}
+                    sx={{
+                      color: "var(--muted-foreground)",
+                      "&.Mui-checked": { color: "var(--primary)" },
+                    }}
+                  />
+                }
+                label={
+                  <Typography
+                    sx={{
+                      pt: 1,
+                      color: "var(--muted-foreground)",
+                      fontSize: "0.78rem",
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    I agree to be contacted by KNORA about counselling and
+                    course options.
+                  </Typography>
+                }
+              />
+              {submitError && (
+                <Alert severity="error" sx={{ mt: 1.5 }}>
+                  {submitError}
+                </Alert>
+              )}
+              <Button
+                type="submit"
+                disabled={submitting}
+                endIcon={!submitting && <ArrowForwardRoundedIcon />}
+                sx={{ ...primaryButton, mt: 2, width: "100%" }}
+              >
+                {submitting ? (
+                  <CircularProgress size={22} color="inherit" />
+                ) : (
+                  "Request counselling"
+                )}
+              </Button>
+              <Typography
+                sx={{
+                  mt: 1.5,
+                  textAlign: "center",
+                  color: "var(--muted-foreground)",
+                  fontSize: "0.7rem",
+                }}
+              >
+                No payment required. Your details are used only to arrange
+                counselling.
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(requestId)}
+        onClose={() => setRequestId("")}
+        fullWidth
+        maxWidth="xs"
+        PaperProps={{
+          sx: {
+            m: 2,
+            borderRadius: "20px",
+            border: "1px solid var(--border)",
+            bgcolor: "var(--card)",
+            color: "var(--foreground)",
+            backgroundImage: "none",
+            textAlign: "center",
+          },
+        }}
+      >
+        <DialogContent sx={{ p: { xs: 3, sm: 4.5 } }}>
+          <Box
+            sx={{
+              width: 68,
+              height: 68,
+              display: "grid",
+              placeItems: "center",
+              mx: "auto",
+              mb: 2.5,
+              borderRadius: "50%",
+              bgcolor: "color-mix(in oklab, var(--primary) 13%, transparent)",
+              color: "var(--primary)",
+              border:
+                "1px solid color-mix(in oklab, var(--primary) 30%, transparent)",
+            }}
+          >
+            <CheckRoundedIcon sx={{ fontSize: 34 }} />
+          </Box>
+          <Typography sx={eyebrow}>Successfully submitted</Typography>
+          <Typography
+            component="h2"
+            sx={{
+              ...heading,
+              mt: 1.2,
+              fontSize: { xs: "1.75rem", sm: "2rem" },
+            }}
+          >
+            You’re all set.
+          </Typography>
+          <Typography
+            sx={{
+              mt: 1.5,
+              color: "var(--muted-foreground)",
+              lineHeight: 1.7,
+            }}
+          >
+            Your counselling request has been received. A KNORA mentor will
+            contact you within one working day.
+          </Typography>
+          <Typography
+            sx={{
+              mt: 2,
+              color: "var(--muted-foreground)",
+              fontSize: "0.75rem",
+            }}
+          >
+            Reference: {requestId.slice(0, 8).toUpperCase()}
+          </Typography>
+          <Button
+            onClick={() => setRequestId("")}
+            sx={{ ...primaryButton, mt: 3.5, width: "100%" }}
+          >
+            Done
+          </Button>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

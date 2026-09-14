@@ -16,12 +16,16 @@ import {
   Button as MuiButton,
   Card as MuiCard,
   Chip as MuiChip,
+  Dialog,
+  DialogContent,
   GlobalStyles,
   IconButton as MuiIconButton,
   Stack as MuiStack,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import CallRoundedIcon from "@mui/icons-material/CallRounded";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
@@ -34,6 +38,7 @@ import LaptopMacIcon from "@mui/icons-material/LaptopMac";
 import PsychologyIcon from "@mui/icons-material/Psychology";
 import SchoolIcon from "@mui/icons-material/School";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import {
   ArrowRight,
   Award,
@@ -54,7 +59,7 @@ import {
 import AiChip from "@/components/AiChip";
 import { journey } from "@/lib/journey";
 import courseAiImage from "@/assets/course-ai.svg";
-import coursePythonImage from "@/assets/course-python.svg";
+import coursePythonImage from "../assets/Revisewithoutpressure.png";
 import courseGenAiImage from "@/assets/course-genai.svg";
 import courseVisionImage from "@/assets/course-vision.svg";
 import facultyArjun from "@/assets/faculty-arjun.avif";
@@ -69,12 +74,13 @@ import letterN from "@/assets/n.png";
 import letterO from "@/assets/o.png";
 import letterR from "@/assets/r.png";
 import letterA from "@/assets/a.png";
-import learningImage from "@/assets/courseimg.webp";
+import learningImage from "../assets/attendonlineclass.png";
 import slide1Image from "@/assets/slide1.webp";
 import slide2Image from "@/assets/slide2.webp";
 import slide3Image from "@/assets/slide3.webp";
 import slide4Image from "@/assets/slide4.webp";
 import slide5Image from "@/assets/slide5.webp";
+import adsImage from "@/assets/Ads1.png";
 import "./HomeImages.css";
 
 const ParticleField = lazy(() => import("@/components/ParticleField"));
@@ -813,6 +819,17 @@ export default function Home() {
   const [activeFaculty, setActiveFaculty] = useState(0);
   const [heroLetterIndex, setHeroLetterIndex] = useState(0);
   const [showParticles, setShowParticles] = useState(false);
+  const [showCourseOffer, setShowCourseOffer] = useState(false);
+  useEffect(() => {
+    if (sessionStorage.getItem("knora-course-offer-seen")) return undefined;
+
+    const offerTimer = window.setTimeout(() => {
+      setShowCourseOffer(true);
+      sessionStorage.setItem("knora-course-offer-seen", "true");
+    }, 5000);
+
+    return () => window.clearTimeout(offerTimer);
+  }, []);
   useEffect(() => {
     const media = window.matchMedia("(min-width: 761px)");
     let idleId;
@@ -1682,7 +1699,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-muted-foreground">
+            <div className="hero-scroll-cue absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-muted-foreground">
               <Mouse className="size-5 animate-bounce text-primary" />
               <span className="text-[0.7rem] tracking-[0.22em] uppercase">
                 Scroll to explore
@@ -2308,6 +2325,191 @@ export default function Home() {
           </section>
         </div>
       </main>
+
+      <MuiStack
+        spacing={1.25}
+        sx={{
+          position: "fixed",
+          right: { xs: 16, sm: 24 },
+          bottom: { xs: 18, sm: 26 },
+          zIndex: 1200,
+        }}
+      >
+        <Tooltip
+          title="Call us"
+          placement="left"
+          arrow
+          slotProps={{
+            tooltip: {
+              sx: {
+                bgcolor: "#fff",
+                color: "#111",
+                fontSize: "0.78rem",
+                fontWeight: 700,
+                px: 1.4,
+                py: 0.9,
+                boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
+              },
+            },
+            arrow: { sx: { color: "#fff" } },
+          }}
+        >
+          <MuiIconButton
+            className="contact-float-action contact-float-call"
+            component="a"
+            href="tel:+919876543210"
+            aria-label="Call KNORA"
+            sx={{
+              width: { xs: 50, sm: 56 },
+              height: { xs: 50, sm: 56 },
+              bgcolor: "var(--primary)",
+              color: "var(--primary-foreground)",
+              border:
+                "1px solid color-mix(in oklab, var(--primary) 72%, white)",
+              boxShadow: "0 12px 28px rgba(0, 0, 0, 0.2)",
+              transition: "transform 180ms ease",
+              "&:hover": {
+                bgcolor: "var(--primary)",
+                transform: "translateY(-3px) scale(1.04)",
+              },
+            }}
+          >
+            <CallRoundedIcon />
+          </MuiIconButton>
+        </Tooltip>
+        <Tooltip
+          title="Chat on WhatsApp"
+          placement="left"
+          arrow
+          slotProps={{
+            tooltip: {
+              sx: {
+                bgcolor: "#fff",
+                color: "#111",
+                fontSize: "0.78rem",
+                fontWeight: 700,
+                px: 1.4,
+                py: 0.9,
+                boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
+              },
+            },
+            arrow: { sx: { color: "#fff" } },
+          }}
+        >
+          <MuiIconButton
+            className="contact-float-action contact-float-whatsapp"
+            component="a"
+            href="https://wa.me/919876543210?text=Hi%20KNORA%2C%20I%27m%20interested%20in%20your%20courses%20and%20would%20like%20more%20information."
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Chat with KNORA on WhatsApp"
+            sx={{
+              width: { xs: 50, sm: 56 },
+              height: { xs: 50, sm: 56 },
+              bgcolor: "#25D366",
+              color: "#fff",
+              border: "1px solid rgba(255,255,255,0.6)",
+              boxShadow: "0 12px 28px rgba(0, 0, 0, 0.2)",
+              transition: "transform 180ms ease",
+              "&:hover": {
+                bgcolor: "#1fbd5b",
+                transform: "translateY(-3px) scale(1.04)",
+              },
+            }}
+          >
+            <WhatsAppIcon />
+          </MuiIconButton>
+        </Tooltip>
+      </MuiStack>
+
+      <Dialog
+        open={showCourseOffer}
+        onClose={() => setShowCourseOffer(false)}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            width: { xs: "calc(100% - 24px)", sm: "100%" },
+            m: { xs: 1.5, sm: 4 },
+            borderRadius: { xs: "16px", sm: "22px" },
+            overflow: "hidden",
+            bgcolor: "var(--card)",
+            color: "var(--foreground)",
+            border: "1px solid var(--border)",
+            backgroundImage: "none",
+          },
+        }}
+      >
+        <DialogContent sx={{ p: 0, position: "relative" }}>
+          <MuiIconButton
+            aria-label="Close offer"
+            onClick={() => setShowCourseOffer(false)}
+            sx={{
+              position: "absolute",
+              top: 12,
+              right: 12,
+              zIndex: 1,
+              bgcolor: "rgba(0,0,0,0.62)",
+              color: "#fff",
+              "&:hover": { bgcolor: "rgba(0,0,0,0.78)" },
+            }}
+          >
+            <span aria-hidden="true">×</span>
+          </MuiIconButton>
+          <Box
+            component="img"
+            src={adsImage}
+            alt="KNORA course offer — 50% off"
+            sx={{
+              display: "block",
+              width: "100%",
+              maxHeight: { xs: "54vh", sm: "58vh" },
+              objectFit: "cover",
+            }}
+          />
+          <Box sx={{ p: { xs: 2.25, sm: 3 } }}>
+            <Typography
+              component="h2"
+              sx={{
+                fontFamily: "var(--font-display)",
+                fontSize: { xs: "1.45rem", sm: "1.8rem" },
+                fontWeight: 800,
+                lineHeight: 1.15,
+              }}
+            >
+              Learn more. Pay 50% less.
+            </Typography>
+            <Typography
+              sx={{
+                mt: 1,
+                color: "var(--muted-foreground)",
+                fontSize: "0.88rem",
+              }}
+            >
+              Explore KNORA’s practical, mentor-led courses while the offer is
+              available.
+            </Typography>
+            <MuiButton
+              component="a"
+              href="/courses"
+              endIcon={<ArrowForwardRoundedIcon />}
+              sx={{
+                mt: 2.25,
+                width: "100%",
+                py: 1.35,
+                borderRadius: "9px",
+                bgcolor: "var(--primary)",
+                color: "var(--primary-foreground)",
+                fontWeight: 750,
+                textTransform: "none",
+                "&:hover": { bgcolor: "var(--primary)" },
+              }}
+            >
+              Explore Courses
+            </MuiButton>
+          </Box>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
