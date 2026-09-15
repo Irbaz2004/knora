@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { ArrowRight, ArrowUp, Mail } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 import knoraLettermark from "@/assets/KNORALettermark.png";
 
 const primaryLinks = [
@@ -111,84 +111,6 @@ const footerStyles = {
     "@media (max-width: 720px)": {
       top: "8.25rem",
     },
-  },
-  signup: {
-    display: "flex",
-    minWidth: 0,
-    flexDirection: "column",
-    gap: "clamp(1.8rem, 4.4vw, 3.7rem)",
-  },
-  heading: {
-    m: 0,
-    color: "#ffffff",
-    fontFamily: "var(--font-display)",
-    fontSize: "clamp(1.35rem, 1.55vw, 1.72rem)",
-    fontWeight: 800,
-    letterSpacing: 0,
-  },
-  emailRow: {
-    display: "grid",
-    gridTemplateColumns: "auto 1fr auto",
-    alignItems: "center",
-    borderBottom: "1px dashed rgba(255, 255, 255, 0.18)",
-    pb: "0.9rem",
-    "@media (max-width: 720px)": {
-      gridTemplateColumns: "1fr",
-      gap: "0.95rem",
-    },
-  },
-  emailIcon: {
-    width: "1.1rem",
-    height: "1.1rem",
-    mr: "0.72rem",
-    color: "rgba(255, 255, 255, 0.48)",
-    "@media (max-width: 720px)": {
-      display: "none",
-    },
-  },
-  input: {
-    minWidth: 0,
-    border: 0,
-    background: "transparent",
-    color: "#ffffff",
-    font: "inherit",
-    fontSize: "clamp(1rem, 1.15vw, 1.2rem)",
-    fontWeight: 700,
-    outline: "none",
-    "&::placeholder": {
-      color: "rgba(225, 236, 255, 0.48)",
-      opacity: 1,
-    },
-  },
-  submit: {
-    display: "inline-flex",
-    height: "2.15rem",
-    alignItems: "center",
-    gap: 0,
-    border: 0,
-    background: "rgba(255, 255, 255, 0.12)",
-    color: "#ffffff",
-    cursor: "pointer",
-    fontSize: "0.72rem",
-    fontWeight: 900,
-    letterSpacing: "0.05em",
-    textTransform: "uppercase",
-    p: 0,
-    "@media (max-width: 720px)": {
-      width: "fit-content",
-    },
-  },
-  submitText: {
-    display: "inline-flex",
-    height: "100%",
-    alignItems: "center",
-    px: "1rem",
-  },
-  submitIcon: {
-    width: "2.15rem",
-    height: "100%",
-    p: "0.55rem",
-    background: "rgba(255, 255, 255, 0.08)",
   },
   label: {
     m: "0 0 1rem",
@@ -313,16 +235,15 @@ const footerStyles = {
       height: "clamp(3.65rem, 17vw, 6.4rem)",
     },
   },
-  srOnly: {
-    position: "absolute",
-    width: 1,
-    height: 1,
-    p: 0,
-    m: -1,
-    overflow: "hidden",
-    clip: "rect(0, 0, 0, 0)",
-    whiteSpace: "nowrap",
-    border: 0,
+  wordmarkBottomBlur: {
+    zIndex: 3,
+    opacity: 0.42,
+    filter:
+      "brightness(0) invert(1) saturate(0) blur(7px) drop-shadow(0 1.15rem 2.4rem rgba(1, 10, 25, 0.32))",
+    WebkitMaskImage:
+      "linear-gradient(to bottom, transparent 0%, transparent 54%, rgba(0,0,0,0.45) 70%, #000 90%, transparent 100%)",
+    maskImage:
+      "linear-gradient(to bottom, transparent 0%, transparent 54%, rgba(0,0,0,0.45) 70%, #000 90%, transparent 100%)",
   },
 };
 
@@ -337,49 +258,6 @@ export default function Footer() {
 
       <Box sx={footerStyles.inner}>
         <Box component="span" sx={footerStyles.corner} aria-hidden="true" />
-
-        <Box
-          component="section"
-          sx={footerStyles.signup}
-          aria-label="Newsletter signup"
-        >
-          <Box component="h2" sx={footerStyles.heading}>
-            Sign up to stay sharp:
-          </Box>
-          <Box component="form" onSubmit={(event) => event.preventDefault()}>
-            <Box
-              component="label"
-              sx={footerStyles.srOnly}
-              htmlFor="footer-email"
-            >
-              Email address
-            </Box>
-            <Box sx={footerStyles.emailRow}>
-              <Box
-                component={Mail}
-                sx={footerStyles.emailIcon}
-                aria-hidden="true"
-              />
-              <Box
-                component="input"
-                id="footer-email"
-                type="email"
-                placeholder="Enter your email"
-                sx={footerStyles.input}
-              />
-              <Box component="button" type="submit" sx={footerStyles.submit}>
-                <Box component="span" sx={footerStyles.submitText}>
-                  Sign Up
-                </Box>
-                <Box
-                  component={ArrowRight}
-                  sx={footerStyles.submitIcon}
-                  aria-hidden="true"
-                />
-              </Box>
-            </Box>
-          </Box>
-        </Box>
 
         <Box
           component="nav"
@@ -473,6 +351,13 @@ export default function Footer() {
         src={knoraLettermark}
         alt=""
         sx={footerStyles.wordmark}
+        aria-hidden="true"
+      />
+      <Box
+        component="img"
+        src={knoraLettermark}
+        alt=""
+        sx={{ ...footerStyles.wordmark, ...footerStyles.wordmarkBottomBlur }}
         aria-hidden="true"
       />
     </Box>

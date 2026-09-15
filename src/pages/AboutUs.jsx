@@ -61,11 +61,9 @@ function useAboutGsap(pageRef) {
       }
 
       gsap.set(revealItems, {
-        transformPerspective: 1000,
-        transformOrigin: "50% 100%",
         willChange: isMobile
           ? "opacity, transform"
-          : "opacity, transform, filter, clip-path",
+          : "opacity, transform, filter",
       });
 
       gsap.utils.toArray(".about-scroll-section").forEach((section, index) => {
@@ -80,9 +78,9 @@ function useAboutGsap(pageRef) {
             defaults: { ease: "power3.out" },
             scrollTrigger: {
               trigger: section,
-              start: index === 0 ? "top 98%" : "top 84%",
+              start: index === 0 ? "top 96%" : "top 84%",
               end: isMobile ? "bottom 42%" : "bottom 18%",
-              scrub: isMobile ? 0.18 : 0.8,
+              scrub: isMobile ? 0.18 : 0.85,
               invalidateOnRefresh: true,
             },
           })
@@ -90,22 +88,16 @@ function useAboutGsap(pageRef) {
             items,
             {
               autoAlpha: 0,
-              y: isMobile ? 28 : 64,
-              rotateX: isMobile ? 0 : -78,
-              scaleY: isMobile ? 1 : 0.9,
+              x: (itemIndex) => (isMobile ? 0 : itemIndex % 2 === 0 ? -92 : 92),
+              y: isMobile ? 24 : 18,
               filter: isMobile ? "none" : "blur(8px)",
-              clipPath: isMobile
-                ? "inset(0% 0% 0% 0%)"
-                : "inset(0% 0% 100% 0%)",
             },
             {
               autoAlpha: 1,
+              x: 0,
               y: 0,
-              rotateX: 0,
-              scaleY: 1,
               filter: isMobile ? "none" : "blur(0px)",
-              clipPath: "inset(0% 0% 0% 0%)",
-              stagger: isMobile ? 0.025 : 0.055,
+              stagger: isMobile ? 0.025 : 0.06,
               duration: isMobile ? 0.24 : 0.42,
             },
           )
@@ -113,13 +105,9 @@ function useAboutGsap(pageRef) {
             items,
             {
               autoAlpha: 0,
-              y: isMobile ? -18 : -38,
-              rotateX: isMobile ? 0 : 46,
-              scaleY: isMobile ? 1 : 0.92,
+              x: (itemIndex) => (isMobile ? 0 : itemIndex % 2 === 0 ? 82 : -82),
+              y: isMobile ? -16 : -12,
               filter: isMobile ? "none" : "blur(6px)",
-              clipPath: isMobile
-                ? "inset(0% 0% 0% 0%)"
-                : "inset(100% 0% 0% 0%)",
               stagger: isMobile ? 0.015 : 0.035,
               duration: isMobile ? 0.18 : 0.3,
               ease: "power2.in",

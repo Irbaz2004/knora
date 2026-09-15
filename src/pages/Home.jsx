@@ -23,6 +23,7 @@ import {
   Stack as MuiStack,
   Tooltip,
   Typography,
+  Zoom,
 } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CallRoundedIcon from "@mui/icons-material/CallRounded";
@@ -83,6 +84,8 @@ import slide4Image from "@/assets/slide4.webp";
 import slide5Image from "@/assets/slide5.webp";
 import adsImage from "@/assets/Ads1.png";
 import "./HomeImages.css";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const ParticleField = lazy(() => import("@/components/ParticleField"));
 
@@ -418,6 +421,36 @@ function AcademyCarousel() {
     );
     return () => window.clearInterval(timer);
   }, [paused]);
+
+  useEffect(() => {
+    const element = carouselRef.current;
+    if (!element) return undefined;
+
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (reduceMotion) return undefined;
+
+    const fade = gsap.fromTo(
+      element,
+      { autoAlpha: 1, filter: "blur(0px)", scale: 1 },
+      {
+        autoAlpha: 0,
+        filter: "blur(18px)",
+        scale: 0.965,
+        ease: "none",
+        scrollTrigger: {
+          trigger: element,
+          start: "bottom 82%",
+          end: "bottom 8%",
+          scrub: 1.15,
+          invalidateOnRefresh: true,
+        },
+      },
+    );
+
+    return () => fade.kill();
+  }, []);
 
   const handlePointerMove = (event) => {
     const element = carouselRef.current;
@@ -824,12 +857,20 @@ export default function Home() {
   useEffect(() => {
     if (sessionStorage.getItem("knora-course-offer-seen")) return undefined;
 
-    const offerTimer = window.setTimeout(() => {
-      setShowCourseOffer(true);
-      sessionStorage.setItem("knora-course-offer-seen", "true");
-    }, 7000);
+    const whyJoinSection = document.querySelector("#why-join");
+    if (!whyJoinSection) return undefined;
 
-    return () => window.clearTimeout(offerTimer);
+    const offerTrigger = ScrollTrigger.create({
+      trigger: whyJoinSection,
+      start: "top 72%",
+      once: true,
+      onEnter: () => {
+        setShowCourseOffer(true);
+        sessionStorage.setItem("knora-course-offer-seen", "true");
+      },
+    });
+
+    return () => offerTrigger.kill();
   }, []);
   useEffect(() => {
     const media = window.matchMedia("(min-width: 761px)");
@@ -890,7 +931,6 @@ export default function Home() {
     const useFastScroll = journey.reducedMotion || isMobile;
     const revealText = window.matchMedia("(min-width: 640px)").matches;
 
-    gsap.registerPlugin(ScrollTrigger);
     ScrollTrigger.config({ ignoreMobileResize: true });
     const ctx = gsap.context(() => {
       const scenes = sceneRefs.current.slice(0, SCENE_COUNT).filter(Boolean);
@@ -2426,6 +2466,8 @@ export default function Home() {
       <Dialog
         open={showCourseOffer}
         onClose={() => setShowCourseOffer(false)}
+        slots={{ transition: Zoom }}
+        slotProps={{ transition: { timeout: { enter: 700, exit: 350 } } }}
         fullWidth
         maxWidth="sm"
         PaperProps={{
