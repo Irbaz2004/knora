@@ -484,7 +484,9 @@ export default function Login() {
     setStatus("Login successful. Redirecting...");
     toast.success("Login successful. Redirecting...");
     window.setTimeout(() => {
-      window.location.href = "/";
+      const nextPath = sessionStorage.getItem("knora-post-login-path") || "/";
+      sessionStorage.removeItem("knora-post-login-path");
+      window.location.href = nextPath;
     }, 700);
   };
 

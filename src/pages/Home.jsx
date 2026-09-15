@@ -430,6 +430,11 @@ function AcademyCarousel() {
       "(prefers-reduced-motion: reduce)",
     ).matches;
     if (reduceMotion) return undefined;
+    const isSmallScreen = window.matchMedia("(max-width: 760px)").matches;
+    if (isSmallScreen) {
+      gsap.set(element, { clearProps: "opacity,visibility,filter,scale" });
+      return undefined;
+    }
 
     const fade = gsap.fromTo(
       element,
@@ -2475,7 +2480,7 @@ export default function Home() {
             width: { xs: "calc(100% - 32px)", sm: "100%" },
             maxWidth: 480,
             m: { xs: 2, sm: 4 },
-            p: { xs: 1, sm: 1.25 },
+            p: 0,
             borderRadius: { xs: "16px", sm: "22px" },
             overflow: "hidden",
             bgcolor: "var(--card)",
@@ -2487,7 +2492,7 @@ export default function Home() {
       >
         <DialogContent
           sx={{
-            p: "0 !important",
+            p: { xs: "12px !important", sm: "16px !important" },
             position: "relative",
             overflow: "hidden",
             borderRadius: { xs: "11px", sm: "16px" },
@@ -2498,8 +2503,8 @@ export default function Home() {
             onClick={() => setShowCourseOffer(false)}
             sx={{
               position: "absolute",
-              top: 10,
-              right: 10,
+              top: { xs: 20, sm: 24 },
+              right: { xs: 20, sm: 24 },
               zIndex: 1,
               width: 36,
               minWidth: 36,
@@ -2524,12 +2529,12 @@ export default function Home() {
               width: "100%",
               maxHeight: { xs: "54vh", sm: "58vh" },
               objectFit: "cover",
-              borderRadius: { xs: "10px 10px 0 0", sm: "15px 15px 0 0" },
+              borderRadius: 0,
             }}
           />
           <Box
             sx={{
-              px: { xs: 2, sm: 2.75 },
+              px: { xs: 1, sm: 1.5 },
               pt: { xs: 2, sm: 2.5 },
               pb: { xs: 2.25, sm: 2.75 },
             }}

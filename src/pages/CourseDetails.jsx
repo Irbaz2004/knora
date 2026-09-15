@@ -23,6 +23,17 @@ import ShoppingCartRoundedIcon from "@mui/icons-material/ShoppingCartRounded";
 import SmartToyRoundedIcon from "@mui/icons-material/SmartToyRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import courseImage from "@/assets/courseimg.webp";
+import { toast } from "sonner";
+import { addToCart, formatPrice } from "@/lib/cart";
+import { auth } from "@/firebase";
+
+const coursePrices = {
+  "AI Foundation": 24999,
+  "Python AI": 18999,
+  GenAI: 21999,
+  Vision: 19999,
+  "Data Stack": 22999,
+};
 
 const courseCatalog = [
   {
@@ -274,6 +285,7 @@ function getCourseDetail() {
 
 export default function CourseDetails() {
   const detail = getCourseDetail();
+  const [adding, setAdding] = useState(false);
 
   if (!detail) {
     return (
@@ -314,6 +326,41 @@ export default function CourseDetails() {
     "Curiosity to practice between classes",
   ];
   const syllabus = getLessons(course).slice(0, 6);
+  const price = coursePrices[course.name] ?? 19999;
+  const cartItem = {
+    id: slugify(course.name),
+    name: course.fullName,
+    category: course.category,
+    duration: course.duration,
+    mode: course.mode,
+    level: course.level,
+    image: courseImage,
+    price,
+  };
+  const navigate = (path) =>
+    window.dispatchEvent(
+      new CustomEvent("knora:navigate", { detail: { path } }),
+    );
+  const handleAddToCart = async (goToCheckout = false) => {
+    if (!auth?.currentUser) {
+      sessionStorage.setItem("knora-post-login-path", window.location.pathname);
+      toast.info("Please log in to add this course to your cart.");
+      navigate("/login");
+      return;
+    }
+    setAdding(true);
+    try {
+      await addToCart(cartItem);
+      toast.success("Course added to your cart.");
+    } catch {
+      toast.info(
+        "Course saved on this device. Firebase sync needs permission.",
+      );
+    } finally {
+      setAdding(false);
+    }
+    navigate(goToCheckout ? "/checkout" : "/cart");
+  };
 
   return (
     <>
@@ -526,6 +573,9 @@ export default function CourseDetails() {
                 >
                   {course.fullName}
                 </Typography>
+                <Typography sx={{ fontSize: 28, fontWeight: 850 }}>
+                  {formatPrice(price)}
+                </Typography>
                 <Stack spacing={1}>
                   {[
                     ["Duration", course.duration],
@@ -555,6 +605,8 @@ export default function CourseDetails() {
                 <Button
                   fullWidth
                   startIcon={<ShoppingCartRoundedIcon />}
+                  disabled={adding}
+                  onClick={() => handleAddToCart(false)}
                   sx={{
                     bgcolor: "var(--primary)",
                     borderRadius: "8px",
@@ -564,11 +616,13 @@ export default function CourseDetails() {
                     textTransform: "none",
                   }}
                 >
-                  Add to cart
+                  {adding ? "Saving..." : "Add to cart"}
                 </Button>
                 <Button
                   fullWidth
                   endIcon={<ArrowForwardRoundedIcon />}
+                  disabled={adding}
+                  onClick={() => handleAddToCart(true)}
                   sx={{
                     border:
                       "1px solid color-mix(in oklab, var(--primary) 24%, transparent)",
@@ -646,3 +700,4 @@ function DetailSection({ title, items }) {
     </Box>
   );
 }
+import { useState } from "react";

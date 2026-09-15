@@ -9,6 +9,7 @@ import {
   LogIn,
   LogOut,
   Menu,
+  ShoppingBag,
   SunMoon,
   UserRound,
   X,
@@ -690,6 +691,18 @@ export default function Navbar() {
                       My Learning
                     </Box>
                     <Box
+                      component="a"
+                      href="/cart"
+                      onClick={closeMenus}
+                      sx={navbarStyles.dropdownLink}
+                    >
+                      <Box
+                        component={ShoppingBag}
+                        sx={{ width: "1rem", height: "1rem" }}
+                      />
+                      Cart
+                    </Box>
+                    <Box
                       component="button"
                       type="button"
                       onClick={handleLogout}
@@ -853,6 +866,22 @@ export default function Navbar() {
                     sx={{ width: "1rem", height: "1rem" }}
                   />
                   My Learning
+                </Box>
+                <Box
+                  component="a"
+                  href="/cart"
+                  onClick={closeMenus}
+                  sx={{
+                    ...navbarStyles.dropdownLink,
+                    ...navbarStyles.mobileAction,
+                    color: "var(--foreground)",
+                  }}
+                >
+                  <Box
+                    component={ShoppingBag}
+                    sx={{ width: "1rem", height: "1rem" }}
+                  />
+                  Cart
                 </Box>
                 <Box
                   component="button"

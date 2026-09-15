@@ -4,6 +4,8 @@ import { lockPageScroll } from "@/lib/scrollLock";
 import navigationVideo from "@/assets/navigate.mp4";
 import "./NavigationVideo.css";
 
+const NAVIGATION_VIDEO_SPEED = 1.5;
+
 export default function SplashScreen({
   transitionKey,
   routeTitle,
@@ -64,6 +66,8 @@ export default function SplashScreen({
     video.addEventListener("ended", finish);
     video.addEventListener("error", finish);
     video.currentTime = 0;
+    video.defaultPlaybackRate = NAVIGATION_VIDEO_SPEED;
+    video.playbackRate = NAVIGATION_VIDEO_SPEED;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) finish();
     else video.play().catch(finish);
     return () => {

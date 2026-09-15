@@ -23,6 +23,8 @@ const ContactUs = lazy(() => import("@/pages/ContactUs"));
 const Counselling = lazy(() => import("@/pages/Counselling"));
 const CourseDetails = lazy(() => import("@/pages/CourseDetails"));
 const Courses = lazy(() => import("@/pages/Courses"));
+const Cart = lazy(() => import("@/pages/Cart"));
+const Checkout = lazy(() => import("@/pages/Checkout"));
 const EventsNews = lazy(() => import("@/pages/EventsNews"));
 const Faculty = lazy(() => import("@/pages/Faculty"));
 const Gallery = lazy(() => import("@/pages/Gallery"));
@@ -43,6 +45,8 @@ const routes = {
   "/admission-process": AdmissionProcess,
   "/apply-online": ApplyOnline,
   "/career": Career,
+  "/cart": Cart,
+  "/checkout": Checkout,
   "/contact-us": ContactUs,
   "/counselling": Counselling,
   "/courses": Courses,
@@ -66,6 +70,8 @@ const routeLabels = {
   "/admission-process": "Admission Process",
   "/apply-online": "Apply Online",
   "/career": "Career",
+  "/cart": "Cart",
+  "/checkout": "Checkout",
   "/contact-us": "Contact Us",
   "/counselling": "Counselling",
   "/courses": "Courses",
@@ -137,6 +143,8 @@ export default function App() {
   const pendingPathRef = useRef(null);
   const Page = useMemo(() => getRouteComponent(path), [path]);
   const isAuthRoute = ["/forgot-password", "/login", "/signup"].includes(path);
+  const isCommerceRoute = ["/cart", "/checkout"].includes(path);
+  const hideChrome = isAuthRoute || isCommerceRoute;
 
   const beginNavigation = useCallback(
     (nextPath, { push = true } = {}) => {
@@ -228,15 +236,15 @@ export default function App() {
 
   return (
     <>
-      {!isAuthRoute && <Navbar />}
+      {!hideChrome && <Navbar />}
       <Suspense fallback={<div className="min-h-screen bg-background" />}>
         <Page />
       </Suspense>
-      {!isAuthRoute && <Footer />}
+      {!hideChrome && <Footer />}
       <SmoothScroll />
       <CursorEffect />
       <Toaster richColors position="top-right" />
-      {!isAuthRoute && transitionKey === 0 && <OpeningVideoSplash />}
+      {!hideChrome && transitionKey === 0 && <OpeningVideoSplash />}
       <SplashScreen
         transitionKey={transitionKey}
         routeTitle={transitionLabel}

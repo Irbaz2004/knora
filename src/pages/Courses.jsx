@@ -658,12 +658,6 @@ function CourseLessonList({ course }) {
               sx={{ "--card-index": String(index + 1).padStart(2, "0") }}
             >
               <Box className="course-list-card-top">
-                {isLocked && (
-                  <span className="course-list-lock">
-                    <LockRoundedIcon />
-                    Coming soon
-                  </span>
-                )}
                 <Stack className="course-list-number" spacing={0.4}>
                   <span>{String(index + 1).padStart(2, "0")}</span>
                   <b>{lesson.badge}</b>
@@ -695,6 +689,15 @@ function CourseLessonList({ course }) {
               <Box className="course-list-thumb">
                 <Box component="img" src={lesson.image} alt="" />
               </Box>
+              {isLocked && (
+                <Box
+                  className="course-list-lock-center"
+                  aria-label="Coming soon"
+                >
+                  <LockRoundedIcon />
+                  <span>Coming soon</span>
+                </Box>
+              )}
             </Box>
           );
         })}
@@ -1324,8 +1327,7 @@ export default function Courses() {
             fontSize: "clamp(64px, 7vw, 118px) !important",
           },
           ".course-list-view": {
-            background:
-              "radial-gradient(circle at 50% 18%, color-mix(in oklab, var(--primary) 11%, transparent), transparent 34%), var(--background)",
+            background: "var(--background)",
             color: "var(--foreground)",
             minHeight: "100vh",
             overflow: "hidden",
@@ -1334,31 +1336,18 @@ export default function Courses() {
             position: "relative",
           },
           ".dark .course-list-view": {
-            background:
-              "radial-gradient(circle at 50% 14%, color-mix(in oklab, var(--primary) 16%, transparent), transparent 34%), var(--background)",
+            background: "var(--background)",
             color: "var(--foreground)",
           },
           ".course-list-view::before": {
-            background:
-              "radial-gradient(circle at 18% 14%, color-mix(in oklab, var(--primary) 16%, transparent) 0 1px, transparent 1.2px), radial-gradient(circle at 72% 4%, color-mix(in oklab, var(--primary) 10%, transparent) 0 1px, transparent 1.3px)",
-            backgroundSize: "6px 6px, 9px 9px",
-            content: '""',
-            inset: 0,
-            opacity: 0.32,
-            pointerEvents: "none",
-            position: "absolute",
+            display: "none",
           },
           ".dark .course-list-view::before": {
             background:
               "radial-gradient(circle at 18% 14%, color-mix(in oklab, var(--foreground) 13%, transparent) 0 1px, transparent 1.2px), radial-gradient(circle at 72% 4%, color-mix(in oklab, var(--primary) 16%, transparent) 0 1px, transparent 1.3px)",
           },
           ".course-list-view::after": {
-            background:
-              "radial-gradient(circle at 50% 0%, color-mix(in oklab, var(--card) 72%, transparent), transparent 35%)",
-            content: '""',
-            inset: 0,
-            pointerEvents: "none",
-            position: "absolute",
+            display: "none",
           },
           ".dark .course-list-view::after": {
             background:
@@ -1439,7 +1428,7 @@ export default function Courses() {
             border:
               "1px solid color-mix(in oklab, var(--primary) 10%, transparent)",
             borderRadius: "8px",
-            color: "var(--foreground)",
+            color: "#000",
             display: "flex",
             flexDirection: "column",
             minHeight: "356px",
@@ -1451,22 +1440,12 @@ export default function Courses() {
               "transform 220ms ease, border-color 220ms ease, filter 220ms ease, background 220ms ease",
           },
           ".dark .course-list-card": {
-            background:
-              "linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.025))",
-            borderColor: "rgba(255,255,255,0.095)",
-            color: "#f5f5f5",
+            background: "#fff",
+            borderColor: "rgba(0,0,0,0.1)",
+            color: "#000",
           },
           ".course-list-card::before": {
-            background:
-              "radial-gradient(210px circle at var(--glow-x) var(--glow-y), color-mix(in oklab, var(--primary) 30%, transparent), transparent 58%), radial-gradient(circle at 64% 0%, color-mix(in oklab, var(--primary) 13%, transparent) 0 1px, transparent 1px)",
-            backgroundSize: "100% 100%, 5px 5px",
-            content: '""',
-            inset: 0,
-            opacity: 0.28,
-            pointerEvents: "none",
-            position: "absolute",
-            transition: "opacity 220ms ease",
-            zIndex: 1,
+            display: "none",
           },
           ".dark .course-list-card::before": {
             background:
@@ -1500,14 +1479,14 @@ export default function Courses() {
           },
           ".course-list-number": {
             alignItems: "flex-end",
-            color: "color-mix(in oklab, var(--foreground) 38%, transparent)",
+            color: "rgba(0,0,0,0.42)",
             fontSize: "11px",
             fontWeight: 900,
             lineHeight: 1,
             textTransform: "uppercase",
           },
           ".dark .course-list-number": {
-            color: "rgba(255,255,255,0.36)",
+            color: "rgba(0,0,0,0.42)",
           },
           ".course-list-number b": {
             background: "color-mix(in oklab, var(--primary) 8%, transparent)",
@@ -1526,7 +1505,7 @@ export default function Courses() {
             color: "#d9d9d9",
           },
           ".course-list-card-title.MuiTypography-root": {
-            color: "var(--foreground)",
+            color: "#000",
             fontFamily: "var(--font-display)",
             fontSize: "19px",
             fontWeight: 900,
@@ -1538,10 +1517,10 @@ export default function Courses() {
             zIndex: 2,
           },
           ".dark .course-list-card-title.MuiTypography-root": {
-            color: "#f5f5f5",
+            color: "#000",
           },
           ".course-list-card-copy.MuiTypography-root": {
-            color: "color-mix(in oklab, var(--foreground) 62%, transparent)",
+            color: "rgba(0,0,0,0.68)",
             fontSize: "14px",
             fontWeight: 750,
             lineHeight: 1.5,
@@ -1551,11 +1530,11 @@ export default function Courses() {
             zIndex: 2,
           },
           ".dark .course-list-card-copy.MuiTypography-root": {
-            color: "rgba(255,255,255,0.58)",
+            color: "rgba(0,0,0,0.68)",
           },
           ".course-list-meta": {
             alignItems: "center",
-            color: "color-mix(in oklab, var(--foreground) 50%, transparent)",
+            color: "rgba(0,0,0,0.58)",
             flexWrap: "wrap",
             fontSize: "10.5px",
             fontWeight: 800,
@@ -1565,7 +1544,7 @@ export default function Courses() {
             zIndex: 2,
           },
           ".dark .course-list-meta": {
-            color: "rgba(255,255,255,0.48)",
+            color: "rgba(0,0,0,0.58)",
           },
           ".course-list-meta span": {
             alignItems: "center",
@@ -1574,11 +1553,11 @@ export default function Courses() {
             minWidth: 0,
           },
           ".course-list-meta svg": {
-            color: "color-mix(in oklab, var(--foreground) 50%, transparent)",
+            color: "rgba(0,0,0,0.58)",
             fontSize: "12px",
           },
           ".dark .course-list-meta svg": {
-            color: "rgba(255,255,255,0.48)",
+            color: "rgba(0,0,0,0.58)",
           },
           ".course-list-meta i": {
             background:
@@ -1614,16 +1593,13 @@ export default function Courses() {
             height: "100%",
             inset: 0,
             objectFit: "cover",
-            opacity: 0.72,
+            filter: "none",
+            opacity: 1,
             position: "absolute",
             width: "100%",
           },
           ".course-list-thumb::after": {
-            background:
-              "linear-gradient(180deg, color-mix(in oklab, var(--card) 8%, transparent), color-mix(in oklab, var(--foreground) 30%, transparent))",
-            content: '""',
-            inset: 0,
-            position: "absolute",
+            display: "none",
           },
           ".dark .course-list-thumb::after": {
             background:
@@ -1646,34 +1622,45 @@ export default function Courses() {
           },
           ".course-list-card-locked": {
             cursor: "default",
-            filter: "saturate(0.72)",
+            filter: "none",
           },
           ".course-list-card-locked:hover": {
             borderColor: "color-mix(in oklab, var(--primary) 18%, transparent)",
-            filter: "saturate(0.72)",
+            filter: "none",
             transform: "none",
           },
           ".course-list-card-locked::after": {
             content: "none",
           },
-          ".course-list-lock": {
-            alignItems: "center",
-            background: "color-mix(in oklab, var(--primary) 10%, transparent)",
-            border:
-              "1px solid color-mix(in oklab, var(--primary) 16%, transparent)",
-            borderRadius: "999px",
-            color: "var(--primary)",
-            display: "inline-flex",
-            fontSize: "10px",
-            fontWeight: 900,
-            gap: "4px",
-            letterSpacing: "0.08em",
-            lineHeight: 1,
-            padding: "6px 8px",
-            textTransform: "uppercase",
+          ".course-list-card-locked > *:not(.course-list-lock-center)": {
+            filter: "blur(5px)",
+            opacity: 0.42,
           },
-          ".course-list-lock svg": {
-            fontSize: "12px",
+          ".course-list-lock-center": {
+            alignItems: "center",
+            background: "rgba(255,255,255,0.82)",
+            border: "1px solid rgba(0,0,0,0.1)",
+            borderRadius: "50%",
+            boxShadow: "0 16px 44px rgba(0,0,0,0.16)",
+            color: "#000",
+            display: "flex",
+            flexDirection: "column",
+            fontSize: "9px",
+            fontWeight: 900,
+            gap: "5px",
+            height: "88px",
+            justifyContent: "center",
+            left: "50%",
+            letterSpacing: "0.08em",
+            position: "absolute",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            textTransform: "uppercase",
+            width: "88px",
+            zIndex: 8,
+          },
+          ".course-list-lock-center svg": {
+            fontSize: "30px",
           },
           ".course-list-card-locked .course-list-thumb img": {
             opacity: 0.34,
@@ -1681,10 +1668,10 @@ export default function Courses() {
           ".course-list-card-locked .course-list-thumb-icon": {
             color: "color-mix(in oklab, var(--primary) 46%, transparent)",
           },
-          ".dark .course-list-lock": {
-            background: "rgba(255,255,255,0.1)",
-            borderColor: "rgba(255,255,255,0.16)",
-            color: "#f5f5f5",
+          ".dark .course-list-lock-center": {
+            background: "rgba(255,255,255,0.88)",
+            borderColor: "rgba(0,0,0,0.1)",
+            color: "#000",
           },
           "@media (max-width: 1180px)": {
             ".course-list-grid": {
