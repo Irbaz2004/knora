@@ -1,5 +1,13 @@
 import { Box } from "@mui/material";
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+} from "framer-motion";
 import { ArrowUp } from "lucide-react";
+import { useRef } from "react";
 import knoraLettermark from "@/assets/KNORALettermark.png";
 
 const primaryLinks = [
@@ -208,15 +216,27 @@ const footerStyles = {
       gridColumn: "auto",
     },
   },
-  wordmark: {
+  wordmarkParallax: {
     position: "absolute",
     zIndex: 2,
-    left: "50%",
-    right: "auto",
+    left: 0,
+    right: 0,
     bottom: "clamp(0.65rem, 1.2vw, 1.4rem)",
     width: "clamp(34rem, 96vw, 112rem)",
     height: "clamp(5.15rem, 14.6vw, 17rem)",
-    transform: "translateX(-50%)",
+    mx: "auto",
+    pointerEvents: "none",
+    "@media (max-width: 720px)": {
+      bottom: "0.8rem",
+      width: "clamp(24rem, 112vw, 42rem)",
+      height: "clamp(3.65rem, 17vw, 6.4rem)",
+    },
+  },
+  wordmark: {
+    position: "absolute",
+    inset: 0,
+    width: "100%",
+    height: "100%",
     display: "block",
     objectFit: "cover",
     objectPosition: "center 51.6%",
@@ -227,33 +247,53 @@ const footerStyles = {
       "linear-gradient(to bottom, #000 0%, #000 55%, rgba(0,0,0,0.72) 72%, transparent 100%)",
     pointerEvents: "none",
     userSelect: "none",
-    filter:
-      "brightness(0) invert(1) saturate(0) blur(0.35px) drop-shadow(0 1.15rem 2.4rem rgba(1, 10, 25, 0.32))",
+    filter: "brightness(0) invert(1) saturate(0)",
+  },
+  cornerBlur: {
+    position: "absolute",
+    zIndex: 3,
+    bottom: "-8rem",
+    width: "clamp(17rem, 34vw, 42rem)",
+    height: "clamp(13rem, 25vw, 30rem)",
+    borderRadius: "50%",
+    background: "rgba(0, 0, 0, 0.78)",
+    filter: "blur(clamp(3.5rem, 6vw, 7rem))",
+    pointerEvents: "none",
     "@media (max-width: 720px)": {
-      bottom: "0.8rem",
-      width: "clamp(24rem, 112vw, 42rem)",
-      height: "clamp(3.65rem, 17vw, 6.4rem)",
+      bottom: "-5rem",
+      width: "18rem",
+      height: "14rem",
+      filter: "blur(3.5rem)",
     },
   },
-  wordmarkBottomBlur: {
-    zIndex: 3,
-    opacity: 0.42,
-    filter:
-      "brightness(0) invert(1) saturate(0) blur(7px) drop-shadow(0 1.15rem 2.4rem rgba(1, 10, 25, 0.32))",
-    WebkitMaskImage:
-      "linear-gradient(to bottom, transparent 0%, transparent 54%, rgba(0,0,0,0.45) 70%, #000 90%, transparent 100%)",
-    maskImage:
-      "linear-gradient(to bottom, transparent 0%, transparent 54%, rgba(0,0,0,0.45) 70%, #000 90%, transparent 100%)",
+  cornerBlurLeft: {
+    left: "clamp(-15rem, -11vw, -5rem)",
+  },
+  cornerBlurRight: {
+    right: "clamp(-15rem, -11vw, -5rem)",
   },
 };
 
 export default function Footer() {
+  const footerRef = useRef(null);
+  const prefersReducedMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: footerRef,
+    offset: ["start end", "end end"],
+  });
+  const lettermarkOffset = useTransform(scrollYProgress, [0, 1], [180, 0]);
+  const lettermarkY = useSpring(lettermarkOffset, {
+    stiffness: 110,
+    damping: 24,
+    mass: 0.35,
+  });
+
   const backToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
-    <Box component="footer" sx={footerStyles.footer}>
+    <Box ref={footerRef} component="footer" sx={footerStyles.footer}>
       <Box sx={footerStyles.grid} aria-hidden="true" />
 
       <Box sx={footerStyles.inner}>
@@ -347,17 +387,25 @@ export default function Footer() {
       </Box>
 
       <Box
-        component="img"
-        src={knoraLettermark}
-        alt=""
-        sx={footerStyles.wordmark}
+        component={motion.div}
+        sx={footerStyles.wordmarkParallax}
+        style={{ y: prefersReducedMotion ? 0 : lettermarkY }}
+        aria-hidden="true"
+      >
+        <Box
+          component="img"
+          src={knoraLettermark}
+          alt=""
+          sx={footerStyles.wordmark}
+        />
+      </Box>
+
+      <Box
+        sx={{ ...footerStyles.cornerBlur, ...footerStyles.cornerBlurLeft }}
         aria-hidden="true"
       />
       <Box
-        component="img"
-        src={knoraLettermark}
-        alt=""
-        sx={{ ...footerStyles.wordmark, ...footerStyles.wordmarkBottomBlur }}
+        sx={{ ...footerStyles.cornerBlur, ...footerStyles.cornerBlurRight }}
         aria-hidden="true"
       />
     </Box>

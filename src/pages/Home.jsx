@@ -882,7 +882,16 @@ export default function Home() {
     let idleId;
     let timerId;
     const update = () => {
-      if (!media.matches) {
+      const connection =
+        navigator.connection ||
+        navigator.mozConnection ||
+        navigator.webkitConnection;
+      const constrainedDevice =
+        connection?.saveData ||
+        (navigator.deviceMemory && navigator.deviceMemory <= 4) ||
+        navigator.hardwareConcurrency <= 4;
+
+      if (!media.matches || constrainedDevice) {
         setShowParticles(false);
         return;
       }

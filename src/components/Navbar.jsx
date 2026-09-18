@@ -1,6 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
 import { Box } from "@mui/material";
 import {
   ArrowRight,
@@ -15,7 +13,6 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { auth, db } from "@/firebase";
 import useThemeLogo from "@/lib/useThemeLogo";
 
 const menu = [
@@ -456,6 +453,7 @@ export default function Navbar() {
   const [mobileGroupOpen, setMobileGroupOpen] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const headerRef = useRef(null);
+  const firebaseRef = useRef(null);
   const logo = useThemeLogo();
 
   useEffect(() => {
@@ -523,33 +521,55 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    if (!auth) return undefined;
-
     let activeSubscription = true;
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        if (activeSubscription) setUserProfile(null);
-        return;
-      }
+    let unsubscribe = () => {};
 
-      const nextProfile = {
-        uid: user.uid,
-        displayName: user.displayName,
-        email: user.email,
+    const connectAuth = async () => {
+      const [authModule, firestoreModule, services] = await Promise.all([
+        import("firebase/auth"),
+        import("firebase/firestore"),
+        import("@/firebase"),
+      ]);
+      if (!activeSubscription || !services.auth) return;
+
+      firebaseRef.current = {
+        auth: services.auth,
+        signOut: authModule.signOut,
       };
-
-      if (db) {
-        try {
-          const snapshot = await getDoc(doc(db, "users", user.uid));
-          if (snapshot.exists()) {
-            Object.assign(nextProfile, snapshot.data());
+      unsubscribe = authModule.onAuthStateChanged(
+        services.auth,
+        async (user) => {
+          if (!user) {
+            if (activeSubscription) setUserProfile(null);
+            return;
           }
-        } catch (error) {
-          console.warn("Could not load user profile", error);
-        }
-      }
 
-      if (activeSubscription) setUserProfile(nextProfile);
+          const nextProfile = {
+            uid: user.uid,
+            displayName: user.displayName,
+            email: user.email,
+          };
+
+          if (services.db) {
+            try {
+              const snapshot = await firestoreModule.getDoc(
+                firestoreModule.doc(services.db, "users", user.uid),
+              );
+              if (snapshot.exists()) {
+                Object.assign(nextProfile, snapshot.data());
+              }
+            } catch (error) {
+              console.warn("Could not load user profile", error);
+            }
+          }
+
+          if (activeSubscription) setUserProfile(nextProfile);
+        },
+      );
+    };
+
+    connectAuth().catch((error) => {
+      console.warn("Could not initialize authentication", error);
     });
 
     return () => {
@@ -559,10 +579,11 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = async () => {
-    if (!auth) return;
+    const firebase = firebaseRef.current;
+    if (!firebase) return;
 
     try {
-      await signOut(auth);
+      await firebase.signOut(firebase.auth);
       setProfileOpen(false);
       setOpen(false);
       toast.success("Logged out successfully.");

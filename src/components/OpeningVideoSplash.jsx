@@ -148,7 +148,7 @@ export default function OpeningVideoSplash() {
         className="opening-video-splash-media ai-entry-video"
         src={splashVideo}
         playsInline
-        preload="auto"
+        preload="none"
         onEnded={() => finishRef.current()}
         onError={() => finishRef.current()}
       />

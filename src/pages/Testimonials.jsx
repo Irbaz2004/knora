@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useCallback, useState } from "react";
 import { Box, Typography, Avatar } from "@mui/material";
 import {
   FormatQuote,
+  PlayCircleOutlined,
   Star,
   StarBorder,
   Shuffle as ShuffleIcon,
@@ -88,6 +89,13 @@ const testimonials = [
   },
 ];
 
+// Replace these IDs with your own YouTube testimonial videos when available.
+const videoTestimonials = [
+  { videoId: "M7lc1UVf-VE", name: "Aarav's learning journey", role: "Frontend Development graduate" },
+  { videoId: "ScMzIvxBSi4", name: "Sara's career transition", role: "UI/UX Design graduate" },
+  { videoId: "jNQXAC9IVRw", name: "Rohan's Knora experience", role: "Data Analytics graduate" },
+];
+
 const avatarPalette = [
   "var(--electric)",
   "#4ba8f5",
@@ -163,6 +171,45 @@ function Stars({ rating }) {
           />
         ),
       )}
+    </Box>
+  );
+}
+
+function SectionHeading({ eyebrow, title, accent, description }) {
+  return (
+    <Box sx={{ textAlign: "center", mb: { xs: 4, md: 5 } }}>
+      <Typography sx={{ color: ACCENT, fontSize: "0.7rem", fontWeight: 800, letterSpacing: "0.18em", mb: 1.2 }}>
+        {eyebrow}
+      </Typography>
+      <Typography component="h2" sx={{ color: TEXT, fontFamily: "var(--font-display)", fontSize: { xs: "1.65rem", sm: "2.2rem" }, fontWeight: 800, mb: 1.2 }}>
+        {title} <Box component="span" sx={{ color: ACCENT }}>{accent}</Box>
+      </Typography>
+      <Typography sx={{ color: TEXT_MUTED, fontSize: "0.88rem", maxWidth: 560, mx: "auto" }}>
+        {description}
+      </Typography>
+    </Box>
+  );
+}
+
+function MarqueeCard({ data, index }) {
+  return (
+    <Box sx={{ flex: "0 0 clamp(17rem, 28vw, 22rem)", minHeight: 218, bgcolor: CARD_BG, border: `1px solid ${BORDER_SOFT}`, borderRadius: "12px", p: 2.5, backdropFilter: "blur(8px)" }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1.4 }}>
+        <FormatQuote sx={{ color: ACCENT, fontSize: 27, opacity: 0.8 }} />
+        <Stars rating={data.rating} />
+      </Box>
+      <Typography sx={{ color: TEXT_MUTED, fontSize: "0.83rem", lineHeight: 1.65, mb: 2.2 }}>
+        &ldquo;{data.text}&rdquo;
+      </Typography>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
+        <Avatar sx={{ width: 38, height: 38, bgcolor: avatarPalette[index % avatarPalette.length], fontSize: "0.75rem", fontWeight: 800 }}>
+          {initials(data.name)}
+        </Avatar>
+        <Box>
+          <Typography sx={{ color: TEXT, fontSize: "0.82rem", fontWeight: 750 }}>{data.name}</Typography>
+          <Typography sx={{ color: TEXT_MUTED, fontSize: "0.7rem" }}>{data.role}</Typography>
+        </Box>
+      </Box>
     </Box>
   );
 }
@@ -529,6 +576,45 @@ export default function Testimonial() {
               ref={(el) => setCardRef(el, i)}
             />
           ))}
+        </Box>
+
+        <Box component="section" aria-label="More learner feedback" sx={{ mt: { xs: 9, md: 13 } }}>
+          <SectionHeading eyebrow="MORE FROM OUR COMMUNITY" title="Feedback that keeps" accent="moving" description="A continuous stream of honest experiences from learners across our programs." />
+          <Box sx={{ position: "relative", mx: { xs: -3, sm: -6, md: -9 }, overflow: "hidden", maskImage: "linear-gradient(90deg, transparent, black 8%, black 92%, transparent)", WebkitMaskImage: "linear-gradient(90deg, transparent, black 8%, black 92%, transparent)", "&:hover .testimonial-marquee": { animationPlayState: "paused" } }}>
+            <Box
+              className="testimonial-marquee"
+              sx={{
+                display: "flex", width: "max-content", gap: 2, py: 2,
+                animation: "testimonialMarquee 42s linear infinite",
+                "@keyframes testimonialMarquee": { from: { transform: "translateX(0)" }, to: { transform: "translateX(calc(-50% - 8px))" } },
+                "@media (prefers-reduced-motion: reduce)": { animation: "none", flexWrap: "wrap", width: "auto", px: 3, "& > :nth-of-type(n+11)": { display: "none" } },
+              }}
+            >
+              {[...testimonials, ...testimonials].map((item, index) => (
+                <MarqueeCard key={`${item.name}-${index}`} data={item} index={index} />
+              ))}
+            </Box>
+          </Box>
+        </Box>
+
+        <Box component="section" aria-label="Video testimonials" sx={{ mt: { xs: 9, md: 13 } }}>
+          <SectionHeading eyebrow="WATCH THEIR STORIES" title="Hear it directly from" accent="our learners" description="Real stories, real progress, and the moments that made their learning journey worthwhile." />
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, minmax(0, 1fr))" }, gap: 2.5, maxWidth: 1200, mx: "auto" }}>
+            {videoTestimonials.map((video) => (
+              <Box component="article" key={video.videoId} sx={{ bgcolor: CARD_BG, border: `1px solid ${BORDER_SOFT}`, borderRadius: "12px", overflow: "hidden", transition: "transform .25s ease, border-color .25s ease", "&:hover": { transform: "translateY(-5px)", borderColor: ACCENT } }}>
+                <Box sx={{ position: "relative", aspectRatio: "16 / 9", bgcolor: "#050b16" }}>
+                  <Box component="iframe" src={`https://www.youtube-nocookie.com/embed/${video.videoId}`} title={video.name} loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen sx={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }} />
+                </Box>
+                <Box sx={{ p: 2.2, display: "flex", gap: 1.2, alignItems: "center" }}>
+                  <PlayCircleOutlined sx={{ color: ACCENT, fontSize: 30, flexShrink: 0 }} />
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography sx={{ color: TEXT, fontWeight: 750, fontSize: "0.88rem" }}>{video.name}</Typography>
+                    <Typography sx={{ color: TEXT_MUTED, fontSize: "0.7rem" }}>{video.role}</Typography>
+                  </Box>
+                </Box>
+              </Box>
+            ))}
+          </Box>
         </Box>
       </Box>
     </>

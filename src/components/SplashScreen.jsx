@@ -5,6 +5,7 @@ import navigationVideo from "@/assets/navigate.mp4";
 import "./NavigationVideo.css";
 
 const NAVIGATION_VIDEO_SPEED = 1.5;
+const MAX_TRANSITION_MS = 900;
 
 export default function SplashScreen({
   transitionKey,
@@ -33,6 +34,7 @@ export default function SplashScreen({
       if (finished || disposed) return;
       finished = true;
       clearInterval(watchdog);
+      clearTimeout(transitionDeadline);
       video.pause();
       // Mount the next page after playback, not while the browser decodes video.
       try {
@@ -59,6 +61,7 @@ export default function SplashScreen({
         : 10000;
       if (now - lastProgress > 2000 || now - startedAt > deadline) finish();
     }, 250);
+    const transitionDeadline = setTimeout(finish, MAX_TRANSITION_MS);
     const key = (e) => {
       if (e.key === "Escape") finish();
     };
@@ -73,6 +76,7 @@ export default function SplashScreen({
     return () => {
       disposed = true;
       clearInterval(watchdog);
+      clearTimeout(transitionDeadline);
       clearTimeout(fadeTimer);
       video.pause();
       video.removeEventListener("ended", finish);
@@ -94,7 +98,7 @@ export default function SplashScreen({
         src={navigationVideo}
         muted
         playsInline
-        preload="auto"
+        preload="metadata"
         disablePictureInPicture
       />
     </div>,

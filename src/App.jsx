@@ -1,5 +1,3 @@
-import SmoothScroll from "@/components/SmoothScroll";
-import CursorEffect from "@/components/CursorEffect";
 import {
   Suspense,
   lazy,
@@ -12,8 +10,13 @@ import {
 import { Toaster } from "sonner";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
-import OpeningVideoSplash from "@/components/OpeningVideoSplash";
 import SplashScreen from "@/components/SplashScreen";
+
+const SmoothScroll = lazy(() => import("@/components/SmoothScroll"));
+const CursorEffect = lazy(() => import("@/components/CursorEffect"));
+const OpeningVideoSplash = lazy(
+  () => import("@/components/OpeningVideoSplash"),
+);
 
 const AboutUs = lazy(() => import("@/pages/AboutUs"));
 const AdmissionProcess = lazy(() => import("@/pages/AdmissionProcess"));
@@ -134,6 +137,45 @@ function NotFound() {
   );
 }
 
+function DeferredEnhancements() {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let idleId;
+    let timerId;
+    const enable = () => setReady(true);
+    const connection =
+      navigator.connection ||
+      navigator.mozConnection ||
+      navigator.webkitConnection;
+    const constrainedDevice =
+      connection?.saveData ||
+      (navigator.deviceMemory && navigator.deviceMemory <= 4) ||
+      navigator.hardwareConcurrency <= 4;
+
+    if (constrainedDevice) return undefined;
+
+    if ("requestIdleCallback" in window) {
+      idleId = window.requestIdleCallback(enable, { timeout: 1800 });
+    } else {
+      timerId = window.setTimeout(enable, 1000);
+    }
+
+    return () => {
+      if (idleId) window.cancelIdleCallback(idleId);
+      if (timerId) window.clearTimeout(timerId);
+    };
+  }, []);
+
+  if (!ready) return null;
+  return (
+    <Suspense fallback={null}>
+      <SmoothScroll />
+      <CursorEffect />
+    </Suspense>
+  );
+}
+
 export default function App() {
   const [path, setPath] = useState(() =>
     normalizePath(window.location.pathname),
@@ -241,10 +283,25 @@ export default function App() {
         <Page />
       </Suspense>
       {!hideChrome && <Footer />}
-      <SmoothScroll />
-      <CursorEffect />
+      <DeferredEnhancements />
       <Toaster richColors position="top-right" />
-      {!hideChrome && transitionKey === 0 && <OpeningVideoSplash />}
+      {!hideChrome && transitionKey === 0 && (
+        <Suspense
+          fallback={
+            <div
+              aria-hidden="true"
+              style={{
+                position: "fixed",
+                inset: 0,
+                zIndex: 12000,
+                background: "#020b19",
+              }}
+            />
+          }
+        >
+          <OpeningVideoSplash />
+        </Suspense>
+      )}
       <SplashScreen
         transitionKey={transitionKey}
         routeTitle={transitionLabel}
