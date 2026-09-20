@@ -14,6 +14,7 @@ import {
   serverTimestamp,
   setDoc,
 } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -28,6 +29,7 @@ export const firebaseReady = Object.values(firebaseConfig).every(Boolean);
 export const firebaseApp = firebaseReady ? initializeApp(firebaseConfig) : null;
 export const auth = firebaseApp ? getAuth(firebaseApp) : null;
 export const db = firebaseApp ? getFirestore(firebaseApp) : null;
+export const storage = firebaseApp ? getStorage(firebaseApp) : null;
 
 export const googleProvider = new GoogleAuthProvider();
 export const facebookProvider = new FacebookAuthProvider();
@@ -65,6 +67,13 @@ export async function saveUserProfile(user, profile = {}) {
     },
     { merge: true },
   );
+}
+
+export async function getUserProfile(uid) {
+  if (!db || !uid) return null;
+
+  const snapshot = await getDoc(doc(db, "users", uid));
+  return snapshot.exists() ? snapshot.data() : null;
 }
 
 export async function submitCounsellingRequest(request) {

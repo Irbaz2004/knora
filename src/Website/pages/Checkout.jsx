@@ -18,7 +18,7 @@ import PaymentsRoundedIcon from "@mui/icons-material/PaymentsRounded";
 import PhoneAndroidRoundedIcon from "@mui/icons-material/PhoneAndroidRounded";
 import { toast } from "sonner";
 import { formatPrice, getCart, saveCheckoutDraft } from "@/lib/cart";
-import { commerceStyles } from "@/pages/Cart";
+import { commerceStyles } from "@/Website/pages/Cart";
 import { auth } from "@/firebase";
 
 const steps = ["Student details", "Billing", "Review", "Payment"];

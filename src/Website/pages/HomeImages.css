@@ -171,15 +171,17 @@
 }
 
 .academy-carousel {
-  --carousel-x: 0px;
-  --carousel-y: 0px;
-  position: relative;
+  position: sticky;
+  z-index: 0;
+  top: 0;
   height: min(94vh, 940px);
   min-height: 700px;
   overflow: hidden;
   isolation: isolate;
   background: #07121f;
   color: #fff;
+  contain: paint;
+  backface-visibility: hidden;
 }
 .academy-carousel::after {
   content: "";
@@ -214,8 +216,7 @@
   height: calc(100% + 36px);
   margin: -18px -22px;
   object-fit: cover;
-  transform: translate3d(var(--carousel-x), var(--carousel-y), 0) scale(1.025);
-  transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform: scale(1.025);
 }
 .academy-slide-shade {
   position: absolute;
@@ -245,7 +246,7 @@
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  backdrop-filter: blur(12px);
+  background: rgba(4, 13, 25, 0.62);
 }
 .academy-slide-copy h2 {
   max-width: 680px;
@@ -294,8 +295,63 @@
   border-radius: 50%;
   background: rgba(4, 13, 25, 0.3);
   color: #fff;
-  backdrop-filter: blur(10px);
   transition: 0.25s ease;
+}
+.home-content-stack {
+  overflow: clip;
+}
+.home-hero-stack {
+  position: relative;
+  min-height: calc(min(94vh, 940px) + 108vh);
+  padding-bottom: 8vh;
+}
+.home-hero-stack > .section-1 {
+  position: sticky;
+  z-index: 3;
+  top: 96px;
+  min-height: calc(100vh - 96px);
+  overflow: hidden;
+  border-radius: 24px 24px 0 0;
+  background: color-mix(in oklab, var(--background) 52%, transparent);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  box-shadow: 0 -24px 60px rgba(3, 12, 24, 0.18);
+  contain: paint;
+  backface-visibility: hidden;
+}
+.home-particle-layer {
+  z-index: 1;
+}
+.home-hero-stack + section,
+.home-hero-stack ~ section {
+  position: relative !important;
+  z-index: 20 !important;
+  isolation: isolate;
+  background: color-mix(
+    in oklab,
+    var(--background) 56%,
+    transparent
+  ) !important;
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+}
+#welcome,
+#why-join,
+#faculty,
+#campus {
+  background: transparent !important;
+  background-color: transparent !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+#faculty::before,
+#faculty::after,
+#campus::before,
+#campus::after {
+  display: none !important;
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
 }
 .academy-carousel-controls > button:hover {
   background: #fff;
@@ -455,6 +511,30 @@
 }
 
 @media (max-width: 760px) {
+  .home-hero-stack {
+    min-height: auto;
+    padding-bottom: 0;
+  }
+  .home-hero-stack > .section-1 {
+    position: relative;
+    top: 0;
+    min-height: 100svh;
+    border-radius: 18px 18px 0 0;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .home-hero-stack + section,
+  .home-hero-stack ~ section {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  #welcome,
+  #why-join,
+  #faculty,
+  #campus {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
   .home-scroll-wrapper .section-1 {
     align-items: start;
     padding-top: 1.5rem !important;

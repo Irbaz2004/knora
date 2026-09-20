@@ -11,36 +11,38 @@ import { Toaster } from "sonner";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import SplashScreen from "@/components/SplashScreen";
+import CmsPageContent from "@/components/CmsPageContent";
 
 const SmoothScroll = lazy(() => import("@/components/SmoothScroll"));
-const CursorEffect = lazy(() => import("@/components/CursorEffect"));
+
 const OpeningVideoSplash = lazy(
   () => import("@/components/OpeningVideoSplash"),
 );
 
-const AboutUs = lazy(() => import("@/pages/AboutUs"));
-const AdmissionProcess = lazy(() => import("@/pages/AdmissionProcess"));
-const ApplyOnline = lazy(() => import("@/pages/ApplyOnline"));
-const Career = lazy(() => import("@/pages/Career"));
-const ContactUs = lazy(() => import("@/pages/ContactUs"));
-const Counselling = lazy(() => import("@/pages/Counselling"));
-const CourseDetails = lazy(() => import("@/pages/CourseDetails"));
-const Courses = lazy(() => import("@/pages/Courses"));
-const Cart = lazy(() => import("@/pages/Cart"));
-const Checkout = lazy(() => import("@/pages/Checkout"));
-const EventsNews = lazy(() => import("@/pages/EventsNews"));
-const Faculty = lazy(() => import("@/pages/Faculty"));
-const Gallery = lazy(() => import("@/pages/Gallery"));
-const Home = lazy(() => import("@/pages/Home"));
-const MyLearning = lazy(() => import("@/pages/MyLearning"));
-const Placements = lazy(() => import("@/pages/Placements"));
+const AboutUs = lazy(() => import("@/Website/pages/AboutUs"));
+const AdmissionProcess = lazy(() => import("@/Website/pages/AdmissionProcess"));
+const ApplyOnline = lazy(() => import("@/Website/pages/ApplyOnline"));
+const Career = lazy(() => import("@/Website/pages/Career"));
+const ContactUs = lazy(() => import("@/Website/pages/ContactUs"));
+const Counselling = lazy(() => import("@/Website/pages/Counselling"));
+const CourseDetails = lazy(() => import("@/Website/pages/CourseDetails"));
+const Courses = lazy(() => import("@/Website/pages/Courses"));
+const Cart = lazy(() => import("@/Website/pages/Cart"));
+const Checkout = lazy(() => import("@/Website/pages/Checkout"));
+const EventsNews = lazy(() => import("@/Website/pages/EventsNews"));
+const Faculty = lazy(() => import("@/Website/pages/Faculty"));
+const Gallery = lazy(() => import("@/Website/pages/Gallery"));
+const Home = lazy(() => import("@/Website/pages/Home"));
+const MyLearning = lazy(() => import("@/Website/pages/MyLearning"));
+const Placements = lazy(() => import("@/Website/pages/Placements"));
 const ForgotPassword = lazy(() => import("@/Auth/ForgotPassword"));
 const Login = lazy(() => import("@/Auth/Login"));
 const SignUp = lazy(() => import("@/Auth/SignUp"));
-const StudentLogin = lazy(() => import("@/pages/StudentLogin"));
-const TeacherLogin = lazy(() => import("@/pages/TeacherLogin"));
-const Testimonials = lazy(() => import("@/pages/Testimonials"));
-const VisionMission = lazy(() => import("@/pages/VisionMission"));
+const StudentLogin = lazy(() => import("@/Website/pages/StudentLogin"));
+const TeacherLogin = lazy(() => import("@/Website/pages/TeacherLogin"));
+const Testimonials = lazy(() => import("@/Website/pages/Testimonials"));
+const VisionMission = lazy(() => import("@/Website/pages/VisionMission"));
+const Crm = lazy(() => import("@/CRM/CrmRouter"));
 
 const routes = {
   "/": Home,
@@ -52,6 +54,7 @@ const routes = {
   "/checkout": Checkout,
   "/contact-us": ContactUs,
   "/counselling": Counselling,
+  "/crm": Crm,
   "/courses": Courses,
   "/events-news": EventsNews,
   "/faculty": Faculty,
@@ -77,6 +80,7 @@ const routeLabels = {
   "/checkout": "Checkout",
   "/contact-us": "Contact Us",
   "/counselling": "Counselling",
+  "/crm": "CRM",
   "/courses": "Courses",
   "/events-news": "Events & News",
   "/faculty": "Faculty",
@@ -105,6 +109,7 @@ function isCourseDetailsPath(path) {
 }
 
 function getRouteComponent(path) {
+  if (path === "/crm" || path.startsWith("/crm/")) return Crm;
   if (isCourseDetailsPath(path)) return CourseDetails;
   if (isCourseFolderPath(path)) return Courses;
   return routes[path] || NotFound;
@@ -137,45 +142,6 @@ function NotFound() {
   );
 }
 
-function DeferredEnhancements() {
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    let idleId;
-    let timerId;
-    const enable = () => setReady(true);
-    const connection =
-      navigator.connection ||
-      navigator.mozConnection ||
-      navigator.webkitConnection;
-    const constrainedDevice =
-      connection?.saveData ||
-      (navigator.deviceMemory && navigator.deviceMemory <= 4) ||
-      navigator.hardwareConcurrency <= 4;
-
-    if (constrainedDevice) return undefined;
-
-    if ("requestIdleCallback" in window) {
-      idleId = window.requestIdleCallback(enable, { timeout: 1800 });
-    } else {
-      timerId = window.setTimeout(enable, 1000);
-    }
-
-    return () => {
-      if (idleId) window.cancelIdleCallback(idleId);
-      if (timerId) window.clearTimeout(timerId);
-    };
-  }, []);
-
-  if (!ready) return null;
-  return (
-    <Suspense fallback={null}>
-      <SmoothScroll />
-      <CursorEffect />
-    </Suspense>
-  );
-}
-
 export default function App() {
   const [path, setPath] = useState(() =>
     normalizePath(window.location.pathname),
@@ -186,7 +152,8 @@ export default function App() {
   const Page = useMemo(() => getRouteComponent(path), [path]);
   const isAuthRoute = ["/forgot-password", "/login", "/signup"].includes(path);
   const isCommerceRoute = ["/cart", "/checkout"].includes(path);
-  const hideChrome = isAuthRoute || isCommerceRoute;
+  const isCrmRoute = path === "/crm" || path.startsWith("/crm/");
+  const hideChrome = isAuthRoute || isCommerceRoute || isCrmRoute;
 
   const beginNavigation = useCallback(
     (nextPath, { push = true } = {}) => {
@@ -279,11 +246,16 @@ export default function App() {
   return (
     <>
       {!hideChrome && <Navbar />}
+      {!hideChrome && <CmsPageContent path={path} />}
       <Suspense fallback={<div className="min-h-screen bg-background" />}>
         <Page />
       </Suspense>
       {!hideChrome && <Footer />}
-      <DeferredEnhancements />
+      {!isCrmRoute && (
+        <Suspense fallback={null}>
+          <SmoothScroll />
+        </Suspense>
+      )}
       <Toaster richColors position="top-right" />
       {!hideChrome && transitionKey === 0 && (
         <Suspense

@@ -25,7 +25,11 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { toast } from "sonner";
 import authRight from "@/assets/authright.png";
 import AuthThemeToggle from "@/Auth/AuthThemeToggle";
-import { requireFirebaseAuth, saveUserProfile } from "@/firebase";
+import {
+  getUserProfile,
+  requireFirebaseAuth,
+  saveUserProfile,
+} from "@/firebase";
 import useThemeLogo from "@/lib/useThemeLogo";
 
 const features = [
@@ -481,10 +485,19 @@ export default function Login() {
 
   const completeLogin = async (user, authProvider = "password") => {
     await saveUserProfile(user, { authProvider });
+    const profile = await getUserProfile(user.uid);
+    const normalizedRole = String(profile?.role ?? "student")
+      .replace(/[\s_-]/g, "")
+      .toLowerCase();
+    const rolePaths = {
+      superadmin: "/crm/superadmin",
+      faculty: "/crm/faculty",
+      student: "/crm/student",
+    };
     setStatus("Login successful. Redirecting...");
     toast.success("Login successful. Redirecting...");
     window.setTimeout(() => {
-      const nextPath = sessionStorage.getItem("knora-post-login-path") || "/";
+      const nextPath = rolePaths[normalizedRole] || "/";
       sessionStorage.removeItem("knora-post-login-path");
       window.location.href = nextPath;
     }, 700);

@@ -61,7 +61,7 @@ import {
 import AiChip from "@/components/AiChip";
 import { journey } from "@/lib/journey";
 import courseAiImage from "@/assets/course-ai.svg";
-import coursePythonImage from "../assets/Revisewithoutpressure.png";
+import coursePythonImage from "@/assets/Revisewithoutpressure.png";
 import courseGenAiImage from "@/assets/course-genai.svg";
 import courseVisionImage from "@/assets/course-vision.svg";
 import facultyArjun from "@/assets/faculty-arjun.avif";
@@ -76,7 +76,7 @@ import letterN from "@/assets/n.png";
 import letterO from "@/assets/o.png";
 import letterR from "@/assets/r.png";
 import letterA from "@/assets/a.png";
-import learningImage from "../assets/attendonlineclass.png";
+import learningImage from "@/assets/attendonlineclass.png";
 import slide1Image from "@/assets/slide1.webp";
 import slide2Image from "@/assets/slide2.webp";
 import slide3Image from "@/assets/slide3.webp";
@@ -430,46 +430,30 @@ function AcademyCarousel() {
       "(prefers-reduced-motion: reduce)",
     ).matches;
     if (reduceMotion) return undefined;
-    const isSmallScreen = window.matchMedia("(max-width: 760px)").matches;
-    if (isSmallScreen) {
-      gsap.set(element, { clearProps: "opacity,visibility,filter,scale" });
-      return undefined;
-    }
+    const isMobile = window.matchMedia("(max-width: 760px)").matches;
+    gsap.set(element, { autoAlpha: 1, y: 0, scale: 1, filter: "blur(0px)" });
 
-    const fade = gsap.fromTo(
-      element,
-      { autoAlpha: 1, filter: "blur(0px)", scale: 1 },
-      {
-        autoAlpha: 0,
-        filter: "blur(18px)",
-        scale: 0.965,
-        ease: "none",
-        scrollTrigger: {
-          trigger: element,
-          start: "bottom 82%",
-          end: "bottom 8%",
-          scrub: 1.15,
-          invalidateOnRefresh: true,
-        },
-      },
-    );
+    const scrollFade = isMobile
+      ? null
+      : gsap.to(element, {
+          autoAlpha: 0.32,
+          filter: "blur(7px)",
+          scale: 0.982,
+          ease: "none",
+          scrollTrigger: {
+            trigger: element,
+            start: "top top",
+            end: "+=85%",
+            scrub: 0.35,
+            invalidateOnRefresh: true,
+          },
+        });
 
-    return () => fade.kill();
+    return () => {
+      scrollFade?.kill();
+      gsap.set(element, { clearProps: "opacity,visibility,filter,scale,y" });
+    };
   }, []);
-
-  const handlePointerMove = (event) => {
-    const element = carouselRef.current;
-    if (!element) return;
-    const rect = element.getBoundingClientRect();
-    element.style.setProperty(
-      "--carousel-x",
-      `${((event.clientX - rect.left) / rect.width - 0.5) * 18}px`,
-    );
-    element.style.setProperty(
-      "--carousel-y",
-      `${((event.clientY - rect.top) / rect.height - 0.5) * 12}px`,
-    );
-  };
 
   return (
     <section
@@ -477,15 +461,10 @@ function AcademyCarousel() {
       className="academy-carousel"
       aria-roledescription="carousel"
       aria-label="Knora Academy highlights"
-      onPointerMove={handlePointerMove}
       onPointerEnter={() => setPaused(true)}
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={() => setPaused(false)}
-      onPointerLeave={() => {
-        setPaused(false);
-        carouselRef.current?.style.setProperty("--carousel-x", "0px");
-        carouselRef.current?.style.setProperty("--carousel-y", "0px");
-      }}
+      onPointerLeave={() => setPaused(false)}
     >
       {academySlides.map((slide, index) => (
         <article
@@ -497,6 +476,8 @@ function AcademyCarousel() {
             src={slide.image}
             alt=""
             loading={index === 0 ? "eager" : "lazy"}
+            fetchPriority={index === 0 ? "high" : "auto"}
+            decoding="async"
           />
           <div className="academy-slide-shade" />
           <div className="academy-slide-copy">
@@ -910,6 +891,33 @@ export default function Home() {
       if (timerId) window.clearTimeout(timerId);
     };
   }, []);
+
+  useEffect(() => {
+    if (!showParticles) return undefined;
+
+    const particleLayer = wrapper.current?.querySelector(
+      ".home-particle-layer",
+    );
+    const welcomeSection = wrapper.current?.querySelector(".section-2");
+    if (!particleLayer || !welcomeSection) return undefined;
+
+    const softenParticles = gsap.to(particleLayer, {
+      opacity: 0.58,
+      ease: "none",
+      scrollTrigger: {
+        trigger: welcomeSection,
+        start: "top bottom",
+        end: "top 88%",
+        scrub: 0.2,
+        invalidateOnRefresh: true,
+      },
+    });
+
+    return () => {
+      softenParticles.kill();
+      gsap.set(particleLayer, { clearProps: "opacity" });
+    };
+  }, [showParticles]);
   const facultyScrollIndexRef = useRef(0);
 
   const setSceneRef = (index) => (el) => {
@@ -1592,175 +1600,177 @@ export default function Home() {
       </div>
 
       <main ref={wrapper} className="home-scroll-wrapper relative w-full">
-        <div className="relative w-full overflow-hidden">
-          {showParticles && (
-            <Suspense fallback={null}>
-              <ParticleField
-                heroAnchorRef={heroCoreRef}
-                heroHoverRef={heroVisualRef}
-              />
-            </Suspense>
-          )}
-          <AcademyCarousel />
-          <section
-            id="home"
-            ref={setSceneRef(0)}
-            className="section-1 relative grid min-h-screen w-full grid-cols-1 items-center gap-8 px-5 pt-24 sm:px-8 lg:grid-cols-[minmax(0,0.96fr)_minmax(0,1.04fr)] lg:gap-10 lg:px-12 xl:px-20 2xl:px-28"
-          >
-            <div className="relative z-10 max-w-[720px]">
-              <Typography
-                component="h1"
-                className="headline-kinetic letter-fade-parent hero-pop text-5xl leading-[0.98] font-semibold text-foreground sm:text-6xl lg:text-7xl xl:text-[5.9rem]"
-                sx={{
-                  color: "var(--foreground)",
-                  fontFamily: "var(--font-display)",
-                  fontSize: {
-                    xs: "clamp(2.35rem, 11.5vw, 3.05rem)",
-                    sm: "3.35rem",
-                    md: "3.8rem",
-                    lg: "4rem",
-                    xl: "5.25rem",
-                  },
-                  fontWeight: 700,
-                  letterSpacing: 0,
-                  lineHeight: { xs: 1, lg: 0.96 },
-                }}
-              >
-                <KnoraLogoHoverText />
-                <br />
-                <span className="inline-block whitespace-nowrap">
-                  <span className="hero-edu-text">
-                    <LetterFadeText text="Edu" />
-                  </span>{" "}
-                  <span className="hero-learn relative inline-block text-primary">
-                    <LetterFadeText text="Academy" />
-                  </span>
-                </span>
-              </Typography>
-              <p className="hero-pop hero-copy-text mt-9 max-w-[36rem] text-base leading-relaxed text-muted-foreground sm:text-lg">
-                Admissions Open - Join Our Founding Batch. Learn in a new-age AI
-                institute built for practical training, personal attention, and
-                flexible online plus offline classes.
-              </p>
-              <div className="hero-pop mt-7 flex flex-wrap items-center gap-3">
-                <a
-                  href="/courses"
-                  className="lift arrow-shift flex min-h-12 items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-medium text-primary-foreground glow-soft sm:px-6 sm:py-3.5"
+        <div className="home-content-stack relative w-full">
+          <div className="home-hero-stack">
+            {showParticles && (
+              <Suspense fallback={null}>
+                <ParticleField
+                  heroAnchorRef={heroCoreRef}
+                  heroHoverRef={heroVisualRef}
+                />
+              </Suspense>
+            )}
+            <AcademyCarousel />
+            <section
+              id="home"
+              ref={setSceneRef(0)}
+              className="section-1 relative grid min-h-screen w-full grid-cols-1 items-center gap-8 px-5 pt-24 sm:px-8 lg:grid-cols-[minmax(0,0.96fr)_minmax(0,1.04fr)] lg:gap-10 lg:px-12 xl:px-20 2xl:px-28"
+            >
+              <div className="relative z-10 max-w-[720px]">
+                <Typography
+                  component="h1"
+                  className="headline-kinetic letter-fade-parent hero-pop text-5xl leading-[0.98] font-semibold text-foreground sm:text-6xl lg:text-7xl xl:text-[5.9rem]"
+                  sx={{
+                    color: "var(--foreground)",
+                    fontFamily: "var(--font-display)",
+                    fontSize: {
+                      xs: "clamp(2.35rem, 11.5vw, 3.05rem)",
+                      sm: "3.35rem",
+                      md: "3.8rem",
+                      lg: "4rem",
+                      xl: "5.25rem",
+                    },
+                    fontWeight: 700,
+                    letterSpacing: 0,
+                    lineHeight: { xs: 1, lg: 0.96 },
+                  }}
                 >
-                  Apply Now <ArrowRight className="arrow size-4" />
-                </a>
-                <a
-                  href="#courses"
-                  className="lift glass flex min-h-12 items-center gap-2 rounded-full px-5 py-3 text-sm font-medium text-foreground sm:px-6 sm:py-3.5"
-                >
-                  <BookOpen className="size-4 text-primary" /> Explore Courses
-                </a>
-              </div>
-              <dl className="hero-pop mt-8 grid max-w-[40rem] grid-cols-1 gap-3 sm:grid-cols-3 lg:flex lg:flex-wrap lg:gap-4">
-                {[
-                  [Building2, "New", "Campus Setup"],
-                  [MonitorPlay, "Live", "Hybrid Classes"],
-                  [CalendarDays, "Sep 2026", "New Batch"],
-                ].map(([Icon, n, l]) => (
-                  <div
-                    key={l}
-                    className="hero-stat flex min-w-0 items-center gap-3 rounded-3xl bg-white/70 p-3 sm:gap-4 lg:pr-6"
-                  >
-                    <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary sm:size-12">
-                      <Icon className="size-5 sm:size-6" />
+                  <KnoraLogoHoverText />
+                  <br />
+                  <span className="inline-block whitespace-nowrap">
+                    <span className="hero-edu-text">
+                      <LetterFadeText text="Edu" />
+                    </span>{" "}
+                    <span className="hero-learn relative inline-block text-primary">
+                      <LetterFadeText text="Academy" />
                     </span>
-                    <div className="min-w-0">
-                      <dt className="font-display text-xl font-semibold text-foreground sm:text-2xl">
-                        {n}
-                      </dt>
-                      <dd className="text-[0.68rem] tracking-wide text-muted-foreground uppercase sm:text-xs">
-                        {l}
-                      </dd>
-                    </div>
-                  </div>
-                ))}
-              </dl>
-            </div>
-
-            <div className="relative hidden h-full min-w-0 items-center justify-center lg:flex">
-              <div
-                ref={heroVisualRef}
-                className="hero-visual absolute left-1/2 top-1/2 flex size-[41rem] -translate-x-1/2 -translate-y-[49%] items-center justify-center"
-              >
-                <div
-                  ref={heroCoreRef}
-                  className="hero-core relative flex size-[18rem] items-center justify-center rounded-full"
-                  onPointerEnter={rotateHeroLetter}
-                >
-                  <button
-                    type="button"
-                    className="hero-k-mark"
-                    aria-label={`Knora animated letter ${heroLetter}`}
-                    onClick={rotateHeroLetter}
+                  </span>
+                </Typography>
+                <p className="hero-pop hero-copy-text mt-9 max-w-[36rem] text-base leading-relaxed text-muted-foreground sm:text-lg">
+                  Admissions Open - Join Our Founding Batch. Learn in a new-age
+                  AI institute built for practical training, personal attention,
+                  and flexible online plus offline classes.
+                </p>
+                <div className="hero-pop mt-7 flex flex-wrap items-center gap-3">
+                  <a
+                    href="/courses"
+                    className="lift arrow-shift flex min-h-12 items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-medium text-primary-foreground glow-soft sm:px-6 sm:py-3.5"
                   >
-                    <span className="hero-letter-orbit hero-letter-orbit-third" />
-                    <img
-                      key={heroLetter}
-                      className="hero-letter-image"
-                      src={HERO_LETTER_IMAGES[heroLetterIndex]}
-                      alt={heroLetter}
-                      width="200"
-                      height="200"
-                    />
-                  </button>
+                    Apply Now <ArrowRight className="arrow size-4" />
+                  </a>
+                  <a
+                    href="#courses"
+                    className="lift glass flex min-h-12 items-center gap-2 rounded-full px-5 py-3 text-sm font-medium text-foreground sm:px-6 sm:py-3.5"
+                  >
+                    <BookOpen className="size-4 text-primary" /> Explore Courses
+                  </a>
                 </div>
-                <div className="hero-cap absolute">
-                  <div className="cap-board" />
-                  <div className="cap-button" />
-                  <div className="cap-string" />
-                </div>
-                <div className="hero-base absolute flex items-center justify-center">
-                  {[14, 18.5, 23].map((s, i) => (
+                <dl className="hero-pop mt-8 grid max-w-[40rem] grid-cols-1 gap-3 sm:grid-cols-3 lg:flex lg:flex-wrap lg:gap-4">
+                  {[
+                    [Building2, "New", "Campus Setup"],
+                    [MonitorPlay, "Live", "Hybrid Classes"],
+                    [CalendarDays, "Sep 2026", "New Batch"],
+                  ].map(([Icon, n, l]) => (
                     <div
-                      key={s}
-                      className="hero-base-ring absolute rounded-full"
-                      style={{
-                        width: `${s}rem`,
-                        height: `${s * 0.22}rem`,
-                      }}
-                    />
+                      key={l}
+                      className="hero-stat flex min-w-0 items-center gap-3 rounded-3xl bg-white/70 p-3 sm:gap-4 lg:pr-6"
+                    >
+                      <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary sm:size-12">
+                        <Icon className="size-5 sm:size-6" />
+                      </span>
+                      <div className="min-w-0">
+                        <dt className="font-display text-xl font-semibold text-foreground sm:text-2xl">
+                          {n}
+                        </dt>
+                        <dd className="text-[0.68rem] tracking-wide text-muted-foreground uppercase sm:text-xs">
+                          {l}
+                        </dd>
+                      </div>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+
+              <div className="relative hidden h-full min-w-0 items-center justify-center lg:flex">
+                <div
+                  ref={heroVisualRef}
+                  className="hero-visual absolute left-1/2 top-1/2 flex size-[41rem] -translate-x-1/2 -translate-y-[49%] items-center justify-center"
+                >
+                  <div
+                    ref={heroCoreRef}
+                    className="hero-core relative flex size-[18rem] items-center justify-center rounded-full"
+                  >
+                    <button
+                      type="button"
+                      className="hero-k-mark"
+                      aria-label={`Knora animated letter ${heroLetter}`}
+                      onPointerEnter={rotateHeroLetter}
+                      onClick={rotateHeroLetter}
+                    >
+                      <span className="hero-letter-orbit hero-letter-orbit-third" />
+                      <img
+                        key={heroLetter}
+                        className="hero-letter-image"
+                        src={HERO_LETTER_IMAGES[heroLetterIndex]}
+                        alt={heroLetter}
+                        width="200"
+                        height="200"
+                      />
+                    </button>
+                  </div>
+                  <div className="hero-cap absolute">
+                    <div className="cap-board" />
+                    <div className="cap-button" />
+                    <div className="cap-string" />
+                  </div>
+                  <div className="hero-base absolute flex items-center justify-center">
+                    {[14, 18.5, 23].map((s, i) => (
+                      <div
+                        key={s}
+                        className="hero-base-ring absolute rounded-full"
+                        style={{
+                          width: `${s}rem`,
+                          height: `${s * 0.22}rem`,
+                        }}
+                      />
+                    ))}
+                  </div>
+                  {heroCards.map((card) => (
+                    <div
+                      key={card.title}
+                      className={`hero-float-card absolute w-52 rounded-3xl p-4 ${card.className}`}
+                    >
+                      <div className="mb-3 flex items-center justify-between gap-3">
+                        <div>
+                          <h3 className="text-sm font-semibold text-foreground">
+                            {card.title}
+                          </h3>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {card.copy}
+                          </p>
+                        </div>
+                        <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-[var(--shadow-glow)]">
+                          <card.icon className="size-5" />
+                        </span>
+                      </div>
+                      {card.progress && (
+                        <div className="h-2 overflow-hidden rounded-full bg-primary/10">
+                          <div className="h-full w-4/5 rounded-full bg-primary" />
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
-                {heroCards.map((card) => (
-                  <div
-                    key={card.title}
-                    className={`hero-float-card absolute w-52 rounded-3xl p-4 ${card.className}`}
-                  >
-                    <div className="mb-3 flex items-center justify-between gap-3">
-                      <div>
-                        <h3 className="text-sm font-semibold text-foreground">
-                          {card.title}
-                        </h3>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {card.copy}
-                        </p>
-                      </div>
-                      <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-[var(--shadow-glow)]">
-                        <card.icon className="size-5" />
-                      </span>
-                    </div>
-                    {card.progress && (
-                      <div className="h-2 overflow-hidden rounded-full bg-primary/10">
-                        <div className="h-full w-4/5 rounded-full bg-primary" />
-                      </div>
-                    )}
-                  </div>
-                ))}
               </div>
-            </div>
 
-            <div className="hero-scroll-cue absolute inset-x-0 bottom-8 flex w-full flex-col items-center gap-2 text-center text-muted-foreground">
-              <Mouse className="size-5 animate-bounce text-primary" />
-              <span className="text-[0.7rem] tracking-[0.22em] uppercase">
-                Scroll to explore
-              </span>
-            </div>
-          </section>
+              <div className="hero-scroll-cue absolute inset-x-0 bottom-8 flex w-full flex-col items-center gap-2 text-center text-muted-foreground">
+                <Mouse className="size-5 animate-bounce text-primary" />
+                <span className="text-[0.7rem] tracking-[0.22em] uppercase">
+                  Scroll to explore
+                </span>
+              </div>
+            </section>
+          </div>
 
           <section
             id="welcome"

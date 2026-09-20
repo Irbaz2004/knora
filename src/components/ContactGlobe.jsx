@@ -320,7 +320,7 @@ export default function ContactGlobe() {
           </button>
         </div>
       </div>
-      <div className="contact-globe-stage" data-lenis-prevent>
+      <div className="contact-globe-stage">
         <GlobeBoundary>
           <Canvas
             dpr={[1, 1.5]}

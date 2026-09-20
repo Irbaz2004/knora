@@ -130,6 +130,7 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
   const groupRef = useRef(null);
   const hoverRef = useRef(0);
   const pointerWorldRef = useRef({ x: 0, y: 0 });
+  const smoothedPointerRef = useRef({ x: 0, y: 0 });
   const scratchRef = useRef(0);
   const scratchVectorRef = useRef({ x: 0, y: 0 });
   const lastPointerRef = useRef(null);
@@ -618,7 +619,19 @@ function ParticleSystem({ heroAnchorRef, heroHoverRef }) {
     );
     const scratch = scratchRef.current;
     const scratchVector = scratchVectorRef.current;
-    const pointerWorld = pointerWorldRef.current;
+    smoothedPointerRef.current.x = THREE.MathUtils.damp(
+      smoothedPointerRef.current.x,
+      pointerWorldRef.current.x,
+      10,
+      delta,
+    );
+    smoothedPointerRef.current.y = THREE.MathUtils.damp(
+      smoothedPointerRef.current.y,
+      pointerWorldRef.current.y,
+      10,
+      delta,
+    );
+    const pointerWorld = smoothedPointerRef.current;
     const sphereLike =
       1 - THREE.MathUtils.smoothstep(p, travelStart, travelEnd);
     const breathe = journey.reducedMotion ? 1 : 1 + Math.sin(t * 0.75) * 0.02;
@@ -733,7 +746,7 @@ export default function ParticleField({ heroAnchorRef, heroHoverRef }) {
   if (!ready) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-0">
+    <div className="home-particle-layer pointer-events-none fixed inset-0">
       <Canvas
         camera={{ position: [0, 0, 12], fov: 50 }}
         dpr={[1, 1.35]}

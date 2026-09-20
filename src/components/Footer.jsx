@@ -282,6 +282,22 @@ export default function Footer() {
     offset: ["start end", "end end"],
   });
   const lettermarkOffset = useTransform(scrollYProgress, [0, 1], [180, 0]);
+  const lettermarkOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.28, 0.62],
+    [0, 0.35, 1],
+  );
+  const lettermarkScale = useTransform(scrollYProgress, [0, 0.62], [0.94, 1]);
+  const lettermarkOpacitySpring = useSpring(lettermarkOpacity, {
+    stiffness: 105,
+    damping: 25,
+    mass: 0.35,
+  });
+  const lettermarkScaleSpring = useSpring(lettermarkScale, {
+    stiffness: 105,
+    damping: 25,
+    mass: 0.35,
+  });
   const lettermarkY = useSpring(lettermarkOffset, {
     stiffness: 110,
     damping: 24,
@@ -389,7 +405,11 @@ export default function Footer() {
       <Box
         component={motion.div}
         sx={footerStyles.wordmarkParallax}
-        style={{ y: prefersReducedMotion ? 0 : lettermarkY }}
+        style={{
+          y: prefersReducedMotion ? 0 : lettermarkY,
+          opacity: prefersReducedMotion ? 1 : lettermarkOpacitySpring,
+          scale: prefersReducedMotion ? 1 : lettermarkScaleSpring,
+        }}
         aria-hidden="true"
       >
         <Box
