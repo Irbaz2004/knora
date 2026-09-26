@@ -59,6 +59,29 @@ export async function removeFromCart(itemId) {
   return next;
 }
 
+export async function clearCart() {
+  const items = getCart();
+  saveLocalCart([]);
+  if (db) {
+    await Promise.all(
+      items.map((item) =>
+        deleteDoc(doc(db, "users", getOwnerId(), "cartItems", item.id)),
+      ),
+    );
+  }
+  return [];
+}
+
+export function getCheckoutDraft() {
+  try {
+    return JSON.parse(
+      localStorage.getItem(`knora-checkout-draft:${getOwnerId()}`) ?? "null",
+    );
+  } catch {
+    return null;
+  }
+}
+
 export async function saveCheckoutDraft(data) {
   localStorage.setItem(
     `knora-checkout-draft:${getOwnerId()}`,

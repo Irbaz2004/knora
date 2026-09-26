@@ -1,5 +1,9 @@
 # React + Vite
 
+## Payments
+
+Course checkout uses Stripe Checkout through Firebase Cloud Functions. See [PAYMENT_SETUP.md](./PAYMENT_SETUP.md) for App Check, secrets, webhooks, and deployment setup.
+
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
 Currently, two official plugins are available:

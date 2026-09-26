@@ -15,6 +15,11 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import {
+  initializeAppCheck,
+  ReCaptchaEnterpriseProvider,
+} from "firebase/app-check";
+import { getFunctions } from "firebase/functions";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -27,9 +32,33 @@ const firebaseConfig = {
 
 export const firebaseReady = Object.values(firebaseConfig).every(Boolean);
 export const firebaseApp = firebaseReady ? initializeApp(firebaseConfig) : null;
+
+if (
+  firebaseApp &&
+  import.meta.env.DEV &&
+  import.meta.env.VITE_FIREBASE_APPCHECK_DEBUG === "true"
+) {
+  self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+}
+
+export const appCheck =
+  firebaseApp && import.meta.env.VITE_FIREBASE_APPCHECK_SITE_KEY
+    ? initializeAppCheck(firebaseApp, {
+        provider: new ReCaptchaEnterpriseProvider(
+          import.meta.env.VITE_FIREBASE_APPCHECK_SITE_KEY,
+        ),
+        isTokenAutoRefreshEnabled: true,
+      })
+    : null;
 export const auth = firebaseApp ? getAuth(firebaseApp) : null;
 export const db = firebaseApp ? getFirestore(firebaseApp) : null;
 export const storage = firebaseApp ? getStorage(firebaseApp) : null;
+export const functions = firebaseApp
+  ? getFunctions(
+      firebaseApp,
+      import.meta.env.VITE_FIREBASE_FUNCTIONS_REGION || "asia-south1",
+    )
+  : null;
 
 export const googleProvider = new GoogleAuthProvider();
 export const facebookProvider = new FacebookAuthProvider();

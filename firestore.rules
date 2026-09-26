@@ -1,0 +1,95 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function isSuperAdmin() {
+      return signedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'superadmin';
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId)
+        && request.resource.data.uid == userId
+        && !request.resource.data.keys().hasAny(['role']);
+      allow update: if isOwner(userId)
+        && request.resource.data.uid == userId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'uid',
+          'fullName',
+          'email',
+          'photoURL',
+          'phoneNumber',
+          'authProvider',
+          'updatedAt',
+          'createdAt'
+        ]);
+
+      match /cartItems/{itemId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId)
+          && request.resource.data.userId == userId;
+        allow delete: if isOwner(userId);
+      }
+
+      match /checkout/{documentId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId)
+          && request.resource.data.userId == userId;
+      }
+
+      match /enrollments/{courseId} {
+        allow read: if isOwner(userId);
+        allow write: if false;
+      }
+    }
+
+    match /orders/{orderId} {
+      allow read: if signedIn() && resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+
+    match /websiteContent/{pageId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
+    match /counsellingRequests/{requestId} {
+      allow create: if request.resource.data.keys().hasOnly([
+          'fullName',
+          'email',
+          'phone',
+          'careerStage',
+          'courseInterest',
+          'learningGoal',
+          'contactMethod',
+          'preferredTime',
+          'userId',
+          'status',
+          'source',
+          'createdAt',
+          'updatedAt'
+        ])
+        && request.resource.data.fullName is string
+        && request.resource.data.fullName.size() <= 120
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 254
+        && request.resource.data.phone is string
+        && request.resource.data.phone.size() <= 30
+        && request.resource.data.learningGoal is string
+        && request.resource.data.learningGoal.size() <= 2000
+        && request.resource.data.status == 'new'
+        && request.resource.data.source == 'counselling-page'
+        && (request.resource.data.userId == null
+          || (signedIn() && request.resource.data.userId == request.auth.uid));
+      allow read, update, delete: if isSuperAdmin();
+    }
+  }
+}

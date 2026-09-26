@@ -15,6 +15,13 @@ export default function SplashScreen({
 }) {
   const rootRef = useRef(null);
   const videoRef = useRef(null);
+  const onCoveredRef = useRef(onCovered);
+  const onCompleteRef = useRef(onComplete);
+
+  useEffect(() => {
+    onCoveredRef.current = onCovered;
+    onCompleteRef.current = onComplete;
+  }, [onCovered, onComplete]);
 
   useEffect(() => {
     if (!transitionKey || !routeTitle) return;
@@ -38,14 +45,14 @@ export default function SplashScreen({
       video.pause();
       // Mount the next page after playback, not while the browser decodes video.
       try {
-        onCovered?.();
+        onCoveredRef.current?.();
       } finally {
         root.style.opacity = "0";
         fadeTimer = setTimeout(() => {
           root.style.display = "none";
           release();
           document.documentElement.classList.remove("navigation-video-active");
-          onComplete?.();
+          onCompleteRef.current?.();
         }, 250);
       }
     };
@@ -86,7 +93,7 @@ export default function SplashScreen({
       release();
       document.documentElement.classList.remove("navigation-video-active");
     };
-  }, [transitionKey, routeTitle, onCovered, onComplete]);
+  }, [transitionKey, routeTitle]);
   return createPortal(
     <div
       ref={rootRef}

@@ -1,147 +1,254 @@
-import { signOut } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 import {
-  Bell,
-  BookOpen,
+  ArrowRight,
   CalendarDays,
-  CheckCircle2,
-  ClipboardCheck,
-  Clock3,
-  FileText,
-  GraduationCap,
-  LogOut,
+  CheckSquare,
+  ClipboardPenLine,
+  Megaphone,
+  UploadCloud,
   Users,
+  Video,
 } from "lucide-react";
-import { auth } from "@/firebase";
-import logo from "@/assets/knoralogo.png";
-import "../../crm.css";
+import FacultyLayout from "../layouts/FacultyLayout";
 
-const classes = [
-  ["Data Science — Batch A", "10:00 AM", "32 students", "Room 204"],
-  ["Python Fundamentals", "12:30 PM", "28 students", "Lab 2"],
-  ["Machine Learning", "03:00 PM", "24 students", "Online"],
+const schedule = [
+  ["09:00 AM", "Data Structures", "BCA 2nd Year - Section A", "blue"],
+  [
+    "11:00 AM",
+    "Database Management Systems",
+    "BCA 2nd Year - Section B",
+    "green",
+  ],
+  ["02:00 PM", "Python Programming", "BCA 1st Year - Section A", "orange"],
+];
+const notices = [
+  [
+    "General",
+    "Holiday Notice",
+    "The institute will remain closed on 27th May 2025 on account of Local Holiday.",
+    "24 May 2025",
+  ],
+  [
+    "Academic",
+    "Internal Exam Schedule Released",
+    "Internal exam schedule is now available. Please check the timetable section.",
+    "22 May 2025",
+  ],
+  [
+    "Event",
+    "Faculty Development Program",
+    "All faculty members are requested to attend the FDP on AI in Education.",
+    "20 May 2025",
+  ],
 ];
 
 export default function FacultyDashboard({ profile }) {
-  const logout = async () => {
-    await signOut(auth);
-    window.location.href = "/login";
-  };
+  const navigate = useNavigate();
+  const firstName = profile?.fullName?.split(" ").slice(-1)[0] || "Ahmed";
+  const stats = [
+    [
+      CalendarDays,
+      "Today’s Classes",
+      "3",
+      "View schedule",
+      "/crm/faculty/timetable",
+      "blue",
+    ],
+    [Users, "Total Batches", "4", "View all", "/crm/faculty/batches", "green"],
+    [
+      CheckSquare,
+      "Attendance Pending",
+      "2",
+      "Mark now",
+      "/crm/faculty/attendance/students",
+      "orange",
+    ],
+    [
+      ClipboardPenLine,
+      "Marks Entry Pending",
+      "1",
+      "Enter marks",
+      "/crm/faculty/marks",
+      "pink",
+    ],
+  ];
 
   return (
-    <main className="role-portal">
-      <aside className="role-sidebar">
-        <img src={logo} alt="Knora Academy" />
-        <p>FACULTY PORTAL</p>
-        <nav>
-          <button className="active">
-            <GraduationCap /> Dashboard
+    <FacultyLayout
+      title={`Welcome back, Dr. ${firstName} 👋`}
+      description="Here’s what’s happening in your classes today."
+      profile={profile}
+    >
+      <section className="faculty-stat-grid">
+        {stats.map(([Icon, label, value, action, to, tone]) => (
+          <button
+            className={`faculty-stat ${tone}`}
+            key={label}
+            onClick={() => navigate(to)}
+          >
+            <span>
+              <Icon />
+            </span>
+            <div>
+              <small>{label}</small>
+              <strong>{value}</strong>
+              <em>
+                {action} <ArrowRight />
+              </em>
+            </div>
           </button>
-          <button>
-            <Users /> My Students
-          </button>
-          <button>
-            <CalendarDays /> Schedule
-          </button>
-          <button>
-            <ClipboardCheck /> Attendance
-          </button>
-          <button>
-            <BookOpen /> Study Materials
-          </button>
-          <button>
-            <FileText /> Assessments
-          </button>
-        </nav>
-        <button className="role-logout" onClick={logout}>
-          <LogOut /> Logout
-        </button>
-      </aside>
-      <section className="role-content">
-        <header className="role-header">
-          <div>
-            <span>Faculty Dashboard</span>
-            <h1>
-              Welcome back, {profile?.fullName?.split(" ")[0] || "Faculty"}
-            </h1>
-            <p>Here is your teaching overview for today.</p>
-          </div>
-          <div className="role-user">
-            <button>
-              <Bell />
+        ))}
+      </section>
+      <section className="faculty-dashboard-grid">
+        <article className="faculty-card">
+          <div className="faculty-card-head">
+            <h2>
+              <CalendarDays /> Today’s Class Schedule
+            </h2>
+            <button onClick={() => navigate("/crm/faculty/timetable")}>
+              View Full Timetable
             </button>
-            <span>{profile?.fullName?.[0] || "F"}</span>
-            <div>
-              <strong>{profile?.fullName || "Faculty"}</strong>
-              <small>{profile?.role}</small>
-            </div>
           </div>
-        </header>
-        <div className="role-stats">
-          <article>
-            <span>
-              <Users />
-            </span>
-            <div>
-              <small>Total Students</small>
-              <strong>84</strong>
-              <em>Across 3 batches</em>
-            </div>
-          </article>
-          <article>
-            <span>
-              <BookOpen />
-            </span>
-            <div>
-              <small>Active Courses</small>
-              <strong>3</strong>
-              <em>This semester</em>
-            </div>
-          </article>
-          <article>
-            <span>
-              <Clock3 />
-            </span>
-            <div>
-              <small>Classes Today</small>
-              <strong>3</strong>
-              <em>First at 10:00 AM</em>
-            </div>
-          </article>
-          <article>
-            <span>
-              <CheckCircle2 />
-            </span>
-            <div>
-              <small>Attendance</small>
-              <strong>92%</strong>
-              <em>Weekly average</em>
-            </div>
-          </article>
-        </div>
-        <section className="role-panel">
-          <div className="role-panel-title">
-            <div>
-              <h2>Today’s Classes</h2>
-              <p>Your scheduled sessions for today</p>
-            </div>
-            <button>View full schedule</button>
-          </div>
-          <div className="class-list">
-            {classes.map(([name, time, count, room]) => (
-              <article key={name}>
-                <span className="class-time">{time}</span>
+          <div className="faculty-schedule-list">
+            {schedule.map(([time, subject, batch, tone]) => (
+              <div key={time} className={tone}>
+                <time>{time}</time>
+                <span className="dot" />
                 <div>
-                  <h3>{name}</h3>
-                  <p>
-                    {count} · {room}
-                  </p>
+                  <strong>{subject}</strong>
+                  <small>{batch}</small>
                 </div>
-                <button>Open class</button>
-              </article>
+                <em>Scheduled</em>
+              </div>
             ))}
           </div>
-        </section>
+          <button
+            className="faculty-text-link"
+            onClick={() => navigate("/crm/faculty/timetable")}
+          >
+            View Full Schedule <ArrowRight />
+          </button>
+        </article>
+        <article className="faculty-card">
+          <div className="faculty-card-head">
+            <h2>
+              <CheckSquare /> Pending Tasks
+            </h2>
+          </div>
+          <div className="faculty-task-list">
+            <button
+              className="pink"
+              onClick={() => navigate("/crm/faculty/attendance/students")}
+            >
+              <CheckSquare />
+              <span>
+                <strong>Mark attendance for 2 classes</strong>
+                <small>Data Structures (BCA 2A), DBMS (BCA 2B)</small>
+              </span>
+              <em>Mark Now</em>
+            </button>
+            <button
+              className="orange"
+              onClick={() => navigate("/crm/faculty/marks")}
+            >
+              <ClipboardPenLine />
+              <span>
+                <strong>Enter marks for 1 assignment</strong>
+                <small>Python Programming - Assignment 2</small>
+              </span>
+              <em>Enter Marks</em>
+            </button>
+            <button
+              className="blue"
+              onClick={() => navigate("/crm/faculty/materials")}
+            >
+              <UploadCloud />
+              <span>
+                <strong>Upload study material for 1 class</strong>
+                <small>DBMS - Normalization Notes</small>
+              </span>
+              <em>Upload Now</em>
+            </button>
+          </div>
+        </article>
+        <article className="faculty-card">
+          <div className="faculty-card-head">
+            <h2>
+              <Megaphone /> Notices & Announcements
+            </h2>
+            <button onClick={() => navigate("/crm/faculty/notices")}>
+              View All
+            </button>
+          </div>
+          <div className="faculty-notice-list">
+            {notices.map(([type, title, text, date], index) => (
+              <div key={title}>
+                <span className={`tag tag-${index}`}>{type}</span>
+                <div>
+                  <strong>{title}</strong>
+                  <p>{text}</p>
+                </div>
+                <time>{date}</time>
+              </div>
+            ))}
+          </div>
+        </article>
+        <article className="faculty-card">
+          <div className="faculty-card-head">
+            <h2>Quick Links</h2>
+          </div>
+          <div className="faculty-quick-links">
+            <button
+              className="blue"
+              onClick={() => navigate("/crm/faculty/live-classes")}
+            >
+              <Video />
+              <span>
+                <strong>Start Live Class</strong>
+                <small>
+                  Go Live Now <ArrowRight />
+                </small>
+              </span>
+            </button>
+            <button
+              className="green"
+              onClick={() => navigate("/crm/faculty/attendance/students")}
+            >
+              <Users />
+              <span>
+                <strong>Mark Attendance</strong>
+                <small>
+                  Mark Now <ArrowRight />
+                </small>
+              </span>
+            </button>
+            <button
+              className="purple"
+              onClick={() => navigate("/crm/faculty/materials/assignments")}
+            >
+              <UploadCloud />
+              <span>
+                <strong>Upload Assignment</strong>
+                <small>
+                  Upload Now <ArrowRight />
+                </small>
+              </span>
+            </button>
+            <button
+              className="orange"
+              onClick={() => navigate("/crm/faculty/marks")}
+            >
+              <ClipboardPenLine />
+              <span>
+                <strong>Enter Marks</strong>
+                <small>
+                  Enter Now <ArrowRight />
+                </small>
+              </span>
+            </button>
+          </div>
+        </article>
       </section>
-    </main>
+    </FacultyLayout>
   );
 }

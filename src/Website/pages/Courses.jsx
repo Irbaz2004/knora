@@ -1,11 +1,14 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Box,
   Button,
   Chip,
   Container,
   GlobalStyles,
+  InputAdornment,
+  MenuItem,
   Stack,
+  TextField,
   Typography,
 } from "@mui/material";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
@@ -22,7 +25,11 @@ import LockRoundedIcon from "@mui/icons-material/LockRounded";
 import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import PsychologyRoundedIcon from "@mui/icons-material/PsychologyRounded";
 import RocketLaunchRoundedIcon from "@mui/icons-material/RocketLaunchRounded";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
+import ShoppingCartRoundedIcon from "@mui/icons-material/ShoppingCartRounded";
 import SmartToyRoundedIcon from "@mui/icons-material/SmartToyRounded";
+import StarRoundedIcon from "@mui/icons-material/StarRounded";
+import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
 import VideocamRoundedIcon from "@mui/icons-material/VideocamRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import courseAiImage from "@/assets/course-ai.svg";
@@ -30,6 +37,9 @@ import courseGenAiImage from "@/assets/course-genai.svg";
 import courseImage from "@/assets/courseimg.webp";
 import coursePythonImage from "@/assets/course-python.svg";
 import courseVisionImage from "@/assets/course-vision.svg";
+import { toast } from "sonner";
+import { auth } from "@/firebase";
+import { addToCart, formatPrice } from "@/lib/cart";
 
 const courses = [
   {
@@ -289,6 +299,44 @@ const courses = [
 
 const courseThumbnailImages = [courseImage];
 
+const courseCommerce = {
+  "AI Foundation": {
+    hours: 48,
+    price: 24999,
+    originalPrice: 32999,
+    rating: 4.9,
+    reviews: 184,
+  },
+  "Python AI": {
+    hours: 36,
+    price: 18999,
+    originalPrice: 24999,
+    rating: 4.8,
+    reviews: 136,
+  },
+  GenAI: {
+    hours: 30,
+    price: 21999,
+    originalPrice: 29999,
+    rating: 4.9,
+    reviews: 112,
+  },
+  Vision: {
+    hours: 24,
+    price: 19999,
+    originalPrice: 26999,
+    rating: 4.7,
+    reviews: 89,
+  },
+  "Data Stack": {
+    hours: 42,
+    price: 22999,
+    originalPrice: 30999,
+    rating: 4.8,
+    reviews: 105,
+  },
+};
+
 const courseAuthors = [
   "by Knora Faculty",
   "by Rahul Mehra",
@@ -327,6 +375,10 @@ function getCoursePath(course) {
   return `/course/${slugifyCourseName(course.name)}`;
 }
 
+function getCourseDetailsPath(course) {
+  return `${getCoursePath(course)}/overview`;
+}
+
 function getCourseLessonPath(course, lesson) {
   return `${getCoursePath(course)}/${slugifyCourseName(lesson.title)}`;
 }
@@ -342,11 +394,232 @@ function getSelectedCourseFromPath() {
   );
 }
 
-function navigateToCourse(course) {
+function navigateToCourseFolder(course) {
   window.dispatchEvent(
     new CustomEvent("knora:navigate", {
       detail: { path: getCoursePath(course) },
     }),
+  );
+}
+
+function navigateToCourseDetails(course, lesson) {
+  window.dispatchEvent(
+    new CustomEvent("knora:navigate", {
+      detail: {
+        path: lesson
+          ? getCourseLessonPath(course, lesson)
+          : getCourseDetailsPath(course),
+      },
+    }),
+  );
+}
+
+function CourseCatalog({ folderCourse }) {
+  const [query, setQuery] = useState("");
+  const [availability, setAvailability] = useState("All courses");
+  const [addingId, setAddingId] = useState(null);
+  const commerce = courseCommerce[folderCourse.name];
+  const folderCourses = useMemo(
+    () =>
+      getCourseLessons(folderCourse).map((lesson, index) => ({
+        ...lesson,
+        hours: 6 + index * 2,
+        rating: Math.max(4.6, commerce.rating - (index % 3) * 0.1),
+        reviews: Math.max(28, commerce.reviews - index * 17),
+      })),
+    [commerce.rating, commerce.reviews, folderCourse],
+  );
+  const visibleCourses = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    return folderCourses.filter((course) => {
+      const matchesAvailability =
+        availability === "All courses" ||
+        (availability === "Available now" && !course.locked) ||
+        (availability === "Coming soon" && course.locked);
+      const matchesQuery =
+        !normalizedQuery ||
+        [course.title, course.copy, course.author, course.badge]
+          .join(" ")
+          .toLowerCase()
+          .includes(normalizedQuery);
+      return matchesAvailability && matchesQuery;
+    });
+  }, [availability, folderCourses, query]);
+
+  const addCourseToCart = async (event, lesson) => {
+    event.stopPropagation();
+    if (lesson.locked) return;
+    if (!auth?.currentUser) {
+      sessionStorage.setItem("knora-post-login-path", window.location.pathname);
+      toast.info("Please log in to add this course to your cart.");
+      window.dispatchEvent(
+        new CustomEvent("knora:navigate", { detail: { path: "/login" } }),
+      );
+      return;
+    }
+
+    setAddingId(lesson.title);
+    try {
+      await addToCart({
+        id: slugifyCourseName(folderCourse.name),
+        name: folderCourse.fullName,
+        category: folderCourse.category,
+        duration: folderCourse.duration,
+        hours: commerce.hours,
+        mode: folderCourse.mode,
+        level: folderCourse.level,
+        image: courseImage,
+        price: commerce.price,
+        originalPrice: commerce.originalPrice,
+        rating: commerce.rating,
+      });
+      toast.success(`${folderCourse.name} added to your cart.`);
+    } catch {
+      toast.warning(
+        "Course added on this device; cloud cart sync is unavailable.",
+      );
+    } finally {
+      setAddingId(null);
+    }
+  };
+
+  return (
+    <Box className="catalog-section" id="course-catalog">
+      <Box className="catalog-heading">
+        <Box>
+          <Button
+            href="/courses"
+            startIcon={<CloseRoundedIcon />}
+            className="catalog-folder-back"
+          >
+            All folders
+          </Button>
+          <Typography component="h1">
+            {folderCourse ? folderCourse.fullName : "Explore all courses"}
+          </Typography>
+          <Typography>
+            Search and compare courses in this folder by format, learning time,
+            rating, and price.
+          </Typography>
+        </Box>
+        <Stack
+          className="catalog-tools"
+          direction={{ xs: "column", sm: "row" }}
+        >
+          <TextField
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search courses or skills"
+            slotProps={{
+              htmlInput: { "aria-label": "Search courses" },
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchRoundedIcon />
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
+          <TextField
+            select
+            value={availability}
+            onChange={(event) => setAvailability(event.target.value)}
+            slotProps={{
+              htmlInput: { "aria-label": "Filter courses by availability" },
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <TuneRoundedIcon />
+                  </InputAdornment>
+                ),
+              },
+            }}
+          >
+            {["All courses", "Available now", "Coming soon"].map((option) => (
+              <MenuItem key={option} value={option}>
+                {option}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Stack>
+      </Box>
+
+      <Box className="catalog-list">
+        {visibleCourses.map((course) => {
+          return (
+            <Box
+              component="article"
+              className={`catalog-card ${course.locked ? "catalog-card-locked" : ""}`}
+              key={course.title}
+              role={course.locked ? undefined : "link"}
+              tabIndex={course.locked ? -1 : 0}
+              onClick={() => {
+                if (!course.locked)
+                  navigateToCourseDetails(folderCourse, course);
+              }}
+              onKeyDown={(event) => {
+                if (
+                  !course.locked &&
+                  (event.key === "Enter" || event.key === " ")
+                ) {
+                  event.preventDefault();
+                  navigateToCourseDetails(folderCourse, course);
+                }
+              }}
+            >
+              <Box className="catalog-card-media">
+                <Box component="img" src={courseImage} alt="" />
+                <Chip label={course.badge} />
+              </Box>
+              <Box className="catalog-card-content">
+                <Typography className="catalog-card-category">
+                  {folderCourse.category} · {course.lessons}
+                </Typography>
+                <Typography component="h3">{course.title}</Typography>
+                <Typography className="catalog-card-description">
+                  {course.copy}
+                </Typography>
+                <Stack className="catalog-card-meta" direction="row">
+                  <span>
+                    <AccessTimeRoundedIcon /> {course.hours} hours
+                  </span>
+                  <span>{folderCourse.mode}</span>
+                  <span className="catalog-rating">
+                    <StarRoundedIcon /> {course.rating.toFixed(1)}
+                    <small>({course.reviews})</small>
+                  </span>
+                </Stack>
+                <Stack className="catalog-card-footer" direction="row">
+                  <Box className="catalog-price">
+                    <strong>{formatPrice(commerce.price)}</strong>
+                    <del>{formatPrice(commerce.originalPrice)}</del>
+                  </Box>
+                  <Button
+                    onClick={(event) => addCourseToCart(event, course)}
+                    disabled={course.locked || addingId === course.title}
+                    startIcon={<ShoppingCartRoundedIcon />}
+                  >
+                    {course.locked
+                      ? "Coming soon"
+                      : addingId === course.title
+                        ? "Adding..."
+                        : "Add to cart"}
+                  </Button>
+                </Stack>
+              </Box>
+            </Box>
+          );
+        })}
+        {!visibleCourses.length && (
+          <Box className="catalog-empty">
+            <SearchRoundedIcon />
+            <Typography component="h3">No matching courses</Typography>
+            <Typography>Try another keyword or category.</Typography>
+          </Box>
+        )}
+      </Box>
+    </Box>
   );
 }
 
@@ -408,6 +681,9 @@ function getCourseLessons(course) {
 
 function CourseFolderStack({ activeCourse, onSelect, onSendBack, onOpen }) {
   const [hoveredCourse, setHoveredCourse] = useState(null);
+  const isCompact =
+    typeof window !== "undefined" &&
+    window.matchMedia("(max-width: 620px)").matches;
   const [drag, setDrag] = useState({
     active: false,
     pointerId: null,
@@ -477,16 +753,19 @@ function CourseFolderStack({ activeCourse, onSelect, onSendBack, onOpen }) {
         const isActive = offset === 0;
         const isHovered = hoveredCourse === index && !drag.active;
         const hoverLift = isHovered ? -16 : 0;
+        const horizontalStep = isCompact ? 18 : 74;
+        const verticalStep = isCompact ? -13 : -36;
+        const depthStep = isCompact ? -18 : -34;
         const baseTransform =
           offset === 0
             ? `translate3d(-50%, ${hoverLift}px, 42px) rotateX(0deg) rotateY(0deg) scale(${
                 isHovered ? 1.012 : 1
               })`
-            : `translate3d(calc(-50% + ${offset * 74}px), ${
-                offset * -36 + hoverLift
-              }px, ${-offset * 34}px) rotateX(${offset * 1.4}deg) rotateY(${
-                -offset * 5
-              }deg) scale(${1 - offset * 0.045 + (isHovered ? 0.008 : 0)})`;
+            : `translate3d(calc(-50% + ${offset * horizontalStep}px), ${
+                offset * verticalStep + hoverLift
+              }px, ${offset * depthStep}px) rotateX(${offset * 1.4}deg) rotateY(${
+                -offset * (isCompact ? 2 : 5)
+              }deg) scale(${1 - offset * (isCompact ? 0.025 : 0.045) + (isHovered ? 0.008 : 0)})`;
         const dragTransform =
           isActive && drag.active
             ? `translate3d(calc(-50% + ${drag.x}px), ${drag.y}px, 42px) rotateY(${
@@ -513,7 +792,7 @@ function CourseFolderStack({ activeCourse, onSelect, onSendBack, onOpen }) {
               left: "50%",
               opacity: offset > 3 ? 0 : 1,
               top: {
-                xs: `${78 - offset * 18}px`,
+                xs: `${42 - offset * 8}px`,
                 md: `${112 - offset * 12}px`,
               },
               transform: dragTransform,
@@ -1160,6 +1439,232 @@ export default function Courses() {
             background: "rgba(255,255,255,0.08)",
             color: "var(--foreground)",
           },
+          ".catalog-section": {
+            margin: 0,
+            maxWidth: "none",
+            minHeight: "100vh",
+            padding:
+              "clamp(124px, 12vw, 154px) clamp(24px, 4vw, 72px) clamp(64px, 8vw, 112px)",
+            width: "100%",
+          },
+          ".catalog-heading": {
+            alignItems: "start",
+            display: "grid",
+            gap: "30px clamp(32px, 5vw, 90px)",
+            gridTemplateColumns: "minmax(0, 1.15fr) minmax(460px, .85fr)",
+            margin: "0 auto 38px",
+            maxWidth: "1600px",
+            width: "100%",
+          },
+          ".catalog-folder-back.MuiButton-root": {
+            color: "var(--primary)",
+            fontSize: "13px",
+            fontWeight: 700,
+            marginBottom: "14px",
+            padding: 0,
+            textTransform: "none",
+          },
+          ".catalog-heading h1": {
+            color: "var(--foreground)",
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(38px, 4.5vw, 68px)",
+            fontWeight: 700,
+            letterSpacing: "-.02em",
+            lineHeight: 1.06,
+            margin: "0 0 10px",
+          },
+          ".catalog-heading > div > p:last-child": {
+            color: "var(--muted-foreground)",
+            fontSize: "15px",
+          },
+          ".catalog-tools": {
+            alignSelf: "end",
+            display: "grid !important",
+            gap: "12px",
+            gridTemplateColumns: "minmax(0, 1fr) 210px",
+            width: "100%",
+          },
+          ".catalog-tools .MuiOutlinedInput-root": {
+            background: "var(--card)",
+            borderRadius: "14px",
+            color: "var(--foreground)",
+            minHeight: "54px",
+          },
+          ".catalog-tools .MuiOutlinedInput-notchedOutline": {
+            borderColor:
+              "color-mix(in oklab, var(--foreground) 13%, transparent)",
+          },
+          ".catalog-tools .MuiSvgIcon-root": {
+            color: "var(--muted-foreground)",
+          },
+          ".catalog-list": {
+            display: "grid",
+            gap: "clamp(18px, 2vw, 28px)",
+            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+            margin: "0 auto",
+            maxWidth: "1600px",
+            width: "100%",
+          },
+          ".catalog-card": {
+            background: "var(--card)",
+            border:
+              "1px solid color-mix(in oklab, var(--foreground) 10%, transparent)",
+            borderRadius: "20px",
+            boxShadow:
+              "0 16px 46px color-mix(in oklab, var(--foreground) 7%, transparent)",
+            cursor: "pointer",
+            display: "flex",
+            flexDirection: "column",
+            minHeight: "500px",
+            overflow: "hidden",
+            transition:
+              "border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease",
+          },
+          ".catalog-card:hover, .catalog-card:focus-visible": {
+            borderColor: "color-mix(in oklab, var(--primary) 44%, transparent)",
+            boxShadow:
+              "0 22px 58px color-mix(in oklab, var(--primary) 14%, transparent)",
+            outline: "none",
+            transform: "translateY(-2px)",
+          },
+          ".catalog-card-locked": {
+            cursor: "default",
+          },
+          ".catalog-card-locked:hover": {
+            borderColor:
+              "color-mix(in oklab, var(--foreground) 10%, transparent)",
+            boxShadow:
+              "0 16px 46px color-mix(in oklab, var(--foreground) 7%, transparent)",
+            transform: "none",
+          },
+          ".catalog-card-locked .catalog-card-media img": {
+            filter: "grayscale(.5)",
+            opacity: 0.72,
+          },
+          ".catalog-card-media": {
+            background: "color-mix(in oklab, var(--primary) 7%, var(--card))",
+            aspectRatio: "16 / 10",
+            minHeight: 0,
+            overflow: "hidden",
+            position: "relative",
+          },
+          ".catalog-card-media img": {
+            display: "block",
+            height: "100%",
+            objectFit: "cover",
+            width: "100%",
+          },
+          ".catalog-card-media .MuiChip-root": {
+            background: "rgba(255,255,255,.92)",
+            bottom: "14px",
+            color: "#12305e",
+            fontSize: "11px",
+            fontWeight: 800,
+            left: "14px",
+            position: "absolute",
+          },
+          ".catalog-card-content": {
+            display: "flex",
+            flex: "1 1 auto",
+            flexDirection: "column",
+            minWidth: 0,
+            padding: "22px 24px 24px",
+          },
+          ".catalog-card-category.MuiTypography-root": {
+            color: "var(--primary)",
+            fontSize: "11px",
+            fontWeight: 800,
+            letterSpacing: ".1em",
+            textTransform: "uppercase",
+          },
+          ".catalog-card-content h3": {
+            color: "var(--foreground)",
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(20px, 1.7vw, 27px)",
+            fontWeight: 650,
+            lineHeight: 1.16,
+            marginTop: "5px",
+          },
+          ".catalog-card-description.MuiTypography-root": {
+            color: "var(--muted-foreground)",
+            fontSize: "14px",
+            fontWeight: 400,
+            lineHeight: 1.55,
+            marginTop: "8px",
+          },
+          ".catalog-card-meta": {
+            alignItems: "center",
+            color: "var(--muted-foreground)",
+            flexWrap: "wrap",
+            fontSize: "12px",
+            gap: "8px 18px",
+            marginTop: "14px",
+          },
+          ".catalog-card-meta span": {
+            alignItems: "center",
+            display: "inline-flex",
+            gap: "5px",
+          },
+          ".catalog-card-meta svg": { fontSize: "16px" },
+          ".catalog-rating": { color: "var(--foreground)" },
+          ".catalog-rating svg": { color: "#f4aa16" },
+          ".catalog-rating small": { color: "var(--muted-foreground)" },
+          ".catalog-card-footer": {
+            alignItems: "end",
+            gap: "16px",
+            justifyContent: "space-between",
+            marginTop: "auto",
+            paddingTop: "18px",
+          },
+          ".catalog-price": {
+            alignItems: "baseline",
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "8px",
+          },
+          ".catalog-price strong": {
+            color: "var(--foreground)",
+            fontSize: "21px",
+            fontWeight: 750,
+          },
+          ".catalog-price del": {
+            color: "var(--muted-foreground)",
+            fontSize: "13px",
+          },
+          ".catalog-card-footer .MuiButton-root": {
+            background: "var(--primary)",
+            borderRadius: "10px",
+            color: "var(--primary-foreground)",
+            fontSize: "13px",
+            fontWeight: 750,
+            minWidth: "138px",
+            padding: "10px 16px",
+            textTransform: "none",
+          },
+          ".catalog-card-footer .MuiButton-root:hover": {
+            background: "color-mix(in oklab, var(--primary) 86%, black)",
+          },
+          ".catalog-card-footer .MuiButton-root.Mui-disabled": {
+            background:
+              "color-mix(in oklab, var(--muted-foreground) 18%, var(--card))",
+            color: "var(--muted-foreground)",
+          },
+          ".catalog-empty": {
+            background: "var(--card)",
+            border:
+              "1px dashed color-mix(in oklab, var(--foreground) 16%, transparent)",
+            borderRadius: "18px",
+            color: "var(--muted-foreground)",
+            gridColumn: "1 / -1",
+            padding: "56px 24px",
+            textAlign: "center",
+          },
+          ".catalog-empty > svg": { color: "var(--primary)", fontSize: "38px" },
+          ".catalog-empty h3": {
+            color: "var(--foreground)",
+            fontSize: "20px",
+            marginTop: "10px",
+          },
           ".course-opened": {
             background:
               "radial-gradient(circle at 50% 46%, color-mix(in oklab, var(--electric) 14%, transparent), transparent 28%), radial-gradient(circle at 80% 12%, color-mix(in oklab, var(--primary) 16%, transparent), transparent 24%), var(--background)",
@@ -1674,11 +2179,21 @@ export default function Courses() {
             color: "#000",
           },
           "@media (max-width: 1180px)": {
+            ".catalog-list": {
+              gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+            },
             ".course-list-grid": {
               gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
             },
           },
           "@media (max-width: 899px)": {
+            ".catalog-heading": {
+              alignItems: "stretch",
+              gridTemplateColumns: "1fr",
+            },
+            ".catalog-tools": {
+              gridTemplateColumns: "minmax(0, 1fr) 220px",
+            },
             ".course-list-grid": {
               gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
             },
@@ -1749,6 +2264,85 @@ export default function Courses() {
             },
           },
           "@media (max-width: 620px)": {
+            ".courses-home-shell": {
+              paddingLeft: "18px !important",
+              paddingRight: "18px !important",
+            },
+            ".course-stack-stage": {
+              height: "292px !important",
+              margin: "0 auto",
+              maxWidth: "360px",
+            },
+            ".course-folder": {
+              height: "260px !important",
+              minHeight: "260px !important",
+              width: "min(86vw, 340px) !important",
+            },
+            ".course-folder-tab": { height: "42px", width: "62%" },
+            ".course-folder-body": { height: "calc(100% - 41px)" },
+            ".course-folder-copy": { left: "20px", width: "72%" },
+            ".course-folder-copy > .MuiTypography-root:first-child": {
+              fontSize: "30px !important",
+            },
+            ".course-folder-name.MuiTypography-root": { fontSize: "15px" },
+            ".course-folder-description.MuiTypography-root": {
+              display: "-webkit-box",
+              fontSize: "12px",
+              overflow: "hidden",
+              WebkitBoxOrient: "vertical",
+              WebkitLineClamp: 2,
+            },
+            ".catalog-section": { padding: "112px 16px 72px" },
+            ".catalog-heading": { marginBottom: "24px" },
+            ".catalog-heading h1": { fontSize: "clamp(34px, 10vw, 46px)" },
+            ".catalog-tools": {
+              gridTemplateColumns: "1fr",
+              width: "100%",
+            },
+            ".catalog-list": { gridTemplateColumns: "1fr" },
+            ".catalog-card": {
+              borderRadius: "16px",
+              flexDirection: "row",
+              minHeight: "204px",
+            },
+            ".catalog-card-media": {
+              aspectRatio: "auto",
+              flex: "0 0 112px",
+              minHeight: "204px",
+              width: "112px",
+            },
+            ".catalog-card-media img": { objectPosition: "center" },
+            ".catalog-card-media .MuiChip-root": {
+              bottom: "10px",
+              fontSize: "9px",
+              left: "8px",
+              maxWidth: "96px",
+            },
+            ".catalog-card-content": { padding: "16px 14px" },
+            ".catalog-card-content h3": { fontSize: "18px" },
+            ".catalog-card-description.MuiTypography-root": {
+              display: "-webkit-box",
+              fontSize: "12px",
+              overflow: "hidden",
+              WebkitBoxOrient: "vertical",
+              WebkitLineClamp: 2,
+            },
+            ".catalog-card-meta": { fontSize: "10px", gap: "6px 10px" },
+            ".catalog-card-meta > span:nth-of-type(2)": { display: "none" },
+            ".catalog-card-footer": {
+              alignItems: "stretch",
+              flexDirection: "column !important",
+              gap: "9px",
+              paddingTop: "12px",
+            },
+            ".catalog-price strong": { fontSize: "17px" },
+            ".catalog-price del": { fontSize: "11px" },
+            ".catalog-card-footer .MuiButton-root": {
+              fontSize: "11px",
+              minWidth: 0,
+              padding: "8px 10px",
+              width: "100%",
+            },
             ".course-list-view": {
               padding: "112px 14px 34px",
             },
@@ -1781,10 +2375,6 @@ export default function Courses() {
             ".course-feature-copy.MuiTypography-root": {
               fontSize: "13px",
             },
-            ".course-folder": {
-              height: "330px",
-              minHeight: "330px",
-            },
             ".course-folder-icon-ring": {
               opacity: 0.18,
             },
@@ -1814,7 +2404,7 @@ export default function Courses() {
         }}
       >
         {opened ? (
-          <CourseLessonList course={opened} />
+          <CourseCatalog folderCourse={opened} />
         ) : (
           <Container
             maxWidth={false}
@@ -1944,7 +2534,7 @@ export default function Courses() {
                   onSendBack={sendFrontFolderBack}
                   onOpen={(index) => {
                     if (!courses[index].comingSoon)
-                      navigateToCourse(courses[index]);
+                      navigateToCourseFolder(courses[index]);
                   }}
                 />
               </Stack>

@@ -3,10 +3,10 @@ import {
   lazy,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { Toaster } from "sonner";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
@@ -29,6 +29,7 @@ const CourseDetails = lazy(() => import("@/Website/pages/CourseDetails"));
 const Courses = lazy(() => import("@/Website/pages/Courses"));
 const Cart = lazy(() => import("@/Website/pages/Cart"));
 const Checkout = lazy(() => import("@/Website/pages/Checkout"));
+const PaymentSuccess = lazy(() => import("@/Website/pages/PaymentSuccess"));
 const EventsNews = lazy(() => import("@/Website/pages/EventsNews"));
 const Faculty = lazy(() => import("@/Website/pages/Faculty"));
 const Gallery = lazy(() => import("@/Website/pages/Gallery"));
@@ -44,32 +45,6 @@ const Testimonials = lazy(() => import("@/Website/pages/Testimonials"));
 const VisionMission = lazy(() => import("@/Website/pages/VisionMission"));
 const Crm = lazy(() => import("@/CRM/CrmRouter"));
 
-const routes = {
-  "/": Home,
-  "/about-us": AboutUs,
-  "/admission-process": AdmissionProcess,
-  "/apply-online": ApplyOnline,
-  "/career": Career,
-  "/cart": Cart,
-  "/checkout": Checkout,
-  "/contact-us": ContactUs,
-  "/counselling": Counselling,
-  "/crm": Crm,
-  "/courses": Courses,
-  "/events-news": EventsNews,
-  "/faculty": Faculty,
-  "/forgot-password": ForgotPassword,
-  "/gallery": Gallery,
-  "/login": Login,
-  "/my-learning": MyLearning,
-  "/placements": Placements,
-  "/signup": SignUp,
-  "/student-login": StudentLogin,
-  "/teacher-login": TeacherLogin,
-  "/testimonials": Testimonials,
-  "/vision-mission": VisionMission,
-};
-
 const routeLabels = {
   "/": "Home",
   "/about-us": "About Us",
@@ -78,6 +53,7 @@ const routeLabels = {
   "/career": "Career",
   "/cart": "Cart",
   "/checkout": "Checkout",
+  "/checkout/success": "Payment complete",
   "/contact-us": "Contact Us",
   "/counselling": "Counselling",
   "/crm": "CRM",
@@ -100,23 +76,8 @@ function normalizePath(path) {
   return path.replace(/\/$/, "") || "/";
 }
 
-function isCourseFolderPath(path) {
-  return /^\/course\/[^/]+$/.test(path);
-}
-
-function isCourseDetailsPath(path) {
-  return /^\/course\/[^/]+\/[^/]+$/.test(path);
-}
-
-function getRouteComponent(path) {
-  if (path === "/crm" || path.startsWith("/crm/")) return Crm;
-  if (isCourseDetailsPath(path)) return CourseDetails;
-  if (isCourseFolderPath(path)) return Courses;
-  return routes[path] || NotFound;
-}
-
 function getRouteLabel(path) {
-  if (isCourseFolderPath(path) || isCourseDetailsPath(path)) return "Courses";
+  if (/^\/course\/[^/]+(?:\/[^/]+)?$/.test(path)) return "Courses";
   return routeLabels[path] ?? "Page";
 }
 
@@ -143,22 +104,23 @@ function NotFound() {
 }
 
 export default function App() {
-  const [path, setPath] = useState(() =>
-    normalizePath(window.location.pathname),
-  );
+  const location = useLocation();
+  const navigate = useNavigate();
+  const path = normalizePath(location.pathname);
   const [transitionKey, setTransitionKey] = useState(0);
   const [transitionLabel, setTransitionLabel] = useState(null);
   const pendingPathRef = useRef(null);
-  const Page = useMemo(() => getRouteComponent(path), [path]);
   const isAuthRoute = ["/forgot-password", "/login", "/signup"].includes(path);
-  const isCommerceRoute = ["/cart", "/checkout"].includes(path);
+  const isCommerceRoute = ["/cart", "/checkout", "/checkout/success"].includes(
+    path,
+  );
   const isCrmRoute = path === "/crm" || path.startsWith("/crm/");
   const hideChrome = isAuthRoute || isCommerceRoute || isCrmRoute;
 
   const beginNavigation = useCallback(
     (nextPath, { push = true } = {}) => {
       const normalizedPath = normalizePath(nextPath);
-      if (normalizedPath === path && !pendingPathRef.current) return;
+      if (pendingPathRef.current || normalizedPath === path) return;
 
       pendingPathRef.current = { path: normalizedPath, push };
       setTransitionLabel(getRouteLabel(normalizedPath));
@@ -209,10 +171,6 @@ export default function App() {
       beginNavigation(url.pathname);
     };
 
-    const onPopState = () => {
-      beginNavigation(window.location.pathname, { push: false });
-    };
-
     const onAppNavigate = (event) => {
       const nextPath = event.detail?.path;
       if (typeof nextPath === "string") {
@@ -222,11 +180,9 @@ export default function App() {
 
     document.addEventListener("click", onDocumentClick);
     window.addEventListener("knora:navigate", onAppNavigate);
-    window.addEventListener("popstate", onPopState);
     return () => {
       document.removeEventListener("click", onDocumentClick);
       window.removeEventListener("knora:navigate", onAppNavigate);
-      window.removeEventListener("popstate", onPopState);
     };
   }, [beginNavigation]);
 
@@ -234,13 +190,14 @@ export default function App() {
     const pending = pendingPathRef.current;
     if (!pending) return;
 
-    if (pending.push) {
-      window.history.pushState({}, "", pending.path);
-    }
-    setPath(pending.path);
+    navigate(pending.path, { replace: !pending.push });
     window.scrollTo(0, 0);
     window.dispatchEvent(new Event("knora:navigation"));
     pendingPathRef.current = null;
+  }, [navigate]);
+
+  const handleTransitionComplete = useCallback(() => {
+    setTransitionLabel(null);
   }, []);
 
   return (
@@ -248,7 +205,38 @@ export default function App() {
       {!hideChrome && <Navbar />}
       {!hideChrome && <CmsPageContent path={path} />}
       <Suspense fallback={<div className="min-h-screen bg-background" />}>
-        <Page />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/admission-process" element={<AdmissionProcess />} />
+          <Route path="/apply-online" element={<ApplyOnline />} />
+          <Route path="/career" element={<Career />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/checkout/success" element={<PaymentSuccess />} />
+          <Route path="/contact-us" element={<ContactUs />} />
+          <Route path="/counselling" element={<Counselling />} />
+          <Route path="/courses" element={<Courses />} />
+          <Route path="/course/:folderSlug" element={<Courses />} />
+          <Route
+            path="/course/:folderSlug/:lessonSlug"
+            element={<CourseDetails />}
+          />
+          <Route path="/crm/*" element={<Crm />} />
+          <Route path="/events-news" element={<EventsNews />} />
+          <Route path="/faculty" element={<Faculty />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/gallery" element={<Gallery />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/my-learning" element={<MyLearning />} />
+          <Route path="/placements" element={<Placements />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/student-login" element={<StudentLogin />} />
+          <Route path="/teacher-login" element={<TeacherLogin />} />
+          <Route path="/testimonials" element={<Testimonials />} />
+          <Route path="/vision-mission" element={<VisionMission />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </Suspense>
       {!hideChrome && <Footer />}
       {!isCrmRoute && (
@@ -278,6 +266,7 @@ export default function App() {
         transitionKey={transitionKey}
         routeTitle={transitionLabel}
         onCovered={handleCovered}
+        onComplete={handleTransitionComplete}
       />
     </>
   );
